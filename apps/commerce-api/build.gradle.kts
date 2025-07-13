@@ -15,4 +15,7 @@ dependencies {
 
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
+
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
 }
