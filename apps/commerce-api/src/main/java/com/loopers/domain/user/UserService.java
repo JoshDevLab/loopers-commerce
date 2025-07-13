@@ -24,4 +24,8 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public User getMyInfo(String userId) {
+        return userRepository.findByUserId(userId).orElse(null);
+    }
 }

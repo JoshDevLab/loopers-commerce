@@ -4,13 +4,14 @@ import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRegisterCommand;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.interfaces.api.user.dto.MyInfoResponse;
 import com.loopers.interfaces.api.user.dto.SignUpRequest;
 import com.loopers.interfaces.api.user.dto.SignUpResponse;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,5 +25,16 @@ public class UserControllerV1 {
         UserRegisterCommand command = request.toCommand();
         User user = userService.signUp(command);
         return ApiResponse.success(SignUpResponse.from(user));
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<MyInfoResponse> getMyInfo(@CurrentUserId String userId) {
+        User myInfo = userService.getMyInfo(userId);
+
+        if (myInfo == null) {
+            throw new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 유저입니다.");
+        }
+
+        return ApiResponse.success(MyInfoResponse.from(myInfo));
     }
 }
