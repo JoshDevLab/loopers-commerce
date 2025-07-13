@@ -18,7 +18,8 @@ public enum ErrorType {
     USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "이메일이 xx@yy.zz 형식에 맞지 않습니다."),
     USER_BIRTHDAY_ERROR(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "생년월일이 yyyy-MM-dd 형식에 맞지 않습니다."),
     ALREADY_EXIST_USERID(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "이미 동일한 아이디가 존재합니다."),
-    USER_GENDER_ERROR(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "유효하지 않은 성별입니다.");
+    USER_GENDER_ERROR(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "유효하지 않은 성별입니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.BAD_REQUEST.getReasonPhrase(), "존재하지 않는 유저 입니다.");
 
     private final HttpStatus status;
     private final String code;
