@@ -28,10 +28,6 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
     @DisplayName("회원 가입시 User 저장이 수행된다.")
     @Test
     void userSignUp() {
-        System.out.println("repository class = " + userRepository.getClass());
-        System.out.println("is mock? = " + org.mockito.Mockito.mockingDetails(userRepository).isMock());
-        System.out.println("is spy?  = " + org.mockito.Mockito.mockingDetails(userRepository).isSpy());
-
         // Arrange
         String userId = "test123";
         String email = "email@email.com";
@@ -84,5 +80,33 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
                 .isEqualTo(ErrorType.ALREADY_EXIST_USERID);
 
     }
+
+    @DisplayName("해당 ID 의 회원이 존재할 경우, 회원 정보가 반환된다.")
+    @Test
+    void shouldReturnMemberInfo_whenMemberExistsById() {
+        // Arrange
+        User user = userRepository.save(User.create("test123", "email@email.com", "1996-11-27", Gender.MALE));
+
+        // Act
+        User myInfo = userService.getMyInfo(user.getUserId());
+
+        // Assert
+        assertThat(myInfo.getUserId()).isEqualTo(user.getUserId());
+        assertThat(myInfo.getEmail()).isEqualTo(user.getEmail());
+        assertThat(myInfo.getBirthDay()).isEqualTo(user.getBirthDay());
+        assertThat(myInfo.getGender()).isEqualTo(user.getGender());
+    }
+
+    @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
+    @Test
+    void shouldReturnNull_whenMemberNotExistsById() {
+        // Arrange
+        // Act
+        User myInfo = userService.getMyInfo("test123");
+
+        // Assert
+        assertThat(myInfo).isNull();
+    }
+
 
 }
