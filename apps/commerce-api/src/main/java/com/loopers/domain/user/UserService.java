@@ -28,4 +28,12 @@ public class UserService {
     public User getMyInfo(String userId) {
         return userRepository.findByUserId(userId).orElse(null);
     }
+
+    public boolean existByUserId(String userId) {
+        return userRepository.existByUserId(userId);
+    }
+
+    public void deleteUser(String userId) {
+        userRepository.deleteByUserId(userId);
+    }
 }
