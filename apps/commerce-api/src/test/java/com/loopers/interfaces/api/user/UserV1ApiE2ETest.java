@@ -1,8 +1,9 @@
-package com.loopers.interfaces.api;
+package com.loopers.interfaces.api.user;
 
 import com.loopers.domain.user.Gender;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
+import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.interfaces.api.user.dto.MyInfoResponse;
 import com.loopers.interfaces.api.user.dto.SignUpRequest;
 import com.loopers.interfaces.api.user.dto.SignUpResponse;
