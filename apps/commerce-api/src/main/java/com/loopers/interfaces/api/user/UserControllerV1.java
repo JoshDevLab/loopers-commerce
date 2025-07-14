@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.user;
 
+import com.loopers.application.userpoint.UserPointFacade;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRegisterCommand;
 import com.loopers.domain.user.UserService;
@@ -19,11 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserControllerV1 {
 
     private final UserService userService;
+    private final UserPointFacade userPointFacade;
 
     @PostMapping
     public ApiResponse<SignUpResponse> signUp(@RequestBody SignUpRequest request) {
         UserRegisterCommand command = request.toCommand();
-        User user = userService.signUp(command);
+        User user = userPointFacade.signUp(command);
         return ApiResponse.success(SignUpResponse.from(user));
     }
 

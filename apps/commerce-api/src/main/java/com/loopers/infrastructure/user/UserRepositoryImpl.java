@@ -29,7 +29,9 @@ public class UserRepositoryImpl implements UserRepository {
         return storage.containsKey(userId);
     }
 
-    public void clearStorageForTest() {
-        storage.clear();
+    @Override
+    public void deleteByUserId(String userId) {
+        storage.remove(userId);
     }
+
 }
