@@ -49,7 +49,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
 
         // Act
         ResponseEntity<ApiResponse<Long>> response = client.exchange(
-                "/api/v1/users/points",
+                "/api/v1/points",
                 HttpMethod.GET,
                 httpEntityWithHeaders,
                 new ParameterizedTypeReference<ApiResponse<Long>>() {
@@ -71,7 +71,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
 
         // Act
         ResponseEntity<ApiResponse<Long>> response = client.exchange(
-                "/api/v1/users/points",
+                "/api/v1/points",
                 HttpMethod.GET,
                 httpEntityWithHeaders,
                 new ParameterizedTypeReference<ApiResponse<Long>>() {
