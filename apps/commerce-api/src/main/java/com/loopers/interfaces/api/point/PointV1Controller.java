@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/users/points")
+@RequestMapping("/api/v1/points")
 public class PointV1Controller {
 
     private final UserPointFacade userPointFacade;
