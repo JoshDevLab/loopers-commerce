@@ -4,6 +4,8 @@ import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.user.*;
 import com.loopers.support.IntegrationTestSupport;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import java.util.Optional;
 
 import static com.loopers.support.InMemoryDbSupport.clearInMemoryStorage;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
 
@@ -112,5 +115,19 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
 
         // Assert
         assertThat(point).isNull();
+    }
+
+    @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, 실패한다.")
+    @Test
+    public void chargingPointNotExistUserIdThenFailCharging() {
+        // Arrange
+        String userId = "test123";
+        Long chargePoint = 10000L;
+
+        // Act
+        CoreException exception = assertThrows(CoreException.class, () -> userPointFacade.chargingPoint(userId, chargePoint));
+
+        // Assert
+        assertThat(exception.getErrorType()).isEqualTo(ErrorType.USER_NOT_FOUND);
     }
 }
