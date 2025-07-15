@@ -82,4 +82,55 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @DisplayName("존재하는 유저가 1000원을 충전할 경우, 충전된 보유 총량을 응답으로 반환한다.")
+    @Test
+    void successChargePointThenReturnChargedPoint() {
+        // Arrange
+        String userId = "test123";
+        String email = "email@email.com";
+        String birthday = "1996-11-27";
+        String gender = "MALE";
+        User user = userRepository.save(User.create(userId, email, birthday, Gender.valueOf(gender)));
+        pointRepository.save(Point.create(10000L, user.getUserId()));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-USER-ID", user.getUserId());
+        HttpEntity<Long> httpEntityWithHeaders = new HttpEntity<>(1000L, headers);
+
+        // Act
+        ResponseEntity<ApiResponse<Long>> response = client.exchange(
+                "/api/v1/points/charge",
+                HttpMethod.POST,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<Long>>() {
+                }
+        );
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().data()).isEqualTo(11000L);
+    }
+
+    @DisplayName("존재하지 않는 유저가 포인트를 충전할 경우, 404 Not Found 응답을 반환한다.")
+    @Test
+    void failChargePoint_whenUserNotFound() {
+        // Arrange
+        String userId = "test123";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-USER-ID", userId);
+        HttpEntity<Long> httpEntityWithHeaders = new HttpEntity<>(1000L, headers);
+
+        // Act
+        ResponseEntity<ApiResponse<Long>> response = client.exchange(
+                "/api/v1/points/charge",
+                HttpMethod.POST,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<Long>>() {
+                }
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
 }
