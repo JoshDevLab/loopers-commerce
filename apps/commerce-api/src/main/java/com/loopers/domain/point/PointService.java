@@ -16,4 +16,8 @@ public class PointService {
     public Point getPoint(String userId) {
         return pointRepository.findByUserId(userId).orElse(null);
     }
+
+    public void chargingPoint(String userId, Long chargePoint) {
+        pointRepository.findByUserId(userId).ifPresent(point -> point.charge(chargePoint));
+    }
 }
