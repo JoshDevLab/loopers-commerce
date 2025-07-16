@@ -1,6 +1,7 @@
 package com.loopers.application.userpoint;
 
 import com.loopers.domain.point.Point;
+import com.loopers.domain.point.PointHistoryService;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRegisterCommand;
@@ -10,12 +11,15 @@ import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @Component
 public class UserPointFacade {
 
     private final UserService userService;
     private final PointService pointService;
+    private final PointHistoryService pointHistoryService;
 
     public User signUp(UserRegisterCommand command) {
         User user = userService.signUp(command);
@@ -38,6 +42,14 @@ public class UserPointFacade {
         if (!userService.existByUserId(userId))
             throw new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 사용자입니다.");
 
-        return pointService.chargingPoint(userId, chargePoint);
+        Long historyId = pointHistoryService.chargePointHistory(userId, chargePoint, LocalDateTime.now());
+
+        try {
+            return pointService.chargingPoint(userId, chargePoint);
+        } catch (Exception e) {
+            pointHistoryService.delete(historyId);
+            throw new CoreException(ErrorType.POINT_CHARGING_ERROR, e.getMessage());
+        }
     }
+
 }

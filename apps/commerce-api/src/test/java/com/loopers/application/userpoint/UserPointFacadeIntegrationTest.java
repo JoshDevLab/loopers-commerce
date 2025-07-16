@@ -1,6 +1,7 @@
 package com.loopers.application.userpoint;
 
 import com.loopers.domain.point.Point;
+import com.loopers.domain.point.PointHistoryRepository;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.user.*;
 import com.loopers.support.IntegrationTestSupport;
@@ -103,6 +104,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(point.getPointBalance()).isEqualTo(10000L);
     }
 
+
     @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
     @Test
     void existUserIdThenReturnNull() {
@@ -129,5 +131,26 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
 
         // Assert
         assertThat(exception.getErrorType()).isEqualTo(ErrorType.USER_NOT_FOUND);
+    }
+
+    @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우 보유 포인트가 증가한다.")
+    @Test
+    void existMemberChargingPointThenSuccess() {
+        // Arrange
+        String userId = "test123";
+        String email = "email@email.com";
+        String birthday = "1996-11-27";
+        Gender gender = Gender.MALE;
+        User user = userRepository.save(User.create(userId, email, birthday, gender));
+        pointRepository.save(Point.create(10000L, user.getUserId()));
+        Long chargePoint = 5000L;
+
+        // Act
+        Point chargedPoint = userPointFacade.existMemberChargingPoint(userId, chargePoint);
+
+        // Assert
+        assertThat(chargedPoint).isNotNull();
+        assertThat(chargedPoint.getUserId()).isEqualTo(userId);
+        assertThat(chargedPoint.getPointBalance()).isEqualTo(15000L);
     }
 }
