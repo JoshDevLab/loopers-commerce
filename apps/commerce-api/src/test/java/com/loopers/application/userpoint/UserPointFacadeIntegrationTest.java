@@ -119,13 +119,13 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
 
     @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, 실패한다.")
     @Test
-    public void chargingPointNotExistUserIdThenFailCharging() {
+    public void chargingPointNotExistUserIdThenFailExistMemberCharging() {
         // Arrange
         String userId = "test123";
         Long chargePoint = 10000L;
 
         // Act
-        CoreException exception = assertThrows(CoreException.class, () -> userPointFacade.chargingPoint(userId, chargePoint));
+        CoreException exception = assertThrows(CoreException.class, () -> userPointFacade.existMemberChargingPoint(userId, chargePoint));
 
         // Assert
         assertThat(exception.getErrorType()).isEqualTo(ErrorType.USER_NOT_FOUND);

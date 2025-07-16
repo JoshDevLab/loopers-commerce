@@ -34,10 +34,10 @@ public class UserPointFacade {
         return userService.existByUserId(userId) ? pointService.getPoint(userId) : null;
     }
 
-    public void chargingPoint(String userId, Long chargePoint) {
+    public Point existMemberChargingPoint(String userId, Long chargePoint) {
         if (!userService.existByUserId(userId))
             throw new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 사용자입니다.");
 
-        pointService.chargingPoint(userId, chargePoint);
+        return pointService.chargingPoint(userId, chargePoint);
     }
 }

@@ -26,5 +26,6 @@ public class Point {
         if (chargePoint <= 0) {
             throw new CoreException(ErrorType.POINT_CHARGING_ERROR, chargePoint + "는 0원 이하 이므로 충전이 불가합니다.");
         }
+        this.pointBalance += chargePoint;
     }
 }
