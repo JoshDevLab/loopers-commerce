@@ -30,4 +30,11 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
     public PointHistory findById(Long pointHistoryId) {
         return storage.get(pointHistoryId);
     }
+
+    @Override
+    public boolean existsByUserId(String userId) {
+        return storage.entrySet()
+                .stream()
+                .anyMatch(entry -> entry.getValue().getUserId().equals(userId));
+    }
 }

@@ -6,4 +6,6 @@ public interface PointHistoryRepository {
     void delete(Long pointHistoryId);
 
     PointHistory findById(Long savedId);
+
+    boolean existsByUserId(String userId);
 }

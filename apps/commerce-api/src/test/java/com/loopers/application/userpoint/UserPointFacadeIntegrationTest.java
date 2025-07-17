@@ -29,10 +29,14 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
     @Autowired
     PointRepository pointRepository;
 
+    @Autowired
+    PointHistoryRepository pointHistoryRepository;
+
     @BeforeEach
     void reset() throws Exception {
         clearInMemoryStorage(userRepository);
         clearInMemoryStorage(pointRepository);
+        clearInMemoryStorage(pointHistoryRepository);
     }
 
     @DisplayName("회원가입이 성공하면 Point 0원이 부여된다.")
@@ -135,7 +139,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
 
     @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우 보유 포인트가 증가한다.")
     @Test
-    void existMemberChargingPointThenSuccess() {
+    void existMemberChargingPointThenHavingPointIncrease() {
         // Arrange
         String userId = "test123";
         String email = "email@email.com";
@@ -152,5 +156,25 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(chargedPoint).isNotNull();
         assertThat(chargedPoint.getUserId()).isEqualTo(userId);
         assertThat(chargedPoint.getPointBalance()).isEqualTo(15000L);
+    }
+
+    @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우 포인트 히스토리에 충전이력이 저장된다.")
+    @Test
+    void existMemberChargingPointThenPointHistorySave() {
+        // Arrange
+        String userId = "test123";
+        String email = "email@email.com";
+        String birthday = "1996-11-27";
+        Gender gender = Gender.MALE;
+        User user = userRepository.save(User.create(userId, email, birthday, gender));
+        pointRepository.save(Point.create(10000L, user.getUserId()));
+        Long chargePoint = 5000L;
+
+        // Act
+        Point point = userPointFacade.existMemberChargingPoint(userId, chargePoint);
+
+        // Assert
+        boolean result = pointHistoryRepository.existsByUserId(point.getUserId());
+        assertThat(result).isTrue();
     }
 }
