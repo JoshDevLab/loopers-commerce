@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.user;
 
+import com.loopers.domain.user.UserInfo;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -11,8 +12,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class CurrentUserIdArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterAnnotation(CurrentUserId.class) != null
-                && parameter.getParameterType().equals(String.class);
+        return parameter.getParameterAnnotation(CurrentUser.class) != null
+                && parameter.getParameterType().equals(UserInfo.class);
     }
 
     @Override

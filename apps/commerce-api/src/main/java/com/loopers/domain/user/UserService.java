@@ -34,8 +34,4 @@ public class UserService {
         return UserInfo.of(user);
     }
 
-    public boolean existByUserId(String userId) {
-        return userRepository.existByUserId(userId);
-    }
-
 }

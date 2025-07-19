@@ -31,7 +31,7 @@ public class UserTest {
         // Assert
         assertThatThrownBy(() -> User.create(userId, email, birthday, gender))
                 .isInstanceOf(CoreException.class)
-                .extracting(e -> ((CoreException)e).getErrorType())
+                .extracting(e -> ((CoreException) e).getErrorType())
                 .isEqualTo(ErrorType.USER_ID_ERROR);
     }
 
@@ -57,7 +57,7 @@ public class UserTest {
         // Assert
         assertThatThrownBy(() -> User.create(userId, email, birthday, gender))
                 .isInstanceOf(CoreException.class)
-                .extracting(e -> ((CoreException)e).getErrorType())
+                .extracting(e -> ((CoreException) e).getErrorType())
                 .isEqualTo(ErrorType.USER_EMAIL_ERROR);
     }
 
@@ -83,7 +83,7 @@ public class UserTest {
         // Assert
         assertThatThrownBy(() -> User.create(userId, email, birthday, gender))
                 .isInstanceOf(CoreException.class)
-                .extracting(e -> ((CoreException)e).getErrorType())
+                .extracting(e -> ((CoreException) e).getErrorType())
                 .isEqualTo(ErrorType.USER_BIRTHDAY_ERROR);
     }
 
