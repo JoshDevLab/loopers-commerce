@@ -25,14 +25,14 @@ public class UserTest {
         // Arrange
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
 
         // Act
         // Assert
         assertThatThrownBy(() -> User.create(userId, email, birthday, gender))
                 .isInstanceOf(CoreException.class)
                 .extracting(e -> ((CoreException)e).getErrorType())
-                .isEqualTo(ErrorType.USERID_ERROR);
+                .isEqualTo(ErrorType.USER_ID_ERROR);
     }
 
 
@@ -51,7 +51,7 @@ public class UserTest {
         // Arrange
         String userId = "userid12";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
 
         // Act
         // Assert
@@ -76,7 +76,8 @@ public class UserTest {
         // Arrange
         String userId = "userid12";
         String email = "email@email.com";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
+
 
         // Act
         // Assert

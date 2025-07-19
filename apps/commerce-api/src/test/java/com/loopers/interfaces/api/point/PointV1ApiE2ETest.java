@@ -2,7 +2,6 @@ package com.loopers.interfaces.api.point;
 
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
-import com.loopers.domain.user.Gender;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.interfaces.api.ApiResponse;
@@ -39,7 +38,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         String email = "email@email.com";
         String birthday = "1996-11-27";
         String gender = "MALE";
-        User user = userRepository.save(User.create(userId, email, birthday, Gender.valueOf(gender)));
+        User user = userRepository.save(User.create(userId, email, birthday, gender));
 
         pointRepository.save(Point.create(10000L, user.getUserId()));
 
@@ -90,7 +89,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         String email = "email@email.com";
         String birthday = "1996-11-27";
         String gender = "MALE";
-        User user = userRepository.save(User.create(userId, email, birthday, Gender.valueOf(gender)));
+        User user = userRepository.save(User.create(userId, email, birthday, gender));
         pointRepository.save(Point.create(10000L, user.getUserId()));
 
         HttpHeaders headers = new HttpHeaders();

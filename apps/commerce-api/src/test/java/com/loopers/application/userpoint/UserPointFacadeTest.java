@@ -2,10 +2,7 @@ package com.loopers.application.userpoint;
 
 import com.loopers.domain.point.PointHistoryService;
 import com.loopers.domain.point.PointService;
-import com.loopers.domain.user.Gender;
-import com.loopers.domain.user.User;
-import com.loopers.domain.user.UserRegisterCommand;
-import com.loopers.domain.user.UserService;
+import com.loopers.domain.user.*;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -42,18 +39,21 @@ public class UserPointFacadeTest {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
-        UserRegisterCommand userRegisterCommand = new UserRegisterCommand(
-                userId, email, birthday, gender
+        String gender = "MALE";
+        UserCommand.Register userCommand = new UserCommand.Register(
+                userId,
+                email,
+                birthday,
+                gender
         );
 
-        User mockUser = User.create(userId, email, birthday, gender);
-        when(userService.signUp(userRegisterCommand)).thenReturn(mockUser);
+        UserInfo mockUser = new UserInfo(userId, email, LocalDate.parse(birthday), Gender.MALE);
+        when(userService.signUp(userCommand)).thenReturn(mockUser);
 
         doThrow(new RuntimeException()).when(pointService).initPoint(userId);
 
         // Act
-        assertThrows(CoreException.class, () -> userPointFacade.signUp(userRegisterCommand));
+        assertThrows(CoreException.class, () -> userPointFacade.signUp(userCommand));
 
         // Assert
         verify(userService).deleteUser(userId);
@@ -68,10 +68,10 @@ public class UserPointFacadeTest {
         long historyId = 1L;
         when(userService.existByUserId(userId)).thenReturn(true);
 
-        when(pointHistoryService.chargePointHistory(eq(userId), eq(chargePoint), any()))
+        when(pointHistoryService.save(eq(userId), eq(chargePoint), any()))
                 .thenReturn(historyId);
 
-        when(pointService.chargingPoint(userId, chargePoint))
+        when(pointService.charge(userId, chargePoint))
                 .thenThrow(new CoreException(ErrorType.POINT_CHARGING_ERROR, "포인트 충전 실패"));
 
         // Act

@@ -19,7 +19,7 @@ public class PointService {
         return pointRepository.findByUserId(userId).orElse(null);
     }
 
-    public Point chargingPoint(String userId, Long chargePoint) {
+    public Point charge(String userId, Long chargePoint) {
         Point point = pointRepository.findByUserId(userId)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, userId + "가 가지고 있는 포인트가 없습니다."));
         point.charge(chargePoint);

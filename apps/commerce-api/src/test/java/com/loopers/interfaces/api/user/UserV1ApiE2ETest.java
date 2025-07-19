@@ -98,7 +98,7 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
         String email = "email@email.com";
         String birthday = "1996-11-27";
         String gender = "MALE";
-        User user = userRepository.save(User.create(userId, email, birthday, Gender.MALE));
+        User user = userRepository.save(User.create(userId, email, birthday, gender));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-USER-ID", user.getUserId());

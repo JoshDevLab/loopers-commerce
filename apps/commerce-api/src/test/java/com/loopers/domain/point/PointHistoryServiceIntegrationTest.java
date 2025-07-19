@@ -30,7 +30,7 @@ public class PointHistoryServiceIntegrationTest extends IntegrationTestSupport {
 
     @DisplayName("포인트 충전 이력이 저장되고 ID가 반환된다")
     @Test
-    void chargePointHistory_success() {
+    void save_success() {
         // given
         String userId = "test123";
         Long point = 500L;

@@ -25,9 +25,9 @@ public class User {
         this.gender = gender;
     }
 
-    public static User create(String userId, String email, String birthday, Gender gender) {
+    public static User create(String userId, String email, String birthday, String gender) {
         validate(userId, email, birthday);
-        return new User(userId, email, LocalDate.parse(birthday), gender);
+        return new User(userId, email, LocalDate.parse(birthday), Gender.validate(gender));
     }
 
     private static void validate(String userId, String email, String birthday) {
@@ -39,7 +39,7 @@ public class User {
     private static void validateUserId(String userId) {
         String USERID_REGEX = "^[a-zA-Z0-9]{1,10}$";
         if (!Pattern.matches(USERID_REGEX, userId)) {
-            throw new CoreException(ErrorType.USERID_ERROR, "Invalid userId: " + userId);
+            throw new CoreException(ErrorType.USER_ID_ERROR, "Invalid userId: " + userId);
         }
     }
 
@@ -64,4 +64,5 @@ public class User {
             throw new CoreException(ErrorType.USER_BIRTHDAY_ERROR, "Invalid birthday: " + dateStr);
         }
     }
+
 }

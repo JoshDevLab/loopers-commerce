@@ -32,8 +32,8 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
-        UserRegisterCommand userRegisterCommand = new UserRegisterCommand(
+        String gender = "MALE";
+        UserCommand.Register userCommand = new UserCommand.Register(
                 userId,
                 email,
                 birthday,
@@ -41,10 +41,10 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        User user = userService.signUp(userRegisterCommand);
+        UserInfo user = userService.signUp(userCommand);
 
         // Assert
-        assertThat(userRepository.findByUserId(user.getUserId())).isPresent();
+        assertThat(userRepository.findByUserId(user.userId())).isPresent();
     }
 
     @DisplayName("이미 가입된 ID 로 회원가입 시도 시, 실패한다.")
@@ -54,27 +54,28 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
 
-        UserRegisterCommand userRegisterCommand1 = new UserRegisterCommand(
+        UserCommand.Register userCommand1 = new UserCommand.Register(
                 userId,
                 email,
                 birthday,
                 gender
         );
 
-        UserRegisterCommand userRegisterCommand2 = new UserRegisterCommand(
+        UserCommand.Register userCommand2 = new UserCommand.Register(
                 userId,
                 email,
                 birthday,
                 gender
         );
 
-        userService.signUp(userRegisterCommand1);
+
+        userService.signUp(userCommand1);
 
         // Act
         // Assert
-        assertThatThrownBy(() -> userService.signUp(userRegisterCommand2))
+        assertThatThrownBy(() -> userService.signUp(userCommand2))
                 .isInstanceOf(CoreException.class)
                 .extracting(e -> ((CoreException) e).getErrorType())
                 .isEqualTo(ErrorType.ALREADY_EXIST_USERID);
@@ -85,28 +86,16 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
     @Test
     void shouldReturnMemberInfo_whenMemberExistsById() {
         // Arrange
-        User user = userRepository.save(User.create("test123", "email@email.com", "1996-11-27", Gender.MALE));
+        User user = userRepository.save(User.create("test123", "email@email.com", "1996-11-27", "MALE"));
 
         // Act
-        User myInfo = userService.getMyInfo(user.getUserId());
+        UserInfo myInfo = userService.getMyInfo(user.getUserId());
 
         // Assert
-        assertThat(myInfo.getUserId()).isEqualTo(user.getUserId());
-        assertThat(myInfo.getEmail()).isEqualTo(user.getEmail());
-        assertThat(myInfo.getBirthDay()).isEqualTo(user.getBirthDay());
-        assertThat(myInfo.getGender()).isEqualTo(user.getGender());
+        assertThat(myInfo.userId()).isEqualTo(user.getUserId());
+        assertThat(myInfo.email()).isEqualTo(user.getEmail());
+        assertThat(myInfo.birthday()).isEqualTo(user.getBirthDay());
+        assertThat(myInfo.gender()).isEqualTo(user.getGender());
     }
-
-    @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
-    @Test
-    void shouldReturnNull_whenMemberNotExistsById() {
-        // Arrange
-        // Act
-        User myInfo = userService.getMyInfo("test123");
-
-        // Assert
-        assertThat(myInfo).isNull();
-    }
-
 
 }

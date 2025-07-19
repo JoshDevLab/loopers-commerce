@@ -46,8 +46,8 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
-        UserRegisterCommand userRegisterCommand = new UserRegisterCommand(
+        String gender = "MALE";
+        UserCommand.Register userCommand = new UserCommand.Register(
                 userId,
                 email,
                 birthday,
@@ -55,7 +55,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        userPointFacade.signUp(userRegisterCommand);
+        userPointFacade.signUp(userCommand);
 
         // Assert
         Optional<Point> point = pointRepository.findByUserId(userId);
@@ -70,8 +70,8 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
-        UserRegisterCommand userRegisterCommand = new UserRegisterCommand(
+        String gender = "MALE";
+        UserCommand.Register userCommand = new UserCommand.Register(
                 userId,
                 email,
                 birthday,
@@ -79,7 +79,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        userPointFacade.signUp(userRegisterCommand);
+        userPointFacade.signUp(userCommand);
 
         // Assert
         Optional<Point> point = pointRepository.findByUserId(userId);
@@ -95,7 +95,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
 
         pointRepository.save(Point.create(10000L, user.getUserId()));
@@ -123,7 +123,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(point).isNull();
     }
 
-    @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, 실패한다.")
+    @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, CoreException ErrorType.USER_NOT_FOUND. 예외가 발생한다.")
     @Test
     public void chargingPointNotExistUserIdThenFailExistMemberCharging() {
         // Arrange
@@ -144,7 +144,8 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
+
         User user = userRepository.save(User.create(userId, email, birthday, gender));
         pointRepository.save(Point.create(10000L, user.getUserId()));
         Long chargePoint = 5000L;
@@ -165,7 +166,8 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         String userId = "test123";
         String email = "email@email.com";
         String birthday = "1996-11-27";
-        Gender gender = Gender.MALE;
+        String gender = "MALE";
+
         User user = userRepository.save(User.create(userId, email, birthday, gender));
         pointRepository.save(Point.create(10000L, user.getUserId()));
         Long chargePoint = 5000L;

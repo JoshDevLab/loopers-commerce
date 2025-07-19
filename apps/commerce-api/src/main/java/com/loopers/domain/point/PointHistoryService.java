@@ -11,7 +11,7 @@ public class PointHistoryService {
 
     private final PointHistoryRepository pointHistoryRepository;
 
-    public Long chargePointHistory(String userId, Long point, LocalDateTime registeredAt) {
+    public Long save(String userId, Long point, LocalDateTime registeredAt) {
         PointHistory pointHistory = PointHistory.create(userId, point, PointHistoryType.CHARGE, registeredAt);
         return pointHistoryRepository.save(pointHistory);
     }
