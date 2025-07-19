@@ -31,17 +31,4 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean existByUserId(String userId) {
         return userJpaRepository.findByUserId(userId).isPresent();
     }
-
-    @Override
-    public void deleteByUserId(String userId) {
-        Optional<User> user = userJpaRepository.findByUserId(userId);
-        if (user.isPresent()) {
-            userJpaRepository.delete(user.get());
-        } else {
-            throw new CoreException(
-                    ErrorType.USER_NOT_FOUND,
-                    userId + "는 존재하지 않는 유저입니다."
-            );
-        }
-    }
 }

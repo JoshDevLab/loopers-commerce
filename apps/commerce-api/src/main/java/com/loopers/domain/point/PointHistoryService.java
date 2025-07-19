@@ -2,6 +2,7 @@ package com.loopers.domain.point;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -11,12 +12,10 @@ public class PointHistoryService {
 
     private final PointHistoryRepository pointHistoryRepository;
 
-    public Long save(String userId, Long point) {
+    @Transactional
+    public PointHistoryInfo save(String userId, Long point) {
         PointHistory pointHistory = PointHistory.create(userId, point, PointHistoryType.CHARGE);
-        return pointHistoryRepository.save(pointHistory);
+        return PointHistoryInfo.of(pointHistoryRepository.save(pointHistory));
     }
 
-    public void delete(Long pointHistoryId) {
-        pointHistoryRepository.delete(pointHistoryId);
-    }
 }

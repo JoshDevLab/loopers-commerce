@@ -12,13 +12,7 @@ public class PointHistoryServiceIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private PointHistoryService pointHistoryService;
 
-    @Autowired
-    private PointHistoryRepository pointHistoryRepository;
-
-    @Autowired
-    private PointRepository pointRepository;
-
-    @DisplayName("포인트 충전 이력이 저장되고 ID가 반환된다")
+    @DisplayName("포인트 충전 이력이 올바르게 저장된다.")
     @Test
     void save_success() {
         // given
@@ -26,32 +20,13 @@ public class PointHistoryServiceIntegrationTest extends IntegrationTestSupport {
         Long point = 500L;
 
         // when
-        Long savedId = pointHistoryRepository.save(PointHistory.create(userId, point, PointHistoryType.CHARGE));
+        PointHistoryInfo saved = pointHistoryService.save(userId, point);
 
         // then
-        assertThat(savedId).isNotNull();
-        PointHistory found = pointHistoryRepository.findById(savedId);
-        assertThat(found).isNotNull();
-        assertThat(found.getUserId()).isEqualTo(userId);
-        assertThat(found.getPoint()).isEqualTo(point);
-        assertThat(found.getType()).isEqualTo(PointHistoryType.CHARGE);
-    }
-
-    @DisplayName("포인트 충전 이력을 삭제하면 제거된다")
-    @Test
-    void deletePointHistory_success() {
-        // given
-        String userId = "test123";
-        Long point = 300L;
-
-        Long savedId = pointHistoryRepository.save(PointHistory.create(userId, point, PointHistoryType.CHARGE));
-
-        // when
-        pointHistoryService.delete(savedId);
-
-        // then
-        assertThat(savedId).isNotNull();
-        PointHistory found = pointHistoryRepository.findById(savedId);
-        assertThat(found).isNull();
+        assertThat(saved).isNotNull();
+        assertThat(saved).isNotNull();
+        assertThat(saved.userId()).isEqualTo(userId);
+        assertThat(saved.point()).isEqualTo(point);
+        assertThat(saved.type()).isEqualTo(PointHistoryType.CHARGE);
     }
 }

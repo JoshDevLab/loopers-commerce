@@ -8,6 +8,4 @@ public interface UserRepository {
     Optional<User> findByUserId(String userId);
 
     boolean existByUserId(String userId);
-
-    void deleteByUserId(String userId);
 }

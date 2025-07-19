@@ -38,4 +38,5 @@ public class Point extends BaseEntity {
         }
         this.pointBalance += chargePoint;
     }
+
 }

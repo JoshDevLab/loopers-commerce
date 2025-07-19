@@ -15,11 +15,11 @@ public class PointV1Controller {
 
     @GetMapping
     public ApiResponse<Long> getPoints(@CurrentUserId String userId) {
-        return ApiResponse.success(userPointFacade.existMemberGetPoint(userId).getPointBalance());
+        return ApiResponse.success(userPointFacade.existMemberGetPoint(userId).pointBalance());
     }
 
     @PostMapping("/charge")
     public ApiResponse<Long> chargePoints(@CurrentUserId String userId, @RequestBody Long chargePoint) {
-        return ApiResponse.success(userPointFacade.existMemberChargingPoint(userId, chargePoint).getPointBalance());
+        return ApiResponse.success(userPointFacade.existMemberChargingPoint(userId, chargePoint).pointBalance());
     }
 }

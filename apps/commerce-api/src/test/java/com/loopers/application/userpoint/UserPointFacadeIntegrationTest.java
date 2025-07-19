@@ -2,6 +2,7 @@ package com.loopers.application.userpoint;
 
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointHistoryRepository;
+import com.loopers.domain.point.PointInfo;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.user.*;
 import com.loopers.support.IntegrationTestSupport;
@@ -92,11 +93,11 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         pointRepository.save(Point.create(10000L, user.getUserId()));
 
         // Act
-        Point point = userPointFacade.existMemberGetPoint(userId);
+        PointInfo point = userPointFacade.existMemberGetPoint(userId);
 
         // Assert
-        assertThat(point.getUserId()).isEqualTo(userId);
-        assertThat(point.getPointBalance()).isEqualTo(10000L);
+        assertThat(point.userId()).isEqualTo(userId);
+        assertThat(point.pointBalance()).isEqualTo(10000L);
     }
 
 
@@ -108,7 +109,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         pointRepository.save(Point.create(10000L, userId));
 
         // Act
-        Point point = userPointFacade.existMemberGetPoint(userId);
+        PointInfo point = userPointFacade.existMemberGetPoint(userId);
 
         // Assert
         assertThat(point).isNull();
@@ -142,12 +143,12 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         Long chargePoint = 5000L;
 
         // Act
-        Point chargedPoint = userPointFacade.existMemberChargingPoint(userId, chargePoint);
+        PointInfo chargedPoint = userPointFacade.existMemberChargingPoint(userId, chargePoint);
 
         // Assert
         assertThat(chargedPoint).isNotNull();
-        assertThat(chargedPoint.getUserId()).isEqualTo(userId);
-        assertThat(chargedPoint.getPointBalance()).isEqualTo(15000L);
+        assertThat(chargedPoint.userId()).isEqualTo(userId);
+        assertThat(chargedPoint.pointBalance()).isEqualTo(15000L);
     }
 
     @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우 포인트 히스토리에 충전이력이 저장된다.")
@@ -164,10 +165,10 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         Long chargePoint = 5000L;
 
         // Act
-        Point point = userPointFacade.existMemberChargingPoint(userId, chargePoint);
+        PointInfo point = userPointFacade.existMemberChargingPoint(userId, chargePoint);
 
         // Assert
-        boolean result = pointHistoryRepository.existsByUserId(point.getUserId());
+        boolean result = pointHistoryRepository.existsByUserId(point.userId());
         assertThat(result).isTrue();
     }
 }

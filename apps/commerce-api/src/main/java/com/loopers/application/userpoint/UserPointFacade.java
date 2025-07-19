@@ -1,7 +1,7 @@
 package com.loopers.application.userpoint;
 
-import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointHistoryService;
+import com.loopers.domain.point.PointInfo;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.UserInfo;
@@ -10,6 +10,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Component
@@ -19,35 +20,23 @@ public class UserPointFacade {
     private final PointService pointService;
     private final PointHistoryService pointHistoryService;
 
+    @Transactional
     public UserInfo signUp(UserCommand.Register command) {
         UserInfo userInfo = userService.signUp(command);
-
-        try {
-            pointService.initPoint(userInfo.userId());
-        } catch (Exception e) {
-            userService.deleteUser(userInfo.userId());
-            throw new CoreException(ErrorType.INTERNAL_ERROR, "회원 가입에 실패하였습니다. 다시 시도해주세요");
-        }
-
+        pointService.initPoint(userInfo.userId());
         return userInfo;
     }
 
-    public Point existMemberGetPoint(String userId) {
+    public PointInfo existMemberGetPoint(String userId) {
         return userService.existByUserId(userId) ? pointService.getPoint(userId) : null;
     }
 
-    public Point existMemberChargingPoint(String userId, Long chargePoint) {
+    @Transactional
+    public PointInfo existMemberChargingPoint(String userId, Long chargePoint) {
         if (!userService.existByUserId(userId))
             throw new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 사용자입니다.");
-
-        Long historyId = pointHistoryService.save(userId, chargePoint);
-
-        try {
-            return pointService.charge(userId, chargePoint);
-        } catch (Exception e) {
-            pointHistoryService.delete(historyId);
-            throw new CoreException(ErrorType.POINT_CHARGING_ERROR, e.getMessage());
-        }
+        pointHistoryService.save(userId, chargePoint);
+        return pointService.charge(userId, chargePoint);
     }
 
 }

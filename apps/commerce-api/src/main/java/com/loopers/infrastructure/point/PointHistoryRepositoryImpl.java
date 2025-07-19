@@ -15,8 +15,8 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
     private final PointHistoryJpaRepository pointHistoryJpaRepository;
 
     @Override
-    public Long save(PointHistory pointHistory) {
-        return pointHistoryJpaRepository.save(pointHistory).getId();
+    public PointHistory save(PointHistory pointHistory) {
+        return pointHistoryJpaRepository.save(pointHistory);
     }
 
     @Override
