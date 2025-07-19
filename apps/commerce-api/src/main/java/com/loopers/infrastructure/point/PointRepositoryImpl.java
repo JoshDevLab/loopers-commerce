@@ -5,9 +5,7 @@ import com.loopers.domain.point.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 @Repository

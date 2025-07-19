@@ -1,41 +1,60 @@
 package com.loopers.interfaces.api.user;
 
+import com.loopers.domain.user.UserInfo;
+import com.loopers.domain.user.UserService;
+import com.loopers.support.error.CoreException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
+import java.time.Instant;
 
+@RequiredArgsConstructor
 @Component
 public class UserIdInterceptor implements HandlerInterceptor {
 
+    private final UserService userService;
+    private static final String HEADER_USER_ID = "X-USER-ID";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        String userId = request.getHeader("X-USER-ID");
+        String userId = request.getHeader(HEADER_USER_ID);
 
         if (userId == null || userId.isBlank()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json;charset=UTF-8");
-
-            String jsonError = """
-                {
-                  "error": "Missing X-USER-ID header",
-                  "code": 400,
-                  "timestamp": "%s"
-                }
-                """.formatted(java.time.Instant.now());
-
-            response.getWriter().write(jsonError);
+            errorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Missing X-USER-ID header", 400);
             return false;
         }
 
-        UserContext.set(userId);
-        return true;
+        try {
+            UserInfo userInfo = userService.getMyInfoByUserId(userId);
+            UserContext.set(userInfo);
+            return true;
+        } catch (CoreException e) {
+            errorResponse(response, HttpServletResponse.SC_NOT_FOUND, e.getMessage(), 404);
+            return false;
+        }
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         UserContext.clear();
+    }
+
+    private void errorResponse(HttpServletResponse response, int statusCode, String message, int code) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json;charset=UTF-8");
+
+        String body = String.format("""
+                {
+                  "error": "%s",
+                  "code": %d,
+                  "timestamp": "%s"
+                }
+                """, message, code, Instant.now());
+
+        response.getWriter().write(body);
     }
 }

@@ -5,10 +5,6 @@ import com.loopers.domain.point.PointHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 @RequiredArgsConstructor
 @Repository
 public class PointHistoryRepositoryImpl implements PointHistoryRepository {

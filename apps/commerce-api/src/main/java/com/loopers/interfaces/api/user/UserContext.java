@@ -1,13 +1,15 @@
 package com.loopers.interfaces.api.user;
 
-public class UserContext {
-    private static final ThreadLocal<String> userIdHolder = new ThreadLocal<>();
+import com.loopers.domain.user.UserInfo;
 
-    public static void set(String userId) {
-        userIdHolder.set(userId);
+public class UserContext {
+    private static final ThreadLocal<UserInfo> userIdHolder = new ThreadLocal<>();
+
+    public static void set(UserInfo userInfo) {
+        userIdHolder.set(userInfo);
     }
 
-    public static String get() {
+    public static UserInfo get() {
         return userIdHolder.get();
     }
 

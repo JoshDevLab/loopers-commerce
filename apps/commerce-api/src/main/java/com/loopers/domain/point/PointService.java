@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PointService {
     private final PointRepository pointRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Transactional
     public void initPoint(String userId) {
@@ -31,6 +32,7 @@ public class PointService {
         Point point = pointRepository.findByUserId(userId)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, userId + "가 가지고 있는 포인트가 없습니다."));
         point.charge(chargePoint);
+        pointHistoryRepository.save(PointHistory.create(userId, chargePoint, PointHistoryType.CHARGE));
         return PointInfo.of(point);
     }
 }

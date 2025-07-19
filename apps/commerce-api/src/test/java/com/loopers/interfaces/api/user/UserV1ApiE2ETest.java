@@ -50,7 +50,8 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
                 "/api/v1/users",
                 HttpMethod.POST,
                 new HttpEntity<>(request),
-                new ParameterizedTypeReference<ApiResponse<SignUpResponse>>() {}
+                new ParameterizedTypeReference<ApiResponse<SignUpResponse>>() {
+                }
         );
 
         // Assert
@@ -82,7 +83,8 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
                 "/api/v1/users",
                 HttpMethod.POST,
                 new HttpEntity<>(request),
-                new ParameterizedTypeReference<ApiResponse<SignUpResponse>>() {}
+                new ParameterizedTypeReference<ApiResponse<SignUpResponse>>() {
+                }
         );
 
         // Assert

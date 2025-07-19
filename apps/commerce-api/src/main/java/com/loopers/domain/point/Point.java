@@ -3,7 +3,9 @@ package com.loopers.domain.point;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +18,7 @@ public class Point extends BaseEntity {
     @Column(name = "point_balance", nullable = false)
     private Long pointBalance;
 
-    @Column(name = "user_id" , nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false, unique = true)
     private String userId;
 
     private Point(Long pointBalance, String userId) {

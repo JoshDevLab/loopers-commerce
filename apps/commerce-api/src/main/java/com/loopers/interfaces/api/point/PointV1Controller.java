@@ -1,8 +1,9 @@
 package com.loopers.interfaces.api.point;
 
-import com.loopers.application.userpoint.UserPointFacade;
+import com.loopers.domain.point.PointService;
+import com.loopers.domain.user.UserInfo;
 import com.loopers.interfaces.api.ApiResponse;
-import com.loopers.interfaces.api.user.CurrentUserId;
+import com.loopers.interfaces.api.user.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,15 +12,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/points")
 public class PointV1Controller {
 
-    private final UserPointFacade userPointFacade;
+    private final PointService pointService;
 
     @GetMapping
-    public ApiResponse<Long> getPoints(@CurrentUserId String userId) {
-        return ApiResponse.success(userPointFacade.existMemberGetPoint(userId).pointBalance());
+    public ApiResponse<Long> getPoints(@CurrentUser UserInfo userInfo) {
+        return ApiResponse.success(pointService.getPoint(userInfo.userId()).pointBalance());
     }
 
     @PostMapping("/charge")
-    public ApiResponse<Long> chargePoints(@CurrentUserId String userId, @RequestBody Long chargePoint) {
-        return ApiResponse.success(userPointFacade.existMemberChargingPoint(userId, chargePoint).pointBalance());
+    public ApiResponse<Long> chargePoints(@CurrentUser UserInfo userInfo, @RequestBody Long chargePoint) {
+        return ApiResponse.success(pointService.charge(userInfo.userId(), chargePoint).pointBalance());
     }
 }
