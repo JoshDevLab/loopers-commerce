@@ -1,10 +1,7 @@
 package com.loopers.domain.point;
 
 import com.loopers.domain.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +16,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 public class PointHistory extends BaseEntity {
     private String userId;
     private Long point;
+
+    @Enumerated(EnumType.STRING)
     private PointHistoryType type;
 
     private PointHistory(String userId, Long point,  PointHistoryType pointHistoryType) {
