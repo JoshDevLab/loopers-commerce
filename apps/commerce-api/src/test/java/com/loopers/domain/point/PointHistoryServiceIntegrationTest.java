@@ -1,14 +1,10 @@
 package com.loopers.domain.point;
 
 import com.loopers.support.IntegrationTestSupport;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
-
-import static com.loopers.support.InMemoryDbSupport.clearInMemoryStorage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PointHistoryServiceIntegrationTest extends IntegrationTestSupport {
@@ -22,22 +18,15 @@ public class PointHistoryServiceIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private PointRepository pointRepository;
 
-    @BeforeEach
-    void reset() throws Exception {
-        clearInMemoryStorage(pointHistoryRepository);
-        clearInMemoryStorage(pointRepository);
-    }
-
     @DisplayName("포인트 충전 이력이 저장되고 ID가 반환된다")
     @Test
     void save_success() {
         // given
         String userId = "test123";
         Long point = 500L;
-        LocalDateTime registeredAt = LocalDateTime.now();
 
         // when
-        Long savedId = pointHistoryRepository.save(PointHistory.create(userId, point, PointHistoryType.CHARGE, registeredAt));
+        Long savedId = pointHistoryRepository.save(PointHistory.create(userId, point, PointHistoryType.CHARGE));
 
         // then
         assertThat(savedId).isNotNull();
@@ -54,9 +43,8 @@ public class PointHistoryServiceIntegrationTest extends IntegrationTestSupport {
         // given
         String userId = "test123";
         Long point = 300L;
-        LocalDateTime registeredAt = LocalDateTime.now();
 
-        Long savedId = pointHistoryRepository.save(PointHistory.create(userId, point, PointHistoryType.CHARGE, registeredAt));
+        Long savedId = pointHistoryRepository.save(PointHistory.create(userId, point, PointHistoryType.CHARGE));
 
         // when
         pointHistoryService.delete(savedId);

@@ -1,22 +1,33 @@
 package com.loopers.domain.user;
 
+import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
 @Getter
-public class User {
-    private String userId;
-    private String email;
-    private LocalDate birthDay;
-    private Gender gender;
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "users")
+public class User extends BaseEntity {
 
-    protected User() {
-    }
+    @Column(name = "user_id", nullable = false, unique = true)
+    private String userId;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "birth_day", nullable = false)
+    private LocalDate birthDay;
+
+    @Column(name = "gender", nullable = false)
+    private Gender gender;
 
     private User(String userId, String email, LocalDate birthDay, Gender gender) {
         this.userId = userId;

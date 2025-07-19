@@ -29,6 +29,6 @@ public class UserControllerV1 {
 
     @GetMapping("/me")
     public ApiResponse<MyInfoResponse> getMyInfo(@CurrentUserId String userId) {
-        return ApiResponse.success(MyInfoResponse.from(userService.getMyInfo(userId)));
+        return ApiResponse.success(MyInfoResponse.from(userService.getMyInfoByUserId(userId)));
     }
 }
