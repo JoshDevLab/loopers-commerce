@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
-import static com.loopers.support.InMemoryDbSupport.clearInMemoryStorage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PointV1ApiE2ETest extends E2ETestSupport {
@@ -25,9 +24,8 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
     PointRepository pointRepository;
 
     @BeforeEach
-    void reset() throws Exception {
-        clearInMemoryStorage(userRepository);
-        clearInMemoryStorage(pointRepository);
+    void tearDown() {
+        databaseCleanUp.truncateAllTables();
     }
 
     @DisplayName("포인트 조회에 성공할 경우, 보유 포인트를 응답으로 반환한다.")
@@ -132,4 +130,6 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
+
+
 }

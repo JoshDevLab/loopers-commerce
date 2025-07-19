@@ -5,9 +5,6 @@ import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Optional;
-
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -28,7 +25,7 @@ public class UserService {
         return UserInfo.of(userRepository.save(user));
     }
 
-    public UserInfo getMyInfo(String userId) {
+    public UserInfo getMyInfoByUserId(String userId) {
         User user = userRepository.findByUserId(userId).orElseThrow(() ->
                 new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 유저입니다."));
         return UserInfo.of(user);

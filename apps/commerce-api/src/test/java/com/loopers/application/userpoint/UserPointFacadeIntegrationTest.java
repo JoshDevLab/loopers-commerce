@@ -7,14 +7,12 @@ import com.loopers.domain.user.*;
 import com.loopers.support.IntegrationTestSupport;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static com.loopers.support.InMemoryDbSupport.clearInMemoryStorage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 
@@ -31,13 +29,6 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
     PointHistoryRepository pointHistoryRepository;
-
-    @BeforeEach
-    void reset() throws Exception {
-        clearInMemoryStorage(userRepository);
-        clearInMemoryStorage(pointRepository);
-        clearInMemoryStorage(pointHistoryRepository);
-    }
 
     @DisplayName("회원가입이 성공하면 Point 0원이 부여된다.")
     @Test

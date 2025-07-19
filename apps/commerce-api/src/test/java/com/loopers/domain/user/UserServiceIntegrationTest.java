@@ -3,12 +3,10 @@ package com.loopers.domain.user;
 import com.loopers.support.IntegrationTestSupport;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.loopers.support.InMemoryDbSupport.clearInMemoryStorage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -20,10 +18,6 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
     @Autowired
     UserService userService;
 
-    @BeforeEach
-    void reset() throws Exception {
-        clearInMemoryStorage(userRepository);
-    }
 
     @DisplayName("회원 가입시 User 저장이 수행된다.")
     @Test
@@ -89,7 +83,7 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
         User user = userRepository.save(User.create("test123", "email@email.com", "1996-11-27", "MALE"));
 
         // Act
-        UserInfo myInfo = userService.getMyInfo(user.getUserId());
+        UserInfo myInfo = userService.getMyInfoByUserId(user.getUserId());
 
         // Assert
         assertThat(myInfo.userId()).isEqualTo(user.getUserId());

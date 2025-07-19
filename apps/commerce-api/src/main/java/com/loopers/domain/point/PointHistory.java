@@ -1,29 +1,34 @@
 package com.loopers.domain.point;
 
+import com.loopers.domain.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 @Getter
-public class PointHistory {
-    private Long id;
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "point_histories")
+public class PointHistory extends BaseEntity {
     private String userId;
     private Long point;
     private PointHistoryType type;
-    private LocalDateTime registeredAt;
 
-    private PointHistory(String userId, Long point,  PointHistoryType pointHistoryType, LocalDateTime registeredAt) {
+    private PointHistory(String userId, Long point,  PointHistoryType pointHistoryType) {
         this.userId = userId;
         this.point = point;
         this.type = pointHistoryType;
-        this.registeredAt = registeredAt;
     }
 
-    public static PointHistory create(String userId, Long point, PointHistoryType pointHistoryType, LocalDateTime registeredAt) {
-        return new PointHistory(userId, point, pointHistoryType, registeredAt);
+    public static PointHistory create(String userId, Long point, PointHistoryType pointHistoryType) {
+        return new PointHistory(userId, point, pointHistoryType);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

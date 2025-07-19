@@ -1,11 +1,17 @@
 package com.loopers.domain.point;
 
+import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class Point {
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "points")
+public class Point extends BaseEntity {
     private Long pointBalance;
     private String userId;
 

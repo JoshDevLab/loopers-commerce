@@ -68,7 +68,7 @@ public class UserPointFacadeTest {
         long historyId = 1L;
         when(userService.existByUserId(userId)).thenReturn(true);
 
-        when(pointHistoryService.save(eq(userId), eq(chargePoint), any()))
+        when(pointHistoryService.save(eq(userId), eq(chargePoint)))
                 .thenReturn(historyId);
 
         when(pointService.charge(userId, chargePoint))

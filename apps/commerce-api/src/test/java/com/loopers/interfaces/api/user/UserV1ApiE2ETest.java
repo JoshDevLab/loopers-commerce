@@ -18,7 +18,6 @@ import org.springframework.http.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import static com.loopers.support.InMemoryDbSupport.clearInMemoryStorage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class UserV1ApiE2ETest extends E2ETestSupport {
@@ -27,8 +26,8 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
     UserRepository userRepository;
 
     @BeforeEach
-    void reset() throws Exception {
-        clearInMemoryStorage(userRepository);
+    void tearDown() {
+        databaseCleanUp.truncateAllTables();
     }
 
     @DisplayName("회원 가입이 성공할 경우, 생성된 유저 정보를 응답으로 반환한다.")

@@ -16,15 +16,13 @@ class PointHistoryTest {
         String userId = "test123";
         Long point = 100L;
         PointHistoryType type = PointHistoryType.CHARGE;
-        LocalDateTime registeredAt = LocalDateTime.now();
 
         // when
-        PointHistory result = PointHistory.create(userId, point, type, registeredAt);
+        PointHistory result = PointHistory.create(userId, point, type);
 
         // then
         assertThat(result.getUserId()).isEqualTo(userId);
         assertThat(result.getPoint()).isEqualTo(point);
         assertThat(result.getType()).isEqualTo(type);
-        assertThat(result.getRegisteredAt()).isEqualTo(registeredAt);
     }
 }
