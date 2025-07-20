@@ -13,20 +13,20 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "point_histories")
 public class PointHistory extends BaseEntity {
-    private String userId;
+    private Long userPk;
     private Long point;
 
     @Enumerated(EnumType.STRING)
     private PointHistoryType type;
 
-    private PointHistory(String userId, Long point, PointHistoryType pointHistoryType) {
-        this.userId = userId;
+    private PointHistory(Long userPk, Long point, PointHistoryType pointHistoryType) {
+        this.userPk = userPk;
         this.point = point;
         this.type = pointHistoryType;
     }
 
-    public static PointHistory create(String userId, Long point, PointHistoryType pointHistoryType) {
-        return new PointHistory(userId, point, pointHistoryType);
+    public static PointHistory create(Long userPk, Long point, PointHistoryType pointHistoryType) {
+        return new PointHistory(userPk, point, pointHistoryType);
     }
 
 }

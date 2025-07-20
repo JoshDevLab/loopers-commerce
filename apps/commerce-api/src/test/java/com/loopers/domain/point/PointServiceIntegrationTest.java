@@ -36,13 +36,13 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
 
-        pointRepository.save(Point.create(10000L, user.getUserId()));
+        pointRepository.save(Point.create(10000L, user.getId()));
 
         // Act
-        PointInfo point = pointService.getPoint(userId);
+        PointInfo point = pointService.getPoint(user.getId());
 
         // Assert
-        assertThat(point.userId()).isEqualTo(userId);
+        assertThat(point.userPk()).isEqualTo(user.getId());
         assertThat(point.pointBalance()).isEqualTo(10000L);
     }
 
@@ -50,11 +50,11 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
     @Test
     public void chargingPointNotExistUserIdThenFailExistMemberCharging() {
         // Arrange
-        String userId = "test123";
+        Long userPk = 1L;
         Long chargePoint = 10000L;
 
         // Act
-        CoreException exception = assertThrows(CoreException.class, () -> pointService.charge(userId, chargePoint));
+        CoreException exception = assertThrows(CoreException.class, () -> pointService.charge(userPk, chargePoint));
 
         // Assert
         assertThat(exception.getErrorType()).isEqualTo(ErrorType.POINT_NOT_FOUND);
@@ -70,15 +70,15 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         String gender = "MALE";
 
         User user = userRepository.save(User.create(userId, email, birthday, gender));
-        pointRepository.save(Point.create(10000L, user.getUserId()));
+        pointRepository.save(Point.create(10000L, user.getId()));
         Long chargePoint = 5000L;
 
         // Act
-        PointInfo chargedPoint = pointService.charge(userId, chargePoint);
+        PointInfo chargedPoint = pointService.charge(user.getId(), chargePoint);
 
         // Assert
         assertThat(chargedPoint).isNotNull();
-        assertThat(chargedPoint.userId()).isEqualTo(userId);
+        assertThat(chargedPoint.userPk()).isEqualTo(user.getId());
         assertThat(chargedPoint.pointBalance()).isEqualTo(15000L);
     }
 
@@ -92,14 +92,14 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         String gender = "MALE";
 
         User user = userRepository.save(User.create(userId, email, birthday, gender));
-        pointRepository.save(Point.create(10000L, user.getUserId()));
+        pointRepository.save(Point.create(10000L, user.getId()));
         Long chargePoint = 5000L;
 
         // Act
-        PointInfo point = pointService.charge(userId, chargePoint);
+        pointService.charge(user.getId(), chargePoint);
 
         // Assert
-        boolean result = pointHistoryRepository.existsByUserId(point.userId());
+        boolean result = pointHistoryRepository.existsByUserId(user.getId());
         assertThat(result).isTrue();
     }
 }

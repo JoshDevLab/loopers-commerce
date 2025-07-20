@@ -12,17 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PointTest {
 
-    @DisplayName("Point 를 초기화 생성할때 인자로 받은 userId가 지정되고 포인트잔액은 0원이다.")
+    @DisplayName("Point 를 초기화 생성할때 인자로 받은 userPk 가 저장되고 포인트잔액은 0원이다.")
     @Test
     void pointInitCreate() {
         // Arrange
-        String userId = "test123";
+        Long userPk = 1L;
 
         // Act
-        Point point = Point.createInit(userId);
+        Point point = Point.createInit(userPk);
 
         // Assert
-        assertThat(point.getUserId()).isEqualTo(userId);
+        assertThat(point.getUserPk()).isEqualTo(userPk);
         assertThat(point.getPointBalance()).isEqualTo(0L);
     }
 
@@ -31,7 +31,7 @@ public class PointTest {
     @ValueSource(longs = {0, -1, -100, Long.MIN_VALUE, -50000})
     void whenChargeTenPointThenFailCharging(Long chargePoint) {
         // Arrange
-        Point point = Point.createInit("test123");
+        Point point = Point.createInit(1L);
 
         // Act
         CoreException exception = assertThrows(CoreException.class, () -> point.charge(chargePoint));

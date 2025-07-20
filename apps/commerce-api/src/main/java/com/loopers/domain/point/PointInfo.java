@@ -2,14 +2,14 @@ package com.loopers.domain.point;
 
 public record PointInfo(
         Long id,
-        String userId,
+        Long userPk,
         Long pointBalance
 ) {
 
     public static PointInfo of(Point point) {
         return new PointInfo(
                 point.getId(),
-                point.getUserId(),
+                point.getUserPk(),
                 point.getPointBalance()
         );
     }

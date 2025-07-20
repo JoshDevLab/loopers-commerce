@@ -13,26 +13,26 @@ public class PointService {
     private final PointHistoryRepository pointHistoryRepository;
 
     @Transactional
-    public void initPoint(String userId) {
-        Point point = Point.createInit(userId);
+    public void initPoint(Long userPk) {
+        Point point = Point.createInit(userPk);
         pointRepository.save(point);
     }
 
     @Transactional(readOnly = true)
-    public PointInfo getPoint(String userId) {
-        Point point = pointRepository.findByUserId(userId)
+    public PointInfo getPoint(Long userPk) {
+        Point point = pointRepository.findByUserPk(userPk)
                 .orElseThrow(() ->
-                        new CoreException(ErrorType.POINT_NOT_FOUND, userId + "가 보유하고 있는 포인트가 없습니다.")
+                        new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다.")
                 );
         return PointInfo.of(point);
     }
 
     @Transactional
-    public PointInfo charge(String userId, Long chargePoint) {
-        Point point = pointRepository.findByUserId(userId)
-                .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, userId + "가 가지고 있는 포인트가 없습니다."));
+    public PointInfo charge(Long userPk, Long chargePoint) {
+        Point point = pointRepository.findByUserPk(userPk)
+                .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.charge(chargePoint);
-        pointHistoryRepository.save(PointHistory.create(userId, chargePoint, PointHistoryType.CHARGE));
+        pointHistoryRepository.save(PointHistory.create(point.getUserPk(), chargePoint, PointHistoryType.CHARGE));
         return PointInfo.of(point);
     }
 }

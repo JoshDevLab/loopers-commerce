@@ -19,19 +19,19 @@ public class Point extends BaseEntity {
     private Long pointBalance;
 
     @Column(name = "user_id", nullable = false, unique = true)
-    private String userId;
+    private Long userPk;
 
-    private Point(Long pointBalance, String userId) {
+    private Point(Long pointBalance, Long userPk) {
         this.pointBalance = pointBalance;
-        this.userId = userId;
+        this.userPk = userPk;
     }
 
-    public static Point createInit(String userId) {
-        return new Point(0L, userId);
+    public static Point createInit(Long userPk) {
+        return new Point(0L, userPk);
     }
 
-    public static Point create(Long pointBalance, String userId) {
-        return new Point(pointBalance, userId);
+    public static Point create(Long pointBalance, Long userPk) {
+        return new Point(pointBalance, userPk);
     }
 
     public void charge(Long chargePoint) {

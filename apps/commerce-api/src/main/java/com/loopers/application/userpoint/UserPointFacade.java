@@ -18,7 +18,7 @@ public class UserPointFacade {
     @Transactional
     public UserInfo signUp(UserCommand.Register command) {
         UserInfo userInfo = userService.signUp(command);
-        pointService.initPoint(userInfo.userId());
+        pointService.initPoint(userInfo.id());
         return userInfo;
     }
 

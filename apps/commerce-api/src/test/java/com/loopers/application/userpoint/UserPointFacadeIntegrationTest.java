@@ -1,10 +1,9 @@
 package com.loopers.application.userpoint;
 
 import com.loopers.domain.point.Point;
-import com.loopers.domain.point.PointHistoryRepository;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.user.UserCommand;
-import com.loopers.domain.user.UserRepository;
+import com.loopers.domain.user.UserInfo;
 import com.loopers.support.IntegrationTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,13 +19,7 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
     UserPointFacade userPointFacade;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
     PointRepository pointRepository;
-
-    @Autowired
-    PointHistoryRepository pointHistoryRepository;
 
     @DisplayName("회원가입이 성공하면 Point 0원이 부여된다.")
     @Test
@@ -44,10 +37,10 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        userPointFacade.signUp(userCommand);
+        UserInfo userInfo = userPointFacade.signUp(userCommand);
 
         // Assert
-        Optional<Point> point = pointRepository.findByUserId(userId);
+        Optional<Point> point = pointRepository.findByUserPk(userInfo.id());
         assertThat(point).isPresent();
         assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(0L);
     }
@@ -68,10 +61,10 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        userPointFacade.signUp(userCommand);
+        UserInfo userInfo = userPointFacade.signUp(userCommand);
 
         // Assert
-        Optional<Point> point = pointRepository.findByUserId(userId);
+        Optional<Point> point = pointRepository.findByUserPk(userInfo.id());
         assertThat(point).isPresent();
         assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(0L);
     }

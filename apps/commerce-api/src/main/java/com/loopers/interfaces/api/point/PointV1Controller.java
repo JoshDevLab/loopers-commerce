@@ -16,11 +16,11 @@ public class PointV1Controller {
 
     @GetMapping
     public ApiResponse<Long> getPoints(@CurrentUser UserInfo userInfo) {
-        return ApiResponse.success(pointService.getPoint(userInfo.userId()).pointBalance());
+        return ApiResponse.success(pointService.getPoint(userInfo.id()).pointBalance());
     }
 
     @PostMapping("/charge")
     public ApiResponse<Long> chargePoints(@CurrentUser UserInfo userInfo, @RequestBody Long chargePoint) {
-        return ApiResponse.success(pointService.charge(userInfo.userId(), chargePoint).pointBalance());
+        return ApiResponse.success(pointService.charge(userInfo.id(), chargePoint).pointBalance());
     }
 }

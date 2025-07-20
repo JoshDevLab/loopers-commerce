@@ -38,7 +38,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
 
-        pointRepository.save(Point.create(10000L, user.getUserId()));
+        pointRepository.save(Point.create(10000L, user.getId()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-USER-ID", user.getUserId());
@@ -88,7 +88,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         String birthday = "1996-11-27";
         String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
-        pointRepository.save(Point.create(10000L, user.getUserId()));
+        pointRepository.save(Point.create(10000L, user.getId()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-USER-ID", user.getUserId());

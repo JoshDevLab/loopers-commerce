@@ -16,17 +16,8 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
     }
 
     @Override
-    public void delete(Long pointHistoryId) {
-        pointHistoryJpaRepository.deleteById(pointHistoryId);
+    public boolean existsByUserId(Long userPk) {
+        return pointHistoryJpaRepository.existsByUserPk(userPk);
     }
 
-    @Override
-    public PointHistory findById(Long savedId) {
-        return pointHistoryJpaRepository.findById(savedId).orElse(null);
-    }
-
-    @Override
-    public boolean existsByUserId(String userId) {
-        return pointHistoryJpaRepository.existsByUserId(userId);
-    }
 }
