@@ -69,6 +69,7 @@ classDiagram
         +Long orderId
         +User user
         +Date orderDate
+        +Address shippingAddress
         +BigDecimal totalAmount
         +BigDecimal usedPoints
         +List<OrderItem> orderItems
@@ -129,6 +130,8 @@ classDiagram
     User "1" -- "0..*" Like : 좋아요를 누른다
     User "1" -- "0..*" Order : 주문을 생성한다
     User "1" -- "1" Point : 포인트를 관리한다
+    Order "1" -- "0..*" Payment : 결제를 포함한다
+    Order "1" -- "0..*" Address : 배송 주소를 가진다
     Order "1" -- "1..*" OrderItem : 항목으로 구성된다
     ProductOption "1" -- "0..*" OrderItem : 주문 항목에 포함된다
     ProductOption "1" --> "1" Inventory
