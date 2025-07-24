@@ -96,6 +96,7 @@ erDiagram
     users ||--o{ likes : "1:N 좋아요를 누른다"
     users ||--o{ orders : "1:N 주문을 생성한다"
     users ||--|| points : "1:1 포인트를 관리한다"
+    orders ||--o{ payments : "1:N 결제를 포함한다"
     orders ||--|{ order_items : "1:N 항목으로 구성된다"
     product_options }o--o{ order_items : "1:N 주문 시 선택될 수 있다"
     product_options ||--|| inventory : "1:1 재고 보유"
