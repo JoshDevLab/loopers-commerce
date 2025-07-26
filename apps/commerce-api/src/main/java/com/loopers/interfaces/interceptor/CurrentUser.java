@@ -1,4 +1,4 @@
-package com.loopers.interfaces.api.user;
+package com.loopers.interfaces.interceptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

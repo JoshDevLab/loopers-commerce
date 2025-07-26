@@ -3,6 +3,8 @@ package com.loopers.domain.point;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PointHistoryTest {
@@ -12,7 +14,7 @@ class PointHistoryTest {
     void createPointHistory_success() {
         // given
         Long userPk = 1L;
-        Long point = 100L;
+        BigDecimal point = BigDecimal.valueOf(100);
         PointHistoryType type = PointHistoryType.CHARGE;
 
         // when

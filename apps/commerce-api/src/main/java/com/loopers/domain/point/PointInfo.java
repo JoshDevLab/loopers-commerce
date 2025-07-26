@@ -1,9 +1,11 @@
 package com.loopers.domain.point;
 
+import java.math.BigDecimal;
+
 public record PointInfo(
         Long id,
         Long userPk,
-        Long pointBalance
+        BigDecimal pointBalance
 ) {
 
     public static PointInfo of(Point point) {

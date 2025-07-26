@@ -141,34 +141,32 @@
 * 상품 ID는 URL 경로 파라미터(`/products/{id}`)를 통해 전달됩니다.
 * 좋아요 여부(`liked`)는 항상 응답에 포함되며, 인증된 사용자의 요청일 경우 해당 사용자의 좋아요 여부를, 비인증 사용자의 요청일 경우 `false`를 반환합니다.
 * 상품 상세 조회 시, 해당 상품에 연결된 모든 `ProductOption` 정보를 함께 반환하여 사용자가 구매 가능한 사이즈 및 재고를 확인할 수 있도록 합니다.
-* `categoryId`를 통해 해당 카테고리의 `sizeUnitType` (예: `MM`, `ALPHA_SIZE`, `INCH` 등)을 함께 제공하여 프론트엔드가 적절한 사이즈 단위로 표시할 수 있도록 합니다.
 
 ---
 
 ## 응답 필드 예시
 
-| 필드명        | 설명                               |
-| :------------ | :--------------------------------- |
-| `id`          | 상품 고유 ID                       |
-| `name`        | 상품명                             |
-| `price`       | 상품의 기본 가격 (옵션에 따른 추가 가격은 각 옵션에 포함) |
-| `description` | 상품 설명                          |
-| `images`      | 이미지 URL 리스트                  |
-| `brandName`   | 브랜드명                           |
-| `likeCount`   | 현재 좋아요 수                     |
-| `liked`       | 사용자가 이 상품을 좋아요했는지 여부 (로그인 여부와 관계없이 항상 포함) |
-| `createdAt`   | 등록일                             |
-| `thumbnail`   | 대표 썸네일 이미지 URL             |
-| `categoryId`  | 상품 카테고리 고유 ID              |
-| `categoryName` | 상품 카테고리명                    |
-| `sizeUnitType` | 해당 카테고리의 사이즈 단위 유형 (예: "MM", "ALPHA_SIZE", "INCH") |
-| `saleStatus`  | 상품 판매 상태 (ON_SALE, SOLD_OUT, DISCONTINUED 등) |
-| `options`     | 상품 옵션 리스트                   |
-| &nbsp;&nbsp;&nbsp;&nbsp;`- optionId` | &nbsp;&nbsp;&nbsp;&nbsp;옵션 고유 ID |
-| &nbsp;&nbsp;&nbsp;&nbsp;`- sizeValue` | &nbsp;&nbsp;&nbsp;&nbsp;사이즈 값 (예: "260", "M", "30") |
-| &nbsp;&nbsp;&nbsp;&nbsp;`- colorValue` | &nbsp;&nbsp;&nbsp;&nbsp;색상 값 (예: "Red", "Black") |
-| &nbsp;&nbsp;&nbsp;&nbsp;`- stock` | &nbsp;&nbsp;&nbsp;&nbsp;해당 옵션의 재고 수량 |
-| &nbsp;&nbsp;&nbsp;&nbsp;`- additionalPrice` | &nbsp;&nbsp;&nbsp;&nbsp;해당 옵션의 추가 가격 (0원일 수 있음) |
+| 필드명        | 설명                                                     |
+| :------------ |:-------------------------------------------------------|
+| `id`          | 상품 고유 ID                                               |
+| `name`        | 상품명                                                    |
+| `price`       | 상품 가격                                                  |
+| `description` | 상품 설명                                                  |
+| `images`      | 이미지 URL 리스트                                            |
+| `brandName`   | 브랜드명                                                   |
+| `likeCount`   | 현재 좋아요 수                                               |
+| `liked`       | 사용자가 이 상품을 좋아요했는지 여부 (로그인 여부와 관계없이 항상 포함)              |
+| `createdAt`   | 등록일                                                    |
+| `thumbnail`   | 대표 썸네일 이미지 URL                                         |
+| `categoryId`  | 상품 카테고리 고유 ID                                          |
+| `categoryName` | 상품 카테고리명                                               |
+| `saleStatus`  | 상품 판매 상태 (ON_SALE, SOLD_OUT, DISCONTINUED 등)           |
+| `options`     | 상품 옵션 리스트                                              |
+| &nbsp;&nbsp;&nbsp;&nbsp;`- optionId` | &nbsp;&nbsp;&nbsp;&nbsp;옵션 고유 ID                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;`- sizeValue` | &nbsp;&nbsp;&nbsp;&nbsp;사이즈 값 (예: "260", "M", "30")    |
+| &nbsp;&nbsp;&nbsp;&nbsp;`- colorValue` | &nbsp;&nbsp;&nbsp;&nbsp;색상 값 (예: "Red", "Black")       |
+| &nbsp;&nbsp;&nbsp;&nbsp;`- stock` | &nbsp;&nbsp;&nbsp;&nbsp;해당 옵션의 재고 수량                   |
+| &nbsp;&nbsp;&nbsp;&nbsp;`- additionalPrice` | &nbsp;&nbsp;&nbsp;&nbsp;해당 옵션의 추가 가격 (0원일 수 있음)        |
 | &nbsp;&nbsp;&nbsp;&nbsp;`- optionStatus` | &nbsp;&nbsp;&nbsp;&nbsp;옵션 판매 상태 (ON_SALE, SOLD_OUT 등) |
 
 ```json
@@ -192,7 +190,6 @@
       "optionId": 101,
       "sizeValue": "260",
       "colorValue": "Black",
-      "stock": 50,
       "additionalPrice": 9000,
       "optionStatus": "ON_SALE"
     },
@@ -200,7 +197,6 @@
       "optionId": 102,
       "sizeValue": "270",
       "colorValue": "Black",
-      "stock": 30,
       "additionalPrice": 9000,
       "optionStatus": "ON_SALE"
     },
@@ -208,7 +204,6 @@
       "optionId": 103,
       "sizeValue": "280",
       "colorValue": "Black",
-      "stock": 0,
       "additionalPrice": 9000,
       "optionStatus": "SOLD_OUT"
     },
@@ -216,7 +211,6 @@
       "optionId": 104,
       "sizeValue": "270",
       "colorValue": "White",
-      "stock": 10,
       "additionalPrice": 9000,
       "optionStatus": "ON_SALE"
     }

@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 
@@ -36,14 +38,14 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
 
-        pointRepository.save(Point.create(10000L, user.getId()));
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000), user.getId()));
 
         // Act
-        PointInfo point = pointService.getPoint(user.getId());
+        Point point = pointService.getPoint(user.getId());
 
         // Assert
-        assertThat(point.userPk()).isEqualTo(user.getId());
-        assertThat(point.pointBalance()).isEqualTo(10000L);
+        assertThat(point.getUserPk()).isEqualTo(user.getId());
+        assertThat(point.getPointBalance()).isEqualTo(BigDecimal.valueOf(10000));
     }
 
     @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, CoreException ErrorType.POINT_NOT_FOUND. 예외가 발생한다.")
@@ -51,7 +53,7 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
     public void chargingPointNotExistUserIdThenFailExistMemberCharging() {
         // Arrange
         Long userPk = 1L;
-        Long chargePoint = 10000L;
+        BigDecimal chargePoint = BigDecimal.valueOf(10000);
 
         // Act
         CoreException exception = assertThrows(CoreException.class, () -> pointService.charge(userPk, chargePoint));
@@ -70,16 +72,16 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         String gender = "MALE";
 
         User user = userRepository.save(User.create(userId, email, birthday, gender));
-        pointRepository.save(Point.create(10000L, user.getId()));
-        Long chargePoint = 5000L;
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000), user.getId()));
+        BigDecimal chargePoint = BigDecimal.valueOf(5000);
 
         // Act
-        PointInfo chargedPoint = pointService.charge(user.getId(), chargePoint);
+        Point chargedPoint = pointService.charge(user.getId(), chargePoint);
 
         // Assert
         assertThat(chargedPoint).isNotNull();
-        assertThat(chargedPoint.userPk()).isEqualTo(user.getId());
-        assertThat(chargedPoint.pointBalance()).isEqualTo(15000L);
+        assertThat(chargedPoint.getUserPk()).isEqualTo(user.getId());
+        assertThat(chargedPoint.getPointBalance()).isEqualTo(BigDecimal.valueOf(15000));
     }
 
     @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우 포인트 히스토리에 충전이력이 저장된다.")
@@ -92,8 +94,8 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         String gender = "MALE";
 
         User user = userRepository.save(User.create(userId, email, birthday, gender));
-        pointRepository.save(Point.create(10000L, user.getId()));
-        Long chargePoint = 5000L;
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000), user.getId()));
+        BigDecimal chargePoint = BigDecimal.valueOf(5000);
 
         // Act
         pointService.charge(user.getId(), chargePoint);

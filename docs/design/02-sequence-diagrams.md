@@ -204,55 +204,47 @@ sequenceDiagram
     participant InventoryService
     participant PointService
     participant OrderService
-    participant PaymentService
 
     User->>OrderController: POST /orders (X-USER-ID 포함)
     alt X-USER-ID 누락
         OrderController-->>User: 401 Unauthorized
-    else 로그인 상태
+    else
         OrderController->>OrderFacade: 주문 생성 요청
 
         loop 상품 항목 반복
             OrderFacade->>ProductService: 상품 옵션 조회 및 검증
-            alt 상품 옵션이 유효하지 않음
-                ProductService--xOrderFacade: CoreException(INVALID_PRODUCT)
+            ProductService-->>OrderFacade: 옵션 정보 반환
+
+            OrderFacade->>InventoryService: 재고 확인
+            alt 재고 부족
+                InventoryService--xOrderFacade: CoreException(INSUFFICIENT_STOCK)
                 OrderFacade--xOrderController: 예외 전달
-                OrderController-->>User: 400 Bad Request
-            else
-                ProductService-->>OrderFacade: 옵션 정보 반환
+                OrderController-->>User: 409 Conflict
+            else 재고 충분
                 OrderFacade->>InventoryService: 재고 차감 요청
-                alt 재고 부족
-                    InventoryService--xOrderFacade: CoreException(INSUFFICIENT_STOCK)
-                    OrderFacade--xOrderController: 예외 전달
-                    OrderController-->>User: 400 Bad Request
-                else
-                    InventoryService-->>OrderFacade: 차감 완료
-                end
-            end
+                InventoryService-->>OrderFacade: 재고 차감 완료
+                OrderFacade->>InventoryService: 재고 차감 내역 저장                
         end
 
-        OrderFacade->>PointService: 포인트 차감 요청
+        OrderFacade->>PointService: 포인트 사용 가능 여부 확인
         alt 포인트 부족
             PointService--xOrderFacade: CoreException(INSUFFICIENT_POINT)
             OrderFacade--xOrderController: 예외 전달
             OrderController-->>User: 400 Bad Request
-        else
-            PointService-->>OrderFacade: 차감 완료
-            alt 결제 실패
-                PaymentService-->>OrderFacade: 결제 실패 응답 HTTP 502 (Bad Gateway)
-                OrderFacade-->>OrderController: 예외 전달
-            else 결제 성공
-                PaymentService-->>OrderFacade: 결제 승인 완료
-                OrderFacade->>OrderService: 주문 및 주문항목 저장
-                OrderService-->>OrderFacade: 저장 완료
-
-                OrderFacade-->>OrderController: HTTP 201 Created + 응답 DTO
-            end
+        else 포인트 사용 가능
+            OrderFacade->>PointService: 포인트 차감 요청 (사용할 포인트)
+            PointService-->>OrderFacade: 포인트 차감 완료
+            OrderFacade->>PointService: 포인트 차감 내역 저장
         end
-        
-    end
 
-```        
+        OrderFacade->>OrderService: 주문 저장 (상태: PENDING)
+        OrderService-->>OrderFacade: 저장 완료
+
+        OrderFacade-->>OrderController: HTTP 201 Created + orderId, toPayAmount 응답
+        OrderController-->>User: 201 Created
+        end
+    end
+```    
 
 ## 5-2) 주문 목록 조회
 ```mermaid
@@ -313,5 +305,59 @@ sequenceDiagram
             end
         end
     end
+```
 
+## 5-4) 결제 생성
+```mermaid
+sequenceDiagram
+    participant User
+    participant PaymentController
+    participant PaymentFacade
+    participant OrderService
+    participant PaymentService
+    participant InventoryService
+    participant InventoryHistoryService
+    participant PointService
+    participant PointHistoryService
+
+    User->>PaymentController: POST /payments (X-USER-ID 포함)
+    alt X-USER-ID 누락
+        PaymentController-->>User: 401 Unauthorized
+    else
+        PaymentController->>PaymentFacade: 결제 생성 요청(orderId 기반)
+
+        PaymentFacade->>OrderService: 주문 조회 및 상태 검증
+        alt 주문이 존재하지 않거나 상태가 PENDING 아님
+            OrderService--xPaymentFacade: CoreException(INVALID_ORDER)
+            PaymentFacade--xPaymentController: 예외 전달
+            PaymentController-->>User: 400 Bad Request
+        else
+            OrderService-->>PaymentFacade: 주문 정보 반환
+        end
+
+        alt 결제 실패
+            PaymentService-->>PaymentFacade: 실패 응답
+
+            PaymentFacade->>OrderService: 주문 상태 → FAILED
+            PaymentFacade->>PaymentService: 결제 상태 → FAIL
+
+            loop 주문 상품 반복
+                PaymentFacade->>InventoryService: 재고 복원
+                InventoryService->>InventoryHistoryService: 재고 복원 이력 기록 (INCREASE, reason=PAYMENT_FAILED)
+            end
+
+            PaymentFacade->>PointService: 포인트 복원
+            PointService->>PointHistoryService: 포인트 복원 이력 기록 (ROLLBACK, reason=PAYMENT_FAILED)
+
+            PaymentFacade-->>PaymentController: 502 Bad Gateway
+            PaymentController-->>User: 502 Bad Gateway
+        else
+            PaymentService-->>PaymentFacade: 결제 승인 완료
+        end
+
+        PaymentFacade->>PaymentService: 결제 정보 저장 (복합 결제 포함)
+        PaymentFacade->>OrderService: 주문 상태 → COMPLETED
+        PaymentFacade-->>PaymentController: HTTP 201 Created
+        PaymentController-->>User: 201 Created
+    end
 ```

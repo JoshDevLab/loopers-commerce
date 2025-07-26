@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @RequiredArgsConstructor
 @Service
 public class PointService {
@@ -19,20 +21,19 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public PointInfo getPoint(Long userPk) {
-        Point point = pointRepository.findByUserPk(userPk)
+    public Point getPoint(Long userPk) {
+        return pointRepository.findByUserPk(userPk)
                 .orElseThrow(() ->
                         new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다.")
                 );
-        return PointInfo.of(point);
     }
 
     @Transactional
-    public PointInfo charge(Long userPk, Long chargePoint) {
+    public Point charge(Long userPk, BigDecimal chargePoint) {
         Point point = pointRepository.findByUserPk(userPk)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.charge(chargePoint);
         pointHistoryRepository.save(PointHistory.create(point.getUserPk(), chargePoint, PointHistoryType.CHARGE));
-        return PointInfo.of(point);
+        return point;
     }
 }

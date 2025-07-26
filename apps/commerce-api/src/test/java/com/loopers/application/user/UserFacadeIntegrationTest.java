@@ -1,4 +1,4 @@
-package com.loopers.application.userpoint;
+package com.loopers.application.user;
 
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
@@ -9,14 +9,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
+public class UserFacadeIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
-    UserPointFacade userPointFacade;
+    UserFacade userFacade;
 
     @Autowired
     PointRepository pointRepository;
@@ -37,12 +38,12 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        UserInfo userInfo = userPointFacade.signUp(userCommand);
+        UserInfo userInfo = userFacade.signUp(userCommand);
 
         // Assert
         Optional<Point> point = pointRepository.findByUserPk(userInfo.id());
         assertThat(point).isPresent();
-        assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(0L);
+        assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(BigDecimal.ZERO);
     }
 
     @DisplayName("회원가입이 실패하면 Point 가 부여되지않는다")
@@ -61,12 +62,12 @@ public class UserPointFacadeIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        UserInfo userInfo = userPointFacade.signUp(userCommand);
+        UserInfo userInfo = userFacade.signUp(userCommand);
 
         // Assert
         Optional<Point> point = pointRepository.findByUserPk(userInfo.id());
         assertThat(point).isPresent();
-        assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(0L);
+        assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(BigDecimal.ZERO);
     }
 
 }

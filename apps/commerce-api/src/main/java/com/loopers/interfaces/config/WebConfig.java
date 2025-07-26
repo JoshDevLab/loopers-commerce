@@ -1,7 +1,8 @@
-package com.loopers.interfaces.api.config;
+package com.loopers.interfaces.config;
 
-import com.loopers.interfaces.api.user.CurrentUserIdArgumentResolver;
-import com.loopers.interfaces.api.user.UserIdInterceptor;
+import com.loopers.interfaces.interceptor.CurrentUserIdArgumentResolver;
+import com.loopers.interfaces.interceptor.OptionalUserIdInterceptor;
+import com.loopers.interfaces.interceptor.UserIdInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -16,6 +17,20 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final CurrentUserIdArgumentResolver resolver;
     private final UserIdInterceptor userIdInterceptor;
+    private final OptionalUserIdInterceptor optionalUserIdInterceptor;
+
+    public static final String[] OPTIONAL_AUTH_PATHS = {
+            "/api/v1/products/**",
+            "/api/v1/brands/**"
+    };
+
+    public static final String[] LOGIN_EXCLUDE_PATHS = {
+            "/api/v1/products/**",
+            "/api/v1/brands/**",
+            "/api/v1/users",
+            "/health",
+            "/docs/**"
+    };
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -24,8 +39,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(optionalUserIdInterceptor)
+                .addPathPatterns(OPTIONAL_AUTH_PATHS);
+
         registry.addInterceptor(userIdInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/api/v1/users"); // 예외 경로 설정 가능
+                .excludePathPatterns(LOGIN_EXCLUDE_PATHS);
     }
 }

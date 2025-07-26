@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PointV1ApiE2ETest extends E2ETestSupport {
@@ -38,25 +40,25 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
 
-        pointRepository.save(Point.create(10000L, user.getId()));
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000), user.getId()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-USER-ID", user.getUserId());
         HttpEntity<Void> httpEntityWithHeaders = new HttpEntity<>(headers);
 
         // Act
-        ResponseEntity<ApiResponse<Long>> response = client.exchange(
+        ResponseEntity<ApiResponse<BigDecimal>> response = client.exchange(
                 "/api/v1/points",
                 HttpMethod.GET,
                 httpEntityWithHeaders,
-                new ParameterizedTypeReference<ApiResponse<Long>>() {
+                new ParameterizedTypeReference<ApiResponse<BigDecimal>>() {
                 }
         );
 
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().data()).isEqualTo(10000L);
+        assertThat(response.getBody().data()).isEqualByComparingTo(BigDecimal.valueOf(10000));
     }
 
     @DisplayName("X-USER-ID 헤더가 없을 경우, 400 Bad Request 응답을 반환한다.")
@@ -88,25 +90,25 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         String birthday = "1996-11-27";
         String gender = "MALE";
         User user = userRepository.save(User.create(userId, email, birthday, gender));
-        pointRepository.save(Point.create(10000L, user.getId()));
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000), user.getId()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-USER-ID", user.getUserId());
         HttpEntity<Long> httpEntityWithHeaders = new HttpEntity<>(1000L, headers);
 
         // Act
-        ResponseEntity<ApiResponse<Long>> response = client.exchange(
+        ResponseEntity<ApiResponse<BigDecimal>> response = client.exchange(
                 "/api/v1/points/charge",
                 HttpMethod.POST,
                 httpEntityWithHeaders,
-                new ParameterizedTypeReference<ApiResponse<Long>>() {
+                new ParameterizedTypeReference<ApiResponse<BigDecimal>>() {
                 }
         );
 
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().data()).isEqualTo(11000L);
+        assertThat(response.getBody().data()).isEqualByComparingTo(BigDecimal.valueOf(11000));
     }
 
     @DisplayName("존재하지 않는 유저가 포인트를 충전할 경우, 404 Not Found 응답을 반환한다.")
