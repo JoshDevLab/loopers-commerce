@@ -10,6 +10,7 @@ classDiagram
         +Brand brand
         +int likeCount
         +ProductStatus status # 예: 판매중, 판매종료 등
+        +BigDecimal basicPrice # 기본 가격
         +void increaseLikeCount()
         +void decreaseLikeCount()
         +boolean isSelling()
@@ -38,6 +39,7 @@ classDiagram
         +String name
         +BigDecimal price
         +String size
+        +String color
         +boolean hasEnoughQuantity(int quantity)
         +void decreaseQuantity(int quantity)
     }
@@ -46,6 +48,17 @@ classDiagram
         Long id
         ProductOption productOption
         int quantity
+    }
+
+    class InventoryHistory {
+        +Long id
+        +Long inventoryId
+        +InventoryHistoryType type
+        +int quantityChanged
+        +int quantityBefore
+        +int quantityAfter
+        +String reason
+        +LocalDateTime changedAt
     }
 
     class Brand {
@@ -117,11 +130,51 @@ classDiagram
         +String country
     }
     
-    class payment {
+    class Payment {
         +Long paymentId
         +Order order
         +BigDecimal amount
-        +PaymentStatus status # 예: 결제완료, 결제실패 등
+        +PaymentStatus status
+        +PaymentMethod method 
+    }
+
+    class PaymentMethod {
+        <<enum>>
+        POINT
+        CARD
+        KAKAO_PAY
+    }
+
+    class PaymentStatus {
+        <<enum>>
+        PENDING
+        SUCCESS
+        FAILED
+    }
+    
+    class InventoryHistoryType {
+        <<enum>>
+        INCREASE
+        DECREASE
+        ADJUSTMENT
+    }
+    
+    class PointHistory {
+        +Long id
+        +Point point
+        +PointHistoryType type
+        +BigDecimal amountChanged
+        +BigDecimal balanceAfter
+        +String reason
+        +LocalDateTime changedAt
+    }
+
+    class PointHistoryType {
+        <<enum>>
+        CHARGE,       // 충전
+        USE,          // 사용
+        ROLLBACK,     // 복원
+        EXPIRE        // 소멸
     }
 
     Product "1" -- "0..*" ProductOption : 옵션을 가진다
@@ -135,4 +188,6 @@ classDiagram
     Order "1" -- "1..*" OrderItem : 항목으로 구성된다
     ProductOption "1" -- "0..*" OrderItem : 주문 항목에 포함된다
     ProductOption "1" --> "1" Inventory
+    Inventory "1" --> "0..*" InventoryHistory
+    Point "1" -- "0..*" PointHistory : 포인트 이력을 관리한다
 ```

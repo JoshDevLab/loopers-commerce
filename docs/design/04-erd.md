@@ -7,6 +7,7 @@ erDiagram
         VARCHAR status "상품 상태 (예: 판매중, 판매종료)"
         VARCHAR category "상품 카테고리 (ENUM 값)"
         BIGINT brand_id FK "브랜드 ID"
+        DECIMAL basic_price "상품 기본 가격"
         INT like_count "좋아요 수"
     }
 
@@ -17,11 +18,23 @@ erDiagram
         VARCHAR name "상품 옵션 상세 이름 (예: 스투시 도쿄 화이트)"
         DECIMAL price "옵션 최종 가격"
         VARCHAR size "사이즈 (예: 270mm, L, XL)"
+        VARCHAR color "색상 (예: 화이트, 블랙)"
     }
 
     inventory {
-        BIGINT product_option_id PK, FK "상품 옵션 ID (1:1 관계)"
+        BIGINT inventory_id PK "재고 고유 ID"
+        BIGINT product_option_id FK "상품 옵션 ID (1:1 관계)"
         INT quantity "재고 수량"
+    }
+
+    inventory_history {
+        BIGINT id PK
+        BIGINT inventory_id FK
+        VARCHAR type
+        INT quantity_changed
+        INT quantity_before
+        INT quantity_after
+        VARCHAR reason
     }
 
     brands {
@@ -73,20 +86,16 @@ erDiagram
         BIGINT order_id FK "주문 ID"
         VARCHAR payment_method "결제 방법 (예: 카드, 계좌이체)"
         DECIMAL amount "결제 금액"
-        VARCHAR status "결제 상태 (예: 성공, 실패)"
+        VARCHAR payment_status "결제 상태 (예: 성공, 실패)"
     }
     
-    addresses {
-        BIGINT address_id PK "주소 고유 ID"
-        BIGINT user_id FK "사용자 ID"
-        VARCHAR recipient_name "수령인 이름"
-        VARCHAR phone_number "전화번호"
-        VARCHAR address_line1 "주소 1"
-        VARCHAR address_line2 "주소 2 (선택)"
-        VARCHAR city "도시"
-        VARCHAR state "주/도"
-        VARCHAR postal_code "우편번호"
-        VARCHAR country "국가"
+    points_history {
+        BIGINT id PK "포인트 이력 고유 ID"
+        BIGINT point_id FK "포인트 ID"
+        VARCHAR type "이력 유형 (예: 적립, 사용)"
+        DECIMAL amount "변경된 포인트 금액"
+        DATETIME created_at "이력 생성 일시"
+        VARCHAR reason "이력 사유"
     }
 
     products ||--o{ product_options : "1:N 옵션을 가진다"
@@ -100,4 +109,6 @@ erDiagram
     orders ||--|{ order_items : "1:N 항목으로 구성된다"
     product_options }o--o{ order_items : "1:N 주문 시 선택될 수 있다"
     product_options ||--|| inventory : "1:1 재고 보유"
+    inventory ||--o{ inventory_history : "1:N 재고 변경 이력"
+    points ||--o{ points_history : "1:N 포인트 변경 이력"
 ```

@@ -12,7 +12,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public UserInfo signUp(UserCommand.Register command) {
+    public User signUp(UserCommand.Register command) {
         if (userRepository.existByUserId(command.userId())) {
             throw new CoreException(ErrorType.ALREADY_EXIST_USERID, command.userId() + "는 이미 존재하는 아이디입니다.");
         }
@@ -24,14 +24,13 @@ public class UserService {
                 command.gender()
         );
 
-        return UserInfo.of(userRepository.save(user));
+        return userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
-    public UserInfo getMyInfoByUserId(String userId) {
-        User user = userRepository.findByUserId(userId).orElseThrow(() ->
+    public User getMyInfoByUserId(String userId) {
+        return userRepository.findByUserId(userId).orElseThrow(() ->
                 new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 유저입니다."));
-        return UserInfo.of(user);
     }
 
 }

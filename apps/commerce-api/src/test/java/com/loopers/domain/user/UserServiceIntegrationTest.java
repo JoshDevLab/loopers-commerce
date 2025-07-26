@@ -35,10 +35,10 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
         );
 
         // Act
-        UserInfo user = userService.signUp(userCommand);
+        User user = userService.signUp(userCommand);
 
         // Assert
-        assertThat(userRepository.findByUserId(user.userId())).isPresent();
+        assertThat(userRepository.findByUserId(user.getUserId())).isPresent();
     }
 
     @DisplayName("이미 가입된 ID 로 회원가입 시도 시, 실패한다.")
@@ -83,13 +83,13 @@ public class UserServiceIntegrationTest extends IntegrationTestSupport {
         User user = userRepository.save(User.create("test123", "email@email.com", "1996-11-27", "MALE"));
 
         // Act
-        UserInfo myInfo = userService.getMyInfoByUserId(user.getUserId());
+        User myInfo = userService.getMyInfoByUserId(user.getUserId());
 
         // Assert
-        assertThat(myInfo.userId()).isEqualTo(user.getUserId());
-        assertThat(myInfo.email()).isEqualTo(user.getEmail());
-        assertThat(myInfo.birthday()).isEqualTo(user.getBirthDay());
-        assertThat(myInfo.gender()).isEqualTo(user.getGender());
+        assertThat(myInfo.getUserId()).isEqualTo(user.getUserId());
+        assertThat(myInfo.getEmail()).isEqualTo(user.getEmail());
+        assertThat(myInfo.getBirthDay()).isEqualTo(user.getBirthDay());
+        assertThat(myInfo.getGender()).isEqualTo(user.getGender());
     }
 
 }

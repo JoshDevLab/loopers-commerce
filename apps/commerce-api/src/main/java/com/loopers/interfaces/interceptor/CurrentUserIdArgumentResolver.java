@@ -1,4 +1,4 @@
-package com.loopers.interfaces.api.user;
+package com.loopers.interfaces.interceptor;
 
 import com.loopers.domain.user.UserInfo;
 import org.springframework.core.MethodParameter;

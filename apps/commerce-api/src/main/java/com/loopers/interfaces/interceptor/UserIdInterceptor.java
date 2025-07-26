@@ -1,5 +1,6 @@
-package com.loopers.interfaces.api.user;
+package com.loopers.interfaces.interceptor;
 
+import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
@@ -29,7 +30,8 @@ public class UserIdInterceptor implements HandlerInterceptor {
         }
 
         try {
-            UserInfo userInfo = userService.getMyInfoByUserId(userId);
+            User user = userService.getMyInfoByUserId(userId);
+            UserInfo userInfo = UserInfo.of(user);
             UserContext.set(userInfo);
             return true;
         } catch (CoreException e) {
