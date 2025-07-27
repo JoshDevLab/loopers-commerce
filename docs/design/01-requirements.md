@@ -53,14 +53,14 @@
 
 ## 요청 파라미터 명세
 
-| 파라미터   | 예시                                  | 설명                           |
-| :--------- | :------------------------------------ | :----------------------------- |
+| 파라미터   | 예시                                    | 설명                           |
+| :--------- |:--------------------------------------| :----------------------------- |
 | `brandId`  | `1`                                   | 특정 브랜드의 상품만 필터링    |
 | `sort`     | `latest` / `price_asc` / `likes_desc` | 정렬 기준 (기본값: `latest`) |
-| `search`   | `운동화`                              | 상품명에 해당 문자열이 포함된 상품 검색 |
+| `search`   | `운동화`                                 | 상품명에 해당 문자열이 포함된 상품 검색 |
 | `page`     | `0`                                   | 페이지 번호 (기본값: `0`)      |
 | `size`     | `20`                                  | 페이지당 상품 수 (기본값: `20`) |
-| `categoryId` | `10`                                  | 특정 카테고리의 상품만 필터링  |
+| `categoryId` | `CLOTHING`                            | 특정 카테고리의 상품만 필터링  |
 
 ---
 
@@ -79,11 +79,9 @@
       "price": 129000,
       "brandName": "Nike",
       "likeCount": 101,
-      "thumbnail": "[https://cdn.example.com/products/42/thumb.jpg](https://cdn.example.com/products/42/thumb.jpg)",
-      "categoryId": 1,
-      "categoryName": "신발",
-      "minOptionPrice": 129000,
-      "availableSizes": ["260", "270", "280"]
+      "imageUrl": "[https://cdn.example.com/products/42/thumb.jpg](https://cdn.example.com/products/42/thumb.jpg)",
+      "categoryName": "shoes",
+      "productStatus": "ON_SALE"
     },
     {
       "productId": 43,
@@ -91,11 +89,9 @@
       "price": 99000,
       "brandName": "Adidas",
       "likeCount": 85,
-      "thumbnail": "[https://cdn.example.com/products/43/thumb.jpg](https://cdn.example.com/products/43/thumb.jpg)",
-      "categoryId": 1,
-      "categoryName": "신발",
-      "minOptionPrice": 99000,
-      "availableSizes": ["S", "M", "L"]
+      "imageUrl": "[https://cdn.example.com/products/43/thumb.jpg](https://cdn.example.com/products/43/thumb.jpg)",
+      "categoryName": "shoes",
+      "productStatus": "ON_SALE"
     }
   ]
 }
