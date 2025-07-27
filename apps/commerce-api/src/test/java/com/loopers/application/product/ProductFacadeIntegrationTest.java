@@ -13,7 +13,8 @@ import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class ProductFacadeIntegrationTest extends IntegrationTestSupport {
 
