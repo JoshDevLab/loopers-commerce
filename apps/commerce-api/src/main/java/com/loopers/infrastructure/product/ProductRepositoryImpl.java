@@ -31,6 +31,16 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public Optional<Product> findById(Long productId) {
+        return productJpaRepository.findById(productId);
+    }
+
+    @Override
+    public Optional<Product> findWithBrandById(Long productId) {
+        return productJpaRepository.findWithBrandById(productId);
+    }
+
+    @Override
     public Page<Product> findAllByCriteria(ProductCriteria criteria, Pageable pageable) {
         List<Product> result = queryFactory
                 .select(product)
