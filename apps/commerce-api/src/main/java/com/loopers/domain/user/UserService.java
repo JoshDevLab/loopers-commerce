@@ -33,4 +33,10 @@ public class UserService {
                 new CoreException(ErrorType.USER_NOT_FOUND, userId + "는 존재하지 않는 유저입니다."));
     }
 
+    @Transactional(readOnly = true)
+    public User getMyInfoByUserPk(Long userPk) {
+        return userRepository.findById(userPk).orElseThrow(() ->
+                new CoreException(ErrorType.USER_NOT_FOUND, "존재하지 않는 유저입니다."));
+    }
+
 }

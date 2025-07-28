@@ -167,48 +167,47 @@
 
 ```json
 {
-  "id": 42,
+  "productId": 42,
   "name": "에어맥스 2023",
   "price": 120000,
   "description": "편안한 착용감을 제공하는 에어맥스 2023...",
-  "images": ["[https://cdn.example.com/products/42/img1.jpg](https://cdn.example.com/products/42/img1.jpg)", "[https://cdn.example.com/products/42/img2.jpg](https://cdn.example.com/products/42/img2.jpg)"],
+  "imageUrl": ["[https://cdn.example.com/products/42/img1.jpg](https://cdn.example.com/products/42/img1.jpg)", "[https://cdn.example.com/products/42/img2.jpg](https://cdn.example.com/products/42/img2.jpg)"],
   "brandName": "Nike",
   "likeCount": 101,
   "liked": true,
   "createdAt": "2024-07-20T10:00:00",
   "thumbnail": "[https://cdn.example.com/products/42/thumb.jpg](https://cdn.example.com/products/42/thumb.jpg)",
   "categoryId": 1,
-  "categoryName": "신발",
-  "sizeUnitType": "MM",
-  "saleStatus": "ON_SALE",
+  "categoryName": "shoes",
+  "productStatus": "ON_SALE",
   "options": [
     {
-      "optionId": 101,
-      "sizeValue": "260",
-      "colorValue": "Black",
-      "additionalPrice": 9000,
-      "optionStatus": "ON_SALE"
+      "productOptionId": 101,
+      "size": "260",
+      "color": "Black",
+      "price": 20000,
+      "productStatus": "ON_SALE"
     },
     {
-      "optionId": 102,
-      "sizeValue": "270",
-      "colorValue": "Black",
-      "additionalPrice": 9000,
-      "optionStatus": "ON_SALE"
+      "productOptionId": 102,
+      "size": "270",
+      "color": "Black",
+      "price": 9000,
+      "productStatus": "ON_SALE"
     },
     {
-      "optionId": 103,
-      "sizeValue": "280",
-      "colorValue": "Black",
-      "additionalPrice": 9000,
-      "optionStatus": "SOLD_OUT"
+      "productOptionId": 103,
+      "size": "280",
+      "color": "Black",
+      "price": 9000,
+      "productStatus": "SOLD_OUT"
     },
     {
-      "optionId": 104,
-      "sizeValue": "270",
-      "colorValue": "White",
-      "additionalPrice": 9000,
-      "optionStatus": "ON_SALE"
+      "productOptionId": 104,
+      "size": "270",
+      "color": "White",
+      "price": 9000,
+      "productStatus": "ON_SALE"
     }
   ]
 }

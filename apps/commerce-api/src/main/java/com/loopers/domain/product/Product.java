@@ -30,6 +30,7 @@ public class Product extends BaseEntity {
     private ProductStatus productStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
     private Brand brand;
 
     private String imageUrl;

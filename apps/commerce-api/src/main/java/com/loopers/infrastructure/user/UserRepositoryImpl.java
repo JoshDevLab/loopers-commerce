@@ -27,4 +27,9 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean existByUserId(String userId) {
         return userJpaRepository.findByUserId(userId).isPresent();
     }
+
+    @Override
+    public Optional<User> findById(Long userPk) {
+        return userJpaRepository.findById(userPk);
+    }
 }
