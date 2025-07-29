@@ -45,7 +45,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
     @Test
     void getProductList() {
         // Arrange
-        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명"));
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
 
         productRepository.save(Product.create(
                 "셔츠1", "상품 설명 1", BigDecimal.valueOf(10000),
@@ -92,7 +92,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
     @DisplayName("로그인한 사용자가 좋아요한 상품을 상세조회하면 liked가 true로 표시된다")
     void getProductDetailWithLoginAndLiked() {
         // Arrange
-        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명"));
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
 
         Product product = productRepository.save(Product.create(
                 "셔츠1", "상품 설명 1", BigDecimal.valueOf(10000),

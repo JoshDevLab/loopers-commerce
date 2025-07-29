@@ -13,13 +13,15 @@ import lombok.NoArgsConstructor;
 public class Brand extends BaseEntity {
     private String name;
     private String description;
+    private String imageUrl;
 
-    private Brand(String name, String description) {
+    private Brand(String name, String description, String imageUrl) {
         this.name = name;
         this.description = description;
+        this.imageUrl = imageUrl;
     }
 
-    public static Brand create(String name, String description) {
-        return new Brand(name, description);
+    public static Brand create(String name, String description, String imageUrl) {
+        return new Brand(name, description, imageUrl);
     }
 }

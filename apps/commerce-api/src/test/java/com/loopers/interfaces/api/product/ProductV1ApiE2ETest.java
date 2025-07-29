@@ -59,8 +59,8 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
     @Test
     void getProductList() {
         // Arrange
-        Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1"));
-        Brand brand2 = brandRepository.save(BrandFixture.createBrand("Brand2", "Brand description 2"));
+        Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
+        Brand brand2 = brandRepository.save(BrandFixture.createBrand("Brand2", "Brand description 2", "https://image2.com"));
         Product testProduct1 = productRepository.save(ProductFixture.createProduct(
                 "testProduct1",
                 "Description for product 1",
@@ -130,7 +130,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
     void getProductDetailNotFound() {
         // Arrange
         long nonExistentProductId = 999L; // 존재하지 않는 상품 ID
-        Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1"));
+        Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
         productRepository.save(ProductFixture.createProduct(
                 "testProduct1",
                 "Description for product 1",
@@ -183,7 +183,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
     @Test
     void getProductDetail() {
         // Arrange
-        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1"));
+        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
         var product = productRepository.save(ProductFixture.createProduct(
                 "testProduct1",
                 "Description for product 1",
@@ -254,7 +254,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
     void getProductDetailWhenLoginUserIncludeLike() {
         // Arrange
         User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
-        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1"));
+        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
         var product = productRepository.save(ProductFixture.createProduct(
                 "testProduct1",
                 "Description for product 1",
