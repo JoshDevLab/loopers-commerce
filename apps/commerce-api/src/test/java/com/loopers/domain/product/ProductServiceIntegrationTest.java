@@ -29,7 +29,7 @@ public class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
     @BeforeEach
     void setUp() {
-        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명"));
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
 
         productRepository.save(Product.create(
                 "셔츠1", "상품 설명 1", BigDecimal.valueOf(10000),
