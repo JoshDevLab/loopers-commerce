@@ -1,5 +1,6 @@
 package com.loopers.infrastructure.product;
 
+import com.loopers.domain.brand.Brand;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductCategory;
 import com.loopers.domain.product.ProductCriteria;
@@ -38,6 +39,11 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public Optional<Product> findWithBrandById(Long productId) {
         return productJpaRepository.findWithBrandById(productId);
+    }
+
+    @Override
+    public List<Product> findByBrandId(Brand brand) {
+        return productJpaRepository.findByBrand(brand);
     }
 
     @Override
