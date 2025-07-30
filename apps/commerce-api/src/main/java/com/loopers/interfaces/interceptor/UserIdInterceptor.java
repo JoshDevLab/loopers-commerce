@@ -35,7 +35,7 @@ public class UserIdInterceptor implements HandlerInterceptor {
             UserContext.set(userInfo);
             return true;
         } catch (CoreException e) {
-            errorResponse(response, HttpServletResponse.SC_NOT_FOUND, e.getMessage(), 404);
+            errorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), 401);
             return false;
         }
     }

@@ -244,13 +244,12 @@
 ### Alternate Flow
 
 * [브랜드 목록 조회]: 시스템은 기본적으로 브랜드명을 오름차순 정렬하여 반환합니다.
-* [브랜드 상세 조회]: 반환 시 브랜드명, 로고 URL, 등록일 등 기본 정보를 포함합니다.
+* [브랜드 상세 조회]: 반환 시 브랜드명, 로고 URL, 브랜드의 상품, 등록일 등 기본 정보를 포함합니다.
 
 ### Exception Flow
 
 * 브랜드가 존재하지 않는 ID로 상세 조회 요청한 경우: 시스템은 `404 Not Found` 와 함께 `"해당 브랜드를 찾을 수 없습니다."` 메시지를 반환합니다.
 * 브랜드가 하나도 없는 경우 (목록 조회): 시스템은 빈 배열을 반환하며, 상태 코드는 `200 OK`입니다.
-* 잘못된 `brandId` 형식 (예: 음수, 문자 등): 시스템은 `400 Bad Request`를 반환합니다.
 
 ---
 
@@ -356,8 +355,7 @@
 
 1.  로그인한 사용자가 본인의 좋아요 목록을 요청합니다.
 2.  시스템은 해당 사용자가 좋아요한 상품 리스트를 조회하여 반환합니다.
-3.  각 상품에는 다음 정보가 포함되어야 합니다: `productId`, `name`, `price`, `brandName`, `likeCount`, `thumbnail`, `categoryId`, `categoryName`, `minOptionPrice`, `availableSizes`.
-4.  페이징 및 정렬 옵션은 기본 적용됩니다 (예: `page=0`, `size=20`, `sort=latest`).
+3.  각 상품에는 다음 정보가 포함되어야 합니다: `productId`, `name`, `price`, `brandName`, `likeCount`, `thumbnail`, `categoryId`, `categoryName`.
 
 #### Exception Flow
 

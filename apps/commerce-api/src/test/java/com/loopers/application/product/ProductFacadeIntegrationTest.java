@@ -5,6 +5,7 @@ import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.product.*;
 import com.loopers.domain.product.like.ProductLike;
 import com.loopers.domain.product.like.ProductLikeRepository;
+import com.loopers.domain.product.like.ProductLikeService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.domain.user.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -39,6 +41,9 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
     ProductLikeRepository productLikeRepository;
+
+    @Autowired
+    ProductLikeService productLikeService;
 
 
     @DisplayName("상품 페이지 목록 조회 테스트")
@@ -120,4 +125,64 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(result.getLiked()).isTrue();
     }
 
+
+    @DisplayName("같은 유저가 같은 상품에 여러 번 좋아요 요청을 보내도 한 번만 반영되어야 한다")
+    @Test
+    void likeProduct_isIdempotent() {
+        // given
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
+        Product product = productRepository.save(Product.create(
+                "셔츠1", "상품 설명 1", BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING, brand, "https://image1.jpg"
+        ));
+
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+
+        Long productId = product.getId();
+        Long userPk = user.getId();
+
+        // when
+        ProductLikedInfo firstLike = productFacade.likeProduct(productId, userPk);
+        ProductLikedInfo secondLike = productFacade.likeProduct(productId, userPk);
+        ProductLikedInfo thirdLike = productFacade.likeProduct(productId, userPk);
+
+        // then
+        assertThat(firstLike.isLiked()).isTrue();
+        assertThat(secondLike.isLiked()).isTrue();
+        assertThat(thirdLike.isLiked()).isTrue();
+
+        // 좋아요 수는 한 번만 증가해야 함
+        Optional<Product> updatedProduct = productRepository.findById(productId);
+        assertThat(updatedProduct.get().getLikeCount()).isEqualTo(1);
+    }
+
+    @DisplayName("같은 유저가 같은 상품에 여러 번 좋아요 취소 요청을 보내도 한 번만 반영되어야 한다")
+    @Test
+    void unLikeProduct_isIdempotent() {
+        // given
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
+        Product product = productRepository.save(Product.create(
+                "셔츠1", "상품 설명 1", BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING, brand, "https://image1.jpg"
+        ));
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+        productLikeService.like(product, user);
+
+        Long productId = product.getId();
+        Long userPk = user.getId();
+
+        // when
+        ProductLikedInfo firstLike = productFacade.unLikeProduct(productId, userPk);
+        ProductLikedInfo secondLike = productFacade.unLikeProduct(productId, userPk);
+        ProductLikedInfo thirdLike = productFacade.unLikeProduct(productId, userPk);
+
+        // then
+        assertThat(firstLike.isLiked()).isFalse();
+        assertThat(secondLike.isLiked()).isFalse();
+        assertThat(thirdLike.isLiked()).isFalse();
+
+        // 좋아요 수는 한 번만 증가해야 함
+        Optional<Product> updatedProduct = productRepository.findById(productId);
+        assertThat(updatedProduct.get().getLikeCount()).isEqualTo(0);
+    }
 }

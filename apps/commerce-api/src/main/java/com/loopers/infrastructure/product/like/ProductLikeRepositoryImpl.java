@@ -7,18 +7,30 @@ import com.loopers.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Repository
 public class ProductLikeRepositoryImpl implements ProductLikeRepository {
     private final ProductLikeJpaRepository productLikeJpaRepository;
 
     @Override
-    public boolean existProductLikeByUser(Product product, User user) {
+    public ProductLike save(ProductLike productLike) {
+        return productLikeJpaRepository.save(productLike);
+    }
+
+    @Override
+    public boolean existsByProductAndUser(Product product, User user) {
         return productLikeJpaRepository.existsByProductAndUser(product, user);
     }
 
     @Override
-    public void save(ProductLike productLike) {
-        productLikeJpaRepository.save(productLike);
+    public void deleteByProductAndUser(Product product, User user) {
+        productLikeJpaRepository.deleteByProductAndUser(product, user);
+    }
+
+    @Override
+    public List<ProductLike> findByUser(User user) {
+        return productLikeJpaRepository.findByUser(user);
     }
 }

@@ -111,7 +111,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         assertThat(response.getBody().data()).isEqualByComparingTo(BigDecimal.valueOf(11000));
     }
 
-    @DisplayName("존재하지 않는 유저가 포인트를 충전할 경우, 404 Not Found 응답을 반환한다.")
+    @DisplayName("존재하지 않는 유저가 포인트를 충전할 경우, 401 Unauthorized 응답을 반환한다.")
     @Test
     void failChargePoint_whenUserNotFound() {
         // Arrange
@@ -130,7 +130,7 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
         );
 
         // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
 

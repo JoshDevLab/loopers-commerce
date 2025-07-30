@@ -145,7 +145,7 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
-    @DisplayName("존재하지 않는 USER ID 로 조회할 경우, 404 Not Found 응답을 반환한다.")
+    @DisplayName("존재하지 않는 USER ID 로 조회할 경우, 401 Unauthorized 에러를 반환한다.")
     @Test
     void failGetMyInfo_whenNotExistsUserId() {
         // Arrange
@@ -163,6 +163,6 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
         );
 
         // Assert
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

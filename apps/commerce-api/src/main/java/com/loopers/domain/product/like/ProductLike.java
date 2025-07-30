@@ -13,7 +13,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Entity
-@Table(name = "product_likes")
+@Table(
+        name = "product_likes",
+        uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = {"product_id", "user_id"})
+)
 public class ProductLike extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
