@@ -61,7 +61,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
         // Arrange
         Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
         Brand brand2 = brandRepository.save(BrandFixture.createBrand("Brand2", "Brand description 2", "https://image2.com"));
-        Product testProduct1 = productRepository.save(ProductFixture.createProduct(
+        productRepository.save(ProductFixture.createProduct(
                 "testProduct1",
                 "Description for product 1",
                 BigDecimal.valueOf(10000),
@@ -320,5 +320,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
                         tuple("Size L", "Color Blue", BigDecimal.valueOf(12000).setScale(2), ProductStatus.ON_SALE.name())
                 );
     }
+
+
 
 }

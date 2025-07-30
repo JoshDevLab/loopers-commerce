@@ -1,6 +1,7 @@
 package com.loopers.application.product;
 
 import com.loopers.domain.product.*;
+import com.loopers.domain.product.like.ProductLike;
 import com.loopers.domain.product.like.ProductLikeService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserInfo;
@@ -21,13 +22,11 @@ public class ProductFacade {
     private final ProductLikeService productLikeService;
     private final UserService userService;
 
-    @Transactional(readOnly = true)
     public Page<ProductInfo> getProductsWithCondition(ProductCriteria criteria, Pageable pageable) {
         return productService.searchByConditionWithPaging(criteria, pageable)
                 .map(ProductInfo::from);
     }
 
-    @Transactional(readOnly = true)
     public ProductInfo getProductDetail(Long productId, UserInfo userInfo) {
         Product product = productService.getProductWithBrandById(productId);
         List<ProductOption> productOptions = productOptionService.getProductOptionsByProductId(productId);
@@ -39,9 +38,39 @@ public class ProductFacade {
         User user = userService.getMyInfoByUserPk(userInfo.id());
 
         ProductInfo result = ProductInfo.from(product, productOptions);
-        if (productLikeService.isProductLikedByUser(product, user)) {
+        if (productLikeService.existsByProductAndUser(product, user)) {
             result.liked();
         }
         return result;
+    }
+
+    @Transactional
+    public ProductLikedInfo likeProduct(Long productId, Long userPk) {
+        Product product = productService.getProductById(productId);
+        User user = userService.getMyInfoByUserPk(userPk);
+        productLikeService.like(product, user);
+        return new ProductLikedInfo(true, product.getLikeCount());
+    }
+
+    @Transactional
+    public ProductLikedInfo unLikeProduct(Long productId, Long userPk) {
+        Product product = productService.getProductById(productId);
+        User user = userService.getMyInfoByUserPk(userPk);
+        productLikeService.unLike(product, user);
+        return new ProductLikedInfo(false, product.getLikeCount());
+    }
+
+    public List<ProductInfo> getLikedProducts(Long userPk) {
+        User user = userService.getMyInfoByUserPk(userPk);
+        List<ProductLike> productLikes = productLikeService.getProductLikeByUser(user);
+        List<Product> products = productLikes
+                .stream()
+                .map(ProductLike::getProduct)
+                .toList();
+        List<ProductInfo> productInfos = products.stream()
+                .map(ProductInfo::from)
+                .toList();
+        productInfos.forEach(ProductInfo::liked);
+        return productInfos;
     }
 }

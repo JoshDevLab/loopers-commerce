@@ -25,10 +25,15 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProductWithBrandById(Long productId) {
         return productRepository.findWithBrandById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "Product not found with id: " + productId));
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
     }
 
     public List<Product> getProductByBrand(Brand brand) {
         return productRepository.findByBrandId(brand);
+    }
+
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
     }
 }

@@ -3,8 +3,14 @@ package com.loopers.domain.product.like;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.user.User;
 
-public interface ProductLikeRepository {
-    boolean existProductLikeByUser(Product product, User user);
+import java.util.List;
 
-    void save(ProductLike productLike);
+public interface ProductLikeRepository {
+    ProductLike save(ProductLike productLike);
+
+    boolean existsByProductAndUser(Product product, User user);
+
+    void deleteByProductAndUser(Product product, User user);
+
+    List<ProductLike> findByUser(User user);
 }
