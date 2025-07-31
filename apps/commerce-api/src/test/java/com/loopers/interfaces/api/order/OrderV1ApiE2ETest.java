@@ -389,4 +389,27 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
                 );
     }
 
+    @DisplayName("주문 상세 조회 API - 존재하지 않는 orderId 로 조회시에 404 Not Found 응답을 반환한다.")
+    @Test
+    void getOrderDetail_whenNonExistOrderId() {
+        // Arrange
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-USER-ID", user.getUserId());
+        HttpEntity<OrderRequest> httpEntityWithHeaders = new HttpEntity<>(headers);
+
+        // Act
+        var response = client.exchange(
+                BASE_URL + "/" + 999,
+                HttpMethod.GET,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<OrderResponse.Detail>>() {
+                }
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
 }
