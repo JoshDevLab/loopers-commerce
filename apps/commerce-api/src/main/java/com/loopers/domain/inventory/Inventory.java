@@ -39,6 +39,9 @@ public class Inventory extends BaseEntity {
     }
 
     public void decreaseQuantity(int quantity) {
+        if (this.quantity - quantity < 0) {
+            throw new CoreException(ErrorType.INSUFFICIENT_STOCK, "상품 재고가 없습니다.");
+        }
         this.quantity -= quantity;
     }
 }
