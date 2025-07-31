@@ -2,14 +2,20 @@ package com.loopers.interfaces.api.order;
 
 import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderInfo;
+import com.loopers.domain.order.OrderCriteria;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.interfaces.api.PageResponse;
 import com.loopers.interfaces.api.order.dto.OrderRequest;
 import com.loopers.interfaces.api.order.dto.OrderResponse;
 import com.loopers.interfaces.interceptor.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,4 +30,15 @@ public class OrderV1Controller {
         OrderInfo orderInfo = orderFacade.order(orderRequest.toRegisterCommand(), userInfo.id());
         return ApiResponse.success(OrderResponse.of(orderInfo));
     }
+
+    @GetMapping
+    public ApiResponse<PageResponse<OrderResponse.OrderSummaryResponse>> getOrderList(
+        OrderRequest.OrderSearchConditionRequest condition,
+        Pageable pageable,
+        @CurrentUser UserInfo userInfo
+    ) {
+        Page<OrderInfo> orderInfos = orderFacade.getOrdersWithCondition(OrderCriteria.toCriteria(condition), userInfo.id(), pageable);
+        return ApiResponse.success(PageResponse.from(orderInfos.map(OrderResponse.OrderSummaryResponse::of)));
+    }
+
 }

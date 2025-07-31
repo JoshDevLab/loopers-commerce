@@ -4,18 +4,21 @@ import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.inventory.Inventory;
 import com.loopers.domain.inventory.InventoryRepository;
+import com.loopers.domain.order.*;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.product.*;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.interfaces.api.PageResponse;
 import com.loopers.interfaces.api.order.dto.OrderRequest;
 import com.loopers.interfaces.api.order.dto.OrderResponse;
 import com.loopers.support.E2ETestSupport;
 import com.loopers.support.fixture.brand.BrandFixture;
 import com.loopers.support.fixture.product.ProductFixture;
 import com.loopers.utils.DatabaseCleanUp;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 
 public class OrderV1ApiE2ETest extends E2ETestSupport {
 
@@ -53,6 +57,9 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
 
     @Autowired
     PointRepository pointRepository;
+    
+    @Autowired
+    OrderRepository orderRepository;
 
     @BeforeEach
     void tearDown() {
@@ -208,4 +215,89 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(result.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(110000));
     }
+
+    @DisplayName("주문 목록 조회 API - 로그인 사용자는 본인의 주문 목록을 페이지 단위로 조회할 수 있다.")
+    @Test
+    void getOrderList() {
+        // Arrange
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000000), user.getId()));
+
+        Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
+        Brand brand2 = brandRepository.save(BrandFixture.createBrand("Brand2", "Brand description 2", "https://image2.com"));
+        Product testProduct1 = productRepository.save(ProductFixture.createProduct(
+                "testProduct1",
+                "Description for product 1",
+                BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING,
+                brand1,
+                "https://example.com/image1.jpg"
+        ));
+        Product testProduct2 = productRepository.save(ProductFixture.createProduct(
+                "testProduct2",
+                "Description for product 2",
+                BigDecimal.valueOf(50000),
+                ProductCategory.CLOTHING,
+                brand2,
+                "https://example.com/image2.jpg"
+        ));
+
+        ProductOption productOption1 = productOptionRepository.save(ProductOption.create("name1","L", "Blue", ProductStatus.ON_SALE, BigDecimal.valueOf(10000), testProduct1));
+        ProductOption productOption2 = productOptionRepository.save(ProductOption.create("name2","XL", "Green", ProductStatus.ON_SALE, BigDecimal.valueOf(50000), testProduct2));
+
+        inventoryRepository.save(Inventory.create(productOption1, 10));
+        inventoryRepository.save(Inventory.create(productOption2, 20));
+
+        OrderRequest orderRequest = new OrderRequest(
+                List.of(new OrderRequest.OrderItemRequest(productOption1.getId(), 1),
+                        new OrderRequest.OrderItemRequest(productOption2.getId(), 2)
+                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-USER-ID", user.getUserId());
+        HttpEntity<OrderRequest> httpEntityWithHeaders = new HttpEntity<>(orderRequest, headers);
+
+        client.exchange(
+                BASE_URL,
+                HttpMethod.POST,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<OrderResponse>>() {
+                }
+        );
+
+        client.exchange(
+                BASE_URL,
+                HttpMethod.POST,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<OrderResponse>>() {
+                }
+        );
+
+        // Act
+        var response = client.exchange(
+                "/api/v1/orders?page=0&size=20&sort=createdAt_desc",
+                HttpMethod.GET,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<PageResponse<OrderResponse.OrderSummaryResponse>>>() {
+                }
+        );
+
+        // Assert
+        ApiResponse<PageResponse<OrderResponse.OrderSummaryResponse>> body = response.getBody();
+        List<OrderResponse.OrderSummaryResponse> result = Objects.requireNonNull(body).data().getContent();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(
+                OrderResponse.OrderSummaryResponse::getTotalAmount,
+                OrderResponse.OrderSummaryResponse::getStatus
+        ).containsExactlyInAnyOrder(
+                tuple(BigDecimal.valueOf(110000).setScale(2), OrderStatus.PENDING),
+                tuple(BigDecimal.valueOf(110000).setScale(2), OrderStatus.PENDING)
+        );
+
+    }
+
 }

@@ -38,4 +38,10 @@ public record OrderRequest(
             return new Address(this.zipCode, this.roadAddress, this.detailAddress, this.receiverName, this.receiverPhone);
         }
     }
+
+    public record OrderSearchConditionRequest(
+        String sort
+    ) {
+
+    }
 }

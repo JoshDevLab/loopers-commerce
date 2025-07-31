@@ -448,22 +448,22 @@
 
 #### 요청 파라미터 명세
 
-| 파라미터 | 예시                     | 설명                           |
-| :------- | :----------------------- | :----------------------------- |
-| `page`   | `0`                      | 페이지 번호 (기본값: `0`)      |
-| `size`   | `20`                     | 페이지당 주문 수 (기본값: `20`) |
-| `sort`   | `orderedAt_desc` / `totalPrice_asc` | 정렬 기준 (기본값: `orderedAt_desc`) |
+| 파라미터 | 예시                                   | 설명                           |
+| :------- |:-------------------------------------| :----------------------------- |
+| `page`   | `0`                                  | 페이지 번호 (기본값: `0`)      |
+| `size`   | `20`                                 | 페이지당 주문 수 (기본값: `20`) |
+| `sort`   | `createdAt_desc` / `totalAmount_asc` | 정렬 기준 (기본값: `orderedAt_desc`) |
 
 #### Main Flow
 
 * 로그인한 사용자가 본인의 주문 목록을 요청합니다.
 * 시스템은 해당 사용자의 주문 리스트를 orderedAt(주문일시) 기준 내림차순으로 페이징하여 반환합니다.
-* 각 주문 항목에는 다음 정보가 포함됩니다: orderId, totalPrice, usedPoint, paidAmount, status, orderedAt.
+* 각 주문 항목에는 다음 정보가 포함됩니다: orderId, totalAmount, status, createdAt.
 * 응답에는 페이징 정보(page, size, totalCount, totalPages)가 포함됩니다.
 
 #### Exception Flow
+* 사용자의 주문이 존재하지 않을 경우 빈값 반환
 
-* 다른 사용자의 주문 목록을 요청할 경우: `403 Forbidden`
 
 -----
 

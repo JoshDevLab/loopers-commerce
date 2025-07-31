@@ -3,16 +3,15 @@ package com.loopers.application.order;
 import com.loopers.domain.inventory.Inventory;
 import com.loopers.domain.inventory.InventoryHistory;
 import com.loopers.domain.inventory.InventoryService;
-import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderCommand;
-import com.loopers.domain.order.OrderItem;
+import com.loopers.domain.order.*;
 import com.loopers.domain.point.PointService;
-import com.loopers.domain.order.OrderService;
 import com.loopers.domain.product.ProductOption;
 import com.loopers.domain.product.ProductOptionService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,5 +52,9 @@ public class OrderFacade {
 
         inventoryHistories.forEach(inventoryHistory -> inventoryHistory.setOrder(order));
         return OrderInfo.from(order);
+    }
+
+    public Page<OrderInfo> getOrdersWithCondition(OrderCriteria criteria, Long userPk, Pageable pageable) {
+        return orderService.getOrdersWithCondition(criteria, userPk, pageable).map(OrderInfo::fromForSearch);
     }
 }
