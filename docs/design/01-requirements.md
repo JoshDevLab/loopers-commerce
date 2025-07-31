@@ -303,13 +303,13 @@
 ### 1) 좋아요 등록
 
 * Method: `POST`
-* URI: `/api/v1/products/{productId}/likes`
+* URI: `/api/v1/like/products`
 
 #### Main Flow
 
 1.  로그인한 사용자가 특정 상품에 좋아요를 등록합니다.
 2.  시스템은 해당 상품 ID가 존재하는지 확인합니다.
-3.  이미 좋아요가 등록되어 있다면: `200 OK` 상태 코드와 함께 현재 상태를 반환합니다. (멱등 처리)
+3.  이미 좋아요가 등록되어 있다면: `201 Created` 상태 코드와 함께 현재 상태를 반환합니다. (멱등 처리)
 4.  좋아요가 등록되지 않은 경우:
     * `likes` 테이블에 새로운 row를 생성합니다.
     * `products.like_count` 값을 +1 증가시킵니다.
@@ -326,7 +326,7 @@
 ### 2) 좋아요 취소
 
 * Method: `DELETE`
-* URI: `/api/v1/products/{productId}/likes`
+* URI: `/api/v1/like/products/{productId}`
 
 #### Main Flow
 
@@ -349,7 +349,7 @@
 ### 3) 좋아요한 상품 목록 조회
 
 * Method: `GET`
-* URI: `/api/v1/users/{userId}/likes`
+* URI: `/api/v1/like/products`
 
 #### Main Flow
 
@@ -394,7 +394,7 @@
 | METHOD | URI                          | 설명           |
 | :----- | :--------------------------- | :------------- |
 | `POST` | `/api/v1/orders`             | 주문 요청      |
-| `GET`  | `/api/v1/users/{userId}/orders` | 유저의 주문 목록 조회 |
+| `GET`  | `/api/v1/orders` | 유저의 주문 목록 조회 |
 | `GET`  | `/api/v1/orders/{orderId}`   | 단일 주문 상세 조회 |
 
 ---
@@ -445,7 +445,7 @@
 ### 2) 주문 목록 조회
 
 * Method: `GET`
-* URI: `/api/v1/users/{userId}/orders`
+* URI: `/api/v1//orders`
 
 #### 요청 파라미터 명세
 
