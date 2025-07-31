@@ -2,13 +2,11 @@ package com.loopers.application.order;
 
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderStatus;
-import com.loopers.domain.user.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Getter

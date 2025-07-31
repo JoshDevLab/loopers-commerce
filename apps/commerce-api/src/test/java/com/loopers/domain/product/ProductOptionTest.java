@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ProductOptionTest {
     @DisplayName("상품 옵션 상태가 ON_SALE이면 예외 없이 통과한다")
