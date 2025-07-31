@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.order;
 
+import com.loopers.application.order.OrderDetailInfo;
 import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderInfo;
 import com.loopers.domain.order.OrderCriteria;
@@ -14,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -32,13 +31,19 @@ public class OrderV1Controller {
     }
 
     @GetMapping
-    public ApiResponse<PageResponse<OrderResponse.OrderSummaryResponse>> getOrderList(
+    public ApiResponse<PageResponse<OrderResponse.Summary>> getOrderList(
         OrderRequest.OrderSearchConditionRequest condition,
         Pageable pageable,
         @CurrentUser UserInfo userInfo
     ) {
         Page<OrderInfo> orderInfos = orderFacade.getOrdersWithCondition(OrderCriteria.toCriteria(condition), userInfo.id(), pageable);
-        return ApiResponse.success(PageResponse.from(orderInfos.map(OrderResponse.OrderSummaryResponse::of)));
+        return ApiResponse.success(PageResponse.from(orderInfos.map(OrderResponse.Summary::of)));
+    }
+
+    @GetMapping("/{orderId}")
+    public ApiResponse<OrderResponse.Detail> getOrderDetail(@PathVariable Long orderId) {
+        OrderDetailInfo orderDetailInfo = orderFacade.getOrderDetail(orderId);
+        return ApiResponse.success(OrderResponse.Detail.of(orderDetailInfo));
     }
 
 }

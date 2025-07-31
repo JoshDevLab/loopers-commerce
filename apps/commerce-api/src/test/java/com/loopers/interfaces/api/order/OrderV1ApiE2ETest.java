@@ -4,7 +4,8 @@ import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.inventory.Inventory;
 import com.loopers.domain.inventory.InventoryRepository;
-import com.loopers.domain.order.*;
+import com.loopers.domain.order.OrderRepository;
+import com.loopers.domain.order.OrderStatus;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
 import com.loopers.domain.product.*;
@@ -12,13 +13,13 @@ import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.interfaces.api.PageResponse;
+import com.loopers.interfaces.api.order.dto.OrderItemResponse;
 import com.loopers.interfaces.api.order.dto.OrderRequest;
 import com.loopers.interfaces.api.order.dto.OrderResponse;
 import com.loopers.support.E2ETestSupport;
 import com.loopers.support.fixture.brand.BrandFixture;
 import com.loopers.support.fixture.product.ProductFixture;
 import com.loopers.utils.DatabaseCleanUp;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -216,7 +217,7 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
         assertThat(result.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(110000));
     }
 
-    @DisplayName("주문 목록 조회 API - 로그인 사용자는 본인의 주문 목록을 페이지 단위로 조회할 수 있다.")
+    @DisplayName("주문 목록 조회 API - 로그인 사용자는 본인의 주문 목록을 페이지 단위로 조회할 수 있다. 응답 200 Ok")
     @Test
     void getOrderList() {
         // Arrange
@@ -277,27 +278,115 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
 
         // Act
         var response = client.exchange(
-                "/api/v1/orders?page=0&size=20&sort=createdAt_desc",
+                BASE_URL + "?page=0&size=20&sort=createdAt_desc",
                 HttpMethod.GET,
                 httpEntityWithHeaders,
-                new ParameterizedTypeReference<ApiResponse<PageResponse<OrderResponse.OrderSummaryResponse>>>() {
+                new ParameterizedTypeReference<ApiResponse<PageResponse<OrderResponse.Summary>>>() {
                 }
         );
 
         // Assert
-        ApiResponse<PageResponse<OrderResponse.OrderSummaryResponse>> body = response.getBody();
-        List<OrderResponse.OrderSummaryResponse> result = Objects.requireNonNull(body).data().getContent();
+        ApiResponse<PageResponse<OrderResponse.Summary>> body = response.getBody();
+        List<OrderResponse.Summary> result = Objects.requireNonNull(body).data().getContent();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result).hasSize(2);
         assertThat(result).extracting(
-                OrderResponse.OrderSummaryResponse::getTotalAmount,
-                OrderResponse.OrderSummaryResponse::getStatus
+                OrderResponse.Summary::getTotalAmount,
+                OrderResponse.Summary::getStatus
         ).containsExactlyInAnyOrder(
                 tuple(BigDecimal.valueOf(110000).setScale(2), OrderStatus.PENDING),
                 tuple(BigDecimal.valueOf(110000).setScale(2), OrderStatus.PENDING)
         );
 
+    }
+
+
+    @DisplayName("주문 상세 조회 API - 로그인 사용자는 본인의 주문을 상세조회 할 수 있다. 응답 200 Ok")
+    @Test
+    void getOrderDetail() {
+        // Arrange
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+
+        pointRepository.save(Point.create(BigDecimal.valueOf(10000000), user.getId()));
+
+        Brand brand1 = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
+        Brand brand2 = brandRepository.save(BrandFixture.createBrand("Brand2", "Brand description 2", "https://image2.com"));
+        Product testProduct1 = productRepository.save(ProductFixture.createProduct(
+                "testProduct1",
+                "Description for product 1",
+                BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING,
+                brand1,
+                "https://example.com/image1.jpg"
+        ));
+        Product testProduct2 = productRepository.save(ProductFixture.createProduct(
+                "testProduct2",
+                "Description for product 2",
+                BigDecimal.valueOf(50000),
+                ProductCategory.CLOTHING,
+                brand2,
+                "https://example.com/image2.jpg"
+        ));
+
+        ProductOption productOption1 = productOptionRepository.save(ProductOption.create("name1","L", "Blue", ProductStatus.ON_SALE, BigDecimal.valueOf(10000), testProduct1));
+        ProductOption productOption2 = productOptionRepository.save(ProductOption.create("name2","XL", "Green", ProductStatus.ON_SALE, BigDecimal.valueOf(50000), testProduct2));
+
+        inventoryRepository.save(Inventory.create(productOption1, 10));
+        inventoryRepository.save(Inventory.create(productOption2, 20));
+
+        OrderRequest orderRequest = new OrderRequest(
+                List.of(new OrderRequest.OrderItemRequest(productOption1.getId(), 1),
+                        new OrderRequest.OrderItemRequest(productOption2.getId(), 2)
+                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-USER-ID", user.getUserId());
+        HttpEntity<OrderRequest> httpEntityWithHeaders = new HttpEntity<>(orderRequest, headers);
+
+        ResponseEntity<ApiResponse<OrderResponse>> orderCreateResponse = client.exchange(
+                BASE_URL,
+                HttpMethod.POST,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<OrderResponse>>() {
+                }
+        );
+
+        Long orderId = Objects.requireNonNull(orderCreateResponse.getBody()).data().getId();
+
+        // Act
+        var response = client.exchange(
+                BASE_URL + "/" + orderId,
+                HttpMethod.GET,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<OrderResponse.Detail>>() {
+                }
+        );
+
+        // Assert
+        ApiResponse<OrderResponse.Detail> body = response.getBody();
+        OrderResponse.Detail result = Objects.requireNonNull(body).data();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getId()).isEqualTo(orderId);
+        assertThat(result.getUserId()).isEqualTo(user.getId());
+        assertThat(result.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(110000));
+        assertThat(result.getOrderStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(result.getOrderItemInfos()).hasSize(2);
+        assertThat(result.getOrderItemInfos())
+                .extracting(
+                        OrderItemResponse::getProductId,
+                        OrderItemResponse::getProductOptionId,
+                        OrderItemResponse::getProductOptionName,
+                        OrderItemResponse::getPrice,
+                        OrderItemResponse::getQuantity,
+                        OrderItemResponse::getSize,
+                        OrderItemResponse::getColor
+                ).containsExactlyInAnyOrder(
+                        tuple(testProduct1.getId(), productOption1.getId(), "name1", BigDecimal.valueOf(10000).setScale(2), 1, "L", "Blue"),
+                        tuple(testProduct2.getId(), productOption2.getId(), "name2", BigDecimal.valueOf(50000).setScale(2), 2, "XL", "Green")
+                );
     }
 
 }

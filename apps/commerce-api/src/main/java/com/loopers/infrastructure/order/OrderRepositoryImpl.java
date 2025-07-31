@@ -3,7 +3,6 @@ package com.loopers.infrastructure.order;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderCriteria;
 import com.loopers.domain.order.OrderRepository;
-import com.loopers.domain.order.QOrder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import static com.loopers.domain.brand.QBrand.brand;
 import static com.loopers.domain.order.QOrder.order;
-import static com.loopers.domain.product.QProduct.product;
 
 @RequiredArgsConstructor
 @Repository
@@ -53,6 +50,11 @@ public class OrderRepositoryImpl implements OrderRepository {
         ).orElse(0L);
 
         return new PageImpl<>(result, pageable, total);
+    }
+
+    @Override
+    public Optional<Order> findByIdWithAll(Long orderId) {
+        return orderJpaRepository.findByIdWithAll(orderId);
     }
 
     private OrderSpecifier<?> ordersOrderBy(OrderCriteria criteria) {

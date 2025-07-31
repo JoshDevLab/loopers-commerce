@@ -1,6 +1,5 @@
 package com.loopers.domain.product;
 
-import com.loopers.domain.order.OrderCommand;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +23,12 @@ public class ProductOptionService {
         return productOptions;
     }
 
-    public ProductOption getProductOption(Long productOptionId) {
-        return productOptionRepository.findById(productOptionId)
+    public ProductOption isOnSales(Long productOptionId) {
+        ProductOption productOption = productOptionRepository.findById(productOptionId)
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_OPTION_NOT_FOUND,
                         "상품을 찾을 수 없습니다. product option id:" + productOptionId));
+        productOption.isOnSales();
+        return productOption;
     }
 
 }

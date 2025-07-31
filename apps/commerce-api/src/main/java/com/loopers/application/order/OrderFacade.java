@@ -33,9 +33,9 @@ public class OrderFacade {
         BigDecimal paidAmount = BigDecimal.ZERO;
         List<InventoryHistory> inventoryHistories = new ArrayList<>();
         List<OrderItem> orderItems = new ArrayList<>();
+
         for (OrderCommand.OrderItemCommand orderItemCommand : orderRegisterCommand.getOrderItemCommands()) {
-            ProductOption productOption = productOptionService.getProductOption(orderItemCommand.getProductOptionId());
-            productOption.isOnSales();
+            ProductOption productOption = productOptionService.isOnSales(orderItemCommand.getProductOptionId());
 
             Inventory inventory = inventoryService.hasEnoughQuantity(productOption, orderItemCommand.getQuantity());
             inventoryHistories.add(InventoryHistory.createOrderHistory(inventory, orderItemCommand.getQuantity()));
@@ -45,6 +45,7 @@ public class OrderFacade {
 
             paidAmount = paidAmount.add(productOption.getPrice().multiply(BigDecimal.valueOf(orderItemCommand.getQuantity())));
         }
+
         pointService.use(userPk, paidAmount);
 
         User user = userService.getMyInfoByUserPk(userPk);
@@ -56,5 +57,10 @@ public class OrderFacade {
 
     public Page<OrderInfo> getOrdersWithCondition(OrderCriteria criteria, Long userPk, Pageable pageable) {
         return orderService.getOrdersWithCondition(criteria, userPk, pageable).map(OrderInfo::fromForSearch);
+    }
+
+    public OrderDetailInfo getOrderDetail(Long orderId) {
+        Order order = orderService.getOrderById(orderId);
+        return OrderDetailInfo.from(order, order.getOrderItems());
     }
 }

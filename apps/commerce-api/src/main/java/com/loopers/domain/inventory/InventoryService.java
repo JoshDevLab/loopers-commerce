@@ -21,9 +21,8 @@ public class InventoryService {
     }
 
     @Transactional
-    public Inventory decreaseQuantity(Inventory inventory, int quantity) {
+    public void decreaseQuantity(Inventory inventory, int quantity) {
         inventory.decreaseQuantity(quantity);
-        return inventory;
     }
 
 }
