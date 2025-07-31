@@ -195,6 +195,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
 
 
         productOptionRepository.save(ProductOption.create(
+                "name1",
                 "Size M",
                 "Color Red",
                 ProductStatus.ON_SALE,
@@ -203,6 +204,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
         ));
 
         productOptionRepository.save(ProductOption.create(
+                "name2",
                 "Size L",
                 "Color Blue",
                 ProductStatus.ON_SALE,
@@ -265,6 +267,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
         ));
 
         productOptionRepository.save(ProductOption.create(
+                "name1",
                 "Size M",
                 "Color Red",
                 ProductStatus.ON_SALE,
@@ -273,6 +276,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
         ));
 
         productOptionRepository.save(ProductOption.create(
+                "name1",
                 "Size L",
                 "Color Blue",
                 ProductStatus.ON_SALE,

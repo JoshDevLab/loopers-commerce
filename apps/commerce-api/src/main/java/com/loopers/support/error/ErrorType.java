@@ -28,7 +28,11 @@ public enum ErrorType {
     INVALID_PRODUCT_CATEGORY(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "존재하지 않는 상품 카테고리입니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "해당 상품을 찾을 수 없습니다."),
     PRODUCT_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "해당 상품의 옵션을 찾을 수 없습니다."),
-    BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "해당 브랜드를 찾을 수 없습니다.");
+    BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "해당 브랜드를 찾을 수 없습니다."),
+    PRODUCT_OPTION_NOT_ON_SALE(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "해당 상품은 판매중인 상품이 아닙니다."),
+    INSUFFICIENT_STOCK(HttpStatus.CONFLICT, HttpStatus.CONFLICT.getReasonPhrase(), "상품 옵션 재고가 부족합니다."),
+    PRODUCT_INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "상품 재고를 찾을 수 없습니다."),
+    INSUFFICIENT_POINT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "포인트가 부족합니다.");
 
     private final HttpStatus status;
     private final String code;

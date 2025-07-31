@@ -411,8 +411,7 @@
   "items": [
     { "productOptionId": 101, "quantity": 2 },
     { "productOptionId": 203, "quantity": 1 }
-  ],
-  "usedPoint": 1000 
+  ]
 }
 ```
 
@@ -436,7 +435,7 @@
 
 * 비로그인 사용자가 요청한 경우: 401 Unauthorized
 * 존재하지 않는 상품 옵션 ID가 포함된 경우: 400 Bad Request
-* 판매 중이 아닌 상품 옵션이 포함된 경우: 400 Bad Request (메시지: "판매 중이 아닌 상품 옵션이 포함되어 있습니다.")
+* 판매 중이 아닌 상품 옵션이 포함된 경우: 400 Bad Request
 * 상품 옵션 재고가 부족한 경우: 409 Conflict (메시지: "상품 옵션 재고가 부족합니다.")
 * 사용 가능한 포인트보다 많은 포인트 사용 시: 400 Bad Request (메시지: "포인트가 부족합니다.")
 
