@@ -105,6 +105,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         ));
 
         productOptionRepository.save(ProductOption.create(
+                "name1",
                 "Size M",
                 "Color Red",
                 ProductStatus.ON_SALE,
