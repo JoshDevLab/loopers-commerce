@@ -40,14 +40,14 @@ classDiagram
         +BigDecimal price
         +String size
         +String color
-        +boolean hasEnoughQuantity(int quantity)
         +void decreaseQuantity(int quantity)
     }
 
     class Inventory {
-        Long id
-        ProductOption productOption
-        int quantity
+        +Long id
+        +ProductOption productOption
+        +int quantity
+        +boolean hasEnoughQuantity(int quantity)    
     }
 
     class InventoryHistory {

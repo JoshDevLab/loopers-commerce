@@ -53,14 +53,14 @@
 
 ## 요청 파라미터 명세
 
-| 파라미터   | 예시                                  | 설명                           |
-| :--------- | :------------------------------------ | :----------------------------- |
+| 파라미터   | 예시                                    | 설명                           |
+| :--------- |:--------------------------------------| :----------------------------- |
 | `brandId`  | `1`                                   | 특정 브랜드의 상품만 필터링    |
 | `sort`     | `latest` / `price_asc` / `likes_desc` | 정렬 기준 (기본값: `latest`) |
-| `search`   | `운동화`                              | 상품명에 해당 문자열이 포함된 상품 검색 |
+| `search`   | `운동화`                                 | 상품명에 해당 문자열이 포함된 상품 검색 |
 | `page`     | `0`                                   | 페이지 번호 (기본값: `0`)      |
 | `size`     | `20`                                  | 페이지당 상품 수 (기본값: `20`) |
-| `categoryId` | `10`                                  | 특정 카테고리의 상품만 필터링  |
+| `categoryId` | `CLOTHING`                            | 특정 카테고리의 상품만 필터링  |
 
 ---
 
@@ -79,11 +79,9 @@
       "price": 129000,
       "brandName": "Nike",
       "likeCount": 101,
-      "thumbnail": "[https://cdn.example.com/products/42/thumb.jpg](https://cdn.example.com/products/42/thumb.jpg)",
-      "categoryId": 1,
-      "categoryName": "신발",
-      "minOptionPrice": 129000,
-      "availableSizes": ["260", "270", "280"]
+      "imageUrl": "[https://cdn.example.com/products/42/thumb.jpg](https://cdn.example.com/products/42/thumb.jpg)",
+      "categoryName": "shoes",
+      "productStatus": "ON_SALE"
     },
     {
       "productId": 43,
@@ -91,11 +89,9 @@
       "price": 99000,
       "brandName": "Adidas",
       "likeCount": 85,
-      "thumbnail": "[https://cdn.example.com/products/43/thumb.jpg](https://cdn.example.com/products/43/thumb.jpg)",
-      "categoryId": 1,
-      "categoryName": "신발",
-      "minOptionPrice": 99000,
-      "availableSizes": ["S", "M", "L"]
+      "imageUrl": "[https://cdn.example.com/products/43/thumb.jpg](https://cdn.example.com/products/43/thumb.jpg)",
+      "categoryName": "shoes",
+      "productStatus": "ON_SALE"
     }
   ]
 }
@@ -171,48 +167,47 @@
 
 ```json
 {
-  "id": 42,
+  "productId": 42,
   "name": "에어맥스 2023",
   "price": 120000,
   "description": "편안한 착용감을 제공하는 에어맥스 2023...",
-  "images": ["[https://cdn.example.com/products/42/img1.jpg](https://cdn.example.com/products/42/img1.jpg)", "[https://cdn.example.com/products/42/img2.jpg](https://cdn.example.com/products/42/img2.jpg)"],
+  "imageUrl": ["[https://cdn.example.com/products/42/img1.jpg](https://cdn.example.com/products/42/img1.jpg)", "[https://cdn.example.com/products/42/img2.jpg](https://cdn.example.com/products/42/img2.jpg)"],
   "brandName": "Nike",
   "likeCount": 101,
   "liked": true,
   "createdAt": "2024-07-20T10:00:00",
   "thumbnail": "[https://cdn.example.com/products/42/thumb.jpg](https://cdn.example.com/products/42/thumb.jpg)",
   "categoryId": 1,
-  "categoryName": "신발",
-  "sizeUnitType": "MM",
-  "saleStatus": "ON_SALE",
+  "categoryName": "shoes",
+  "productStatus": "ON_SALE",
   "options": [
     {
-      "optionId": 101,
-      "sizeValue": "260",
-      "colorValue": "Black",
-      "additionalPrice": 9000,
-      "optionStatus": "ON_SALE"
+      "productOptionId": 101,
+      "size": "260",
+      "color": "Black",
+      "price": 20000,
+      "productStatus": "ON_SALE"
     },
     {
-      "optionId": 102,
-      "sizeValue": "270",
-      "colorValue": "Black",
-      "additionalPrice": 9000,
-      "optionStatus": "ON_SALE"
+      "productOptionId": 102,
+      "size": "270",
+      "color": "Black",
+      "price": 9000,
+      "productStatus": "ON_SALE"
     },
     {
-      "optionId": 103,
-      "sizeValue": "280",
-      "colorValue": "Black",
-      "additionalPrice": 9000,
-      "optionStatus": "SOLD_OUT"
+      "productOptionId": 103,
+      "size": "280",
+      "color": "Black",
+      "price": 9000,
+      "productStatus": "SOLD_OUT"
     },
     {
-      "optionId": 104,
-      "sizeValue": "270",
-      "colorValue": "White",
-      "additionalPrice": 9000,
-      "optionStatus": "ON_SALE"
+      "productOptionId": 104,
+      "size": "270",
+      "color": "White",
+      "price": 9000,
+      "productStatus": "ON_SALE"
     }
   ]
 }
@@ -249,13 +244,12 @@
 ### Alternate Flow
 
 * [브랜드 목록 조회]: 시스템은 기본적으로 브랜드명을 오름차순 정렬하여 반환합니다.
-* [브랜드 상세 조회]: 반환 시 브랜드명, 로고 URL, 등록일 등 기본 정보를 포함합니다.
+* [브랜드 상세 조회]: 반환 시 브랜드명, 로고 URL, 브랜드의 상품, 등록일 등 기본 정보를 포함합니다.
 
 ### Exception Flow
 
 * 브랜드가 존재하지 않는 ID로 상세 조회 요청한 경우: 시스템은 `404 Not Found` 와 함께 `"해당 브랜드를 찾을 수 없습니다."` 메시지를 반환합니다.
 * 브랜드가 하나도 없는 경우 (목록 조회): 시스템은 빈 배열을 반환하며, 상태 코드는 `200 OK`입니다.
-* 잘못된 `brandId` 형식 (예: 음수, 문자 등): 시스템은 `400 Bad Request`를 반환합니다.
 
 ---
 
@@ -309,13 +303,13 @@
 ### 1) 좋아요 등록
 
 * Method: `POST`
-* URI: `/api/v1/products/{productId}/likes`
+* URI: `/api/v1/like/products`
 
 #### Main Flow
 
 1.  로그인한 사용자가 특정 상품에 좋아요를 등록합니다.
 2.  시스템은 해당 상품 ID가 존재하는지 확인합니다.
-3.  이미 좋아요가 등록되어 있다면: `200 OK` 상태 코드와 함께 현재 상태를 반환합니다. (멱등 처리)
+3.  이미 좋아요가 등록되어 있다면: `201 Created` 상태 코드와 함께 현재 상태를 반환합니다. (멱등 처리)
 4.  좋아요가 등록되지 않은 경우:
     * `likes` 테이블에 새로운 row를 생성합니다.
     * `products.like_count` 값을 +1 증가시킵니다.
@@ -332,7 +326,7 @@
 ### 2) 좋아요 취소
 
 * Method: `DELETE`
-* URI: `/api/v1/products/{productId}/likes`
+* URI: `/api/v1/like/products/{productId}`
 
 #### Main Flow
 
@@ -355,14 +349,13 @@
 ### 3) 좋아요한 상품 목록 조회
 
 * Method: `GET`
-* URI: `/api/v1/users/{userId}/likes`
+* URI: `/api/v1/like/products`
 
 #### Main Flow
 
 1.  로그인한 사용자가 본인의 좋아요 목록을 요청합니다.
 2.  시스템은 해당 사용자가 좋아요한 상품 리스트를 조회하여 반환합니다.
-3.  각 상품에는 다음 정보가 포함되어야 합니다: `productId`, `name`, `price`, `brandName`, `likeCount`, `thumbnail`, `categoryId`, `categoryName`, `minOptionPrice`, `availableSizes`.
-4.  페이징 및 정렬 옵션은 기본 적용됩니다 (예: `page=0`, `size=20`, `sort=latest`).
+3.  각 상품에는 다음 정보가 포함되어야 합니다: `productId`, `name`, `price`, `brandName`, `likeCount`, `thumbnail`, `categoryId`, `categoryName`.
 
 #### Exception Flow
 
@@ -401,7 +394,7 @@
 | METHOD | URI                          | 설명           |
 | :----- | :--------------------------- | :------------- |
 | `POST` | `/api/v1/orders`             | 주문 요청      |
-| `GET`  | `/api/v1/users/{userId}/orders` | 유저의 주문 목록 조회 |
+| `GET`  | `/api/v1/orders` | 유저의 주문 목록 조회 |
 | `GET`  | `/api/v1/orders/{orderId}`   | 단일 주문 상세 조회 |
 
 ---
@@ -418,8 +411,7 @@
   "items": [
     { "productOptionId": 101, "quantity": 2 },
     { "productOptionId": 203, "quantity": 1 }
-  ],
-  "usedPoint": 1000 
+  ]
 }
 ```
 
@@ -443,7 +435,7 @@
 
 * 비로그인 사용자가 요청한 경우: 401 Unauthorized
 * 존재하지 않는 상품 옵션 ID가 포함된 경우: 400 Bad Request
-* 판매 중이 아닌 상품 옵션이 포함된 경우: 400 Bad Request (메시지: "판매 중이 아닌 상품 옵션이 포함되어 있습니다.")
+* 판매 중이 아닌 상품 옵션이 포함된 경우: 400 Bad Request
 * 상품 옵션 재고가 부족한 경우: 409 Conflict (메시지: "상품 옵션 재고가 부족합니다.")
 * 사용 가능한 포인트보다 많은 포인트 사용 시: 400 Bad Request (메시지: "포인트가 부족합니다.")
 
@@ -452,26 +444,26 @@
 ### 2) 주문 목록 조회
 
 * Method: `GET`
-* URI: `/api/v1/users/{userId}/orders`
+* URI: `/api/v1//orders`
 
 #### 요청 파라미터 명세
 
-| 파라미터 | 예시                     | 설명                           |
-| :------- | :----------------------- | :----------------------------- |
-| `page`   | `0`                      | 페이지 번호 (기본값: `0`)      |
-| `size`   | `20`                     | 페이지당 주문 수 (기본값: `20`) |
-| `sort`   | `orderedAt_desc` / `totalPrice_asc` | 정렬 기준 (기본값: `orderedAt_desc`) |
+| 파라미터 | 예시                                   | 설명                           |
+| :------- |:-------------------------------------| :----------------------------- |
+| `page`   | `0`                                  | 페이지 번호 (기본값: `0`)      |
+| `size`   | `20`                                 | 페이지당 주문 수 (기본값: `20`) |
+| `sort`   | `createdAt_desc` / `totalAmount_asc` | 정렬 기준 (기본값: `orderedAt_desc`) |
 
 #### Main Flow
 
 * 로그인한 사용자가 본인의 주문 목록을 요청합니다.
 * 시스템은 해당 사용자의 주문 리스트를 orderedAt(주문일시) 기준 내림차순으로 페이징하여 반환합니다.
-* 각 주문 항목에는 다음 정보가 포함됩니다: orderId, totalPrice, usedPoint, paidAmount, status, orderedAt.
+* 각 주문 항목에는 다음 정보가 포함됩니다: orderId, totalAmount, status, createdAt.
 * 응답에는 페이징 정보(page, size, totalCount, totalPages)가 포함됩니다.
 
 #### Exception Flow
+* 사용자의 주문이 존재하지 않을 경우 빈값 반환
 
-* 다른 사용자의 주문 목록을 요청할 경우: `403 Forbidden`
 
 -----
 
