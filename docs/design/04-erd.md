@@ -1,30 +1,30 @@
 ```mermaid
 erDiagram
     products {
-        BIGINT product_id PK "상품 고유 ID"
-        VARCHAR name "상품 이름"
-        VARCHAR description "상품 설명"
-        VARCHAR status "상품 상태 (예: 판매중, 판매종료)"
-        VARCHAR category "상품 카테고리 (ENUM 값)"
-        BIGINT brand_id FK "브랜드 ID"
-        DECIMAL basic_price "상품 기본 가격"
-        INT like_count "좋아요 수"
+        BIGINT product_id PK
+        VARCHAR name
+        VARCHAR description
+        VARCHAR status
+        VARCHAR category
+        BIGINT brand_id FK
+        DECIMAL basic_price
+        INT like_count
     }
 
     product_options {
-        BIGINT option_id PK "상품 옵션 고유 ID"
-        BIGINT product_id FK "상품 ID"
-        VARCHAR status "상품 상태 (예: 판매중, 판매종료)"
-        VARCHAR name "상품 옵션 상세 이름 (예: 스투시 도쿄 화이트)"
-        DECIMAL price "옵션 최종 가격"
-        VARCHAR size "사이즈 (예: 270mm, L, XL)"
-        VARCHAR color "색상 (예: 화이트, 블랙)"
+        BIGINT option_id PK
+        BIGINT product_id FK
+        VARCHAR status
+        VARCHAR name
+        DECIMAL price
+        VARCHAR size
+        VARCHAR color
     }
 
     inventory {
-        BIGINT inventory_id PK "재고 고유 ID"
-        BIGINT product_option_id FK "상품 옵션 ID (1:1 관계)"
-        INT quantity "재고 수량"
+        BIGINT inventory_id PK
+        BIGINT product_option_id FK
+        INT quantity
     }
 
     inventory_history {
@@ -38,64 +38,91 @@ erDiagram
     }
 
     brands {
-        BIGINT brand_id PK "브랜드 고유 ID"
-        VARCHAR name "브랜드 이름"
-        VARCHAR description "브랜드 설명"
+        BIGINT brand_id PK
+        VARCHAR name
+        VARCHAR description
     }
 
     users {
-        BIGINT id PK "사용자 고유 ID"
-        VARCHAR user_id "사용자 로그인 ID"
+        BIGINT id PK
+        VARCHAR user_id
     }
 
     points {
-        BIGINT id PK "포인트 고유 ID"
-        BIGINT user_id FK "사용자 ID"
-        DECIMAL balance "포인트 잔액"
+        BIGINT id PK
+        BIGINT user_id FK
+        DECIMAL balance
     }
 
     likes {
-        BIGINT like_id PK "좋아요 고유 ID"
-        BIGINT user_id FK "사용자 ID"
-        BIGINT product_id FK "상품 ID"
+        BIGINT like_id PK
+        BIGINT user_id FK
+        BIGINT product_id FK
     }
 
     orders {
-        BIGINT order_id PK "주문 고유 ID"
-        BIGINT user_id FK "주문 사용자 ID"
-        DATETIME order_date "주문 일시"
-        DECIMAL total_amount "총 주문 금액"
-        DECIMAL used_points "사용 포인트"
-        VARCHAR status "주문 상태 (예: 결제완료, 배송중)"
+        BIGINT order_id PK
+        BIGINT user_id FK
+        DATETIME order_date
+        DECIMAL total_amount
+        DECIMAL discount_amount "할인 금액"
+        DECIMAL used_points
+        VARCHAR status
     }
 
     order_items {
-        BIGINT order_item_id PK "주문 항목 고유 ID"
-        BIGINT order_id FK "주문 ID"
-        BIGINT product_id FK "상품 ID"
-        BIGINT product_option_id FK "상품 옵션 ID"
-        DECIMAL price "주문 시점 단가"
-        VARCHAR product_name "상품 이름 (주문 시점)"
-        VARCHAR product_option_name "옵션 이름 (주문 시점)"
-        INT quantity "수량"
-        DECIMAL item_total_amount "항목별 총액"
+        BIGINT order_item_id PK
+        BIGINT order_id FK
+        BIGINT product_id FK
+        BIGINT product_option_id FK
+        DECIMAL price
+        VARCHAR product_name
+        VARCHAR product_option_name
+        INT quantity
+        DECIMAL item_total_amount
     }
-    
+
     payments {
-        BIGINT payment_id PK "결제 고유 ID"
-        BIGINT order_id FK "주문 ID"
-        VARCHAR payment_method "결제 방법 (예: 카드, 계좌이체)"
-        DECIMAL amount "결제 금액"
-        VARCHAR payment_status "결제 상태 (예: 성공, 실패)"
+        BIGINT payment_id PK
+        BIGINT order_id FK
+        VARCHAR payment_method
+        DECIMAL amount
+        VARCHAR payment_status
     }
-    
+
     points_history {
-        BIGINT id PK "포인트 이력 고유 ID"
-        BIGINT point_id FK "포인트 ID"
-        VARCHAR type "이력 유형 (예: 적립, 사용)"
-        DECIMAL amount "변경된 포인트 금액"
-        DATETIME created_at "이력 생성 일시"
-        VARCHAR reason "이력 사유"
+        BIGINT id PK
+        BIGINT point_id FK
+        VARCHAR type
+        DECIMAL amount
+        DATETIME created_at
+        VARCHAR reason
+    }
+
+    coupons {
+        BIGINT coupon_id PK
+        VARCHAR name
+        VARCHAR type "FIXED_AMOUNT | RATE"
+        DECIMAL discount_value
+        DATETIME issued_at
+        DATETIME expire_at
+    }
+
+    user_coupons {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT coupon_id FK
+        BOOLEAN used
+        DATETIME used_at
+    }
+
+    coupon_history {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT coupon_id FK
+        BIGINT order_id FK
+        DECIMAL discount_amount
+        DATETIME used_at
     }
 
     products ||--o{ product_options : "1:N 옵션을 가진다"
@@ -111,4 +138,10 @@ erDiagram
     product_options ||--|| inventory : "1:1 재고 보유"
     inventory ||--o{ inventory_history : "1:N 재고 변경 이력"
     points ||--o{ points_history : "1:N 포인트 변경 이력"
+
+    users ||--o{ user_coupons : "1:N 쿠폰 보유"
+    coupons ||--o{ user_coupons : "1:N 사용자에게 발급됨"
+    users ||--o{ coupon_history : "1:N 쿠폰 사용 기록"
+    coupons ||--o{ coupon_history : "1:N 쿠폰 사용 기록"
+    orders ||--|| coupon_history : "1:1 쿠폰 사용 기록"
 ```
