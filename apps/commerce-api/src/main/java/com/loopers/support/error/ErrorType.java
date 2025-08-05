@@ -33,7 +33,12 @@ public enum ErrorType {
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, HttpStatus.CONFLICT.getReasonPhrase(), "상품 옵션 재고가 부족합니다."),
     PRODUCT_INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "상품 재고를 찾을 수 없습니다."),
     INSUFFICIENT_POINT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "포인트가 부족합니다."),
-    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "주문을 찾을 수 없습니다.");
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "주문을 찾을 수 없습니다."),
+    ALREADY_USING_COUPON(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "이미 사용된 쿠폰입니다."),
+    EXPIRED_COUPON(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "만료된 쿠폰입니다."),
+    INVALID_COUPON(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 쿠폰입니다."),
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "쿠폰을 찾을 수 없습니다."),
+    INVALID_PAID_AMOUNT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "총 결제 금액은 0원 이상이어야 합니다.");
 
     private final HttpStatus status;
     private final String code;
