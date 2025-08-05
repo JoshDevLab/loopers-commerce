@@ -1,5 +1,6 @@
 package com.loopers.application.order;
 
+import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.inventory.Inventory;
 import com.loopers.domain.inventory.InventoryHistory;
 import com.loopers.domain.inventory.InventoryService;
@@ -27,31 +28,35 @@ public class OrderFacade {
     private final InventoryService inventoryService;
     private final PointService pointService;
     private final UserService userService;
+    private final CouponService couponService;
 
     @Transactional
     public OrderInfo order(OrderCommand.Register orderRegisterCommand, Long userPk) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
         BigDecimal paidAmount = BigDecimal.ZERO;
         List<InventoryHistory> inventoryHistories = new ArrayList<>();
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (OrderCommand.OrderItemCommand orderItemCommand : orderRegisterCommand.getOrderItemCommands()) {
-            ProductOption productOption = productOptionService.isOnSales(orderItemCommand.getProductOptionId());
-
-            Inventory inventory = inventoryService.hasEnoughQuantity(productOption, orderItemCommand.getQuantity());
+            ProductOption productOption = productOptionService.getOnSalesProductOption(orderItemCommand.getProductOptionId());
+            Inventory inventory = inventoryService.getEnoughQuantityInventory(productOption, orderItemCommand.getQuantity());
             inventoryHistories.add(InventoryHistory.createOrderHistory(inventory, orderItemCommand.getQuantity()));
             inventoryService.decreaseQuantity(inventory, orderItemCommand.getQuantity());
 
             orderItems.add(OrderItem.create(productOption, orderItemCommand.getQuantity()));
 
-            paidAmount = paidAmount.add(productOption.getPrice().multiply(BigDecimal.valueOf(orderItemCommand.getQuantity())));
+            totalAmount = totalAmount.add(productOption.getPrice().multiply(BigDecimal.valueOf(orderItemCommand.getQuantity())));
         }
 
-        pointService.use(userPk, paidAmount);
+        // 쿠폰 사용
+        // TODO
+
+        pointService.use(userPk, totalAmount);
 
         User user = userService.getMyInfoByUserPk(userPk);
-        Order order = orderService.createOrder(orderRegisterCommand, paidAmount, orderItems, user);
+        Order order = orderService.createOrder(orderRegisterCommand, totalAmount, orderItems, user);
 
-        inventoryHistories.forEach(inventoryHistory -> inventoryHistory.setOrder(order));
+        inventoryHistories.forEach(inventoryHistory -> inventoryService.createInventoryHistory(inventoryHistory.setOrder(order)));
         return OrderInfo.from(order);
     }
 

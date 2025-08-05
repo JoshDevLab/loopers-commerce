@@ -14,13 +14,22 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 public class OrderInfo {
     private Long id;
+    private BigDecimal totalAmount;
+    private BigDecimal discountAmount;
     private BigDecimal paidAmount;
     private OrderStatus status;
     private ZonedDateTime createdAt;
 
     public OrderInfo(Long id, BigDecimal totalAmount) {
         this.id = id;
-        this.paidAmount = totalAmount;
+        this.totalAmount = totalAmount;
+    }
+
+    public OrderInfo(Long id, BigDecimal totalAmount, OrderStatus orderStatus, ZonedDateTime createdAt) {
+        this.id = id;
+        this.totalAmount = totalAmount;
+        this.status = orderStatus;
+        this.createdAt = createdAt;
     }
 
     public static OrderInfo from(Order order) {
