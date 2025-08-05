@@ -89,7 +89,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
                 ProductInfo::getBasicPrice,
                 ProductInfo::getProductStatus
         ).containsExactlyInAnyOrder(
-                tuple("셔츠1", "상품 설명 1", "CLOTHING", "Brand1", BigDecimal.valueOf(10000), ProductStatus.ON_SALE)
+                tuple("셔츠1", "상품 설명 1", "CLOTHING", "Brand1", BigDecimal.valueOf(10000).setScale(2), ProductStatus.ON_SALE)
         );
     }
 

@@ -45,7 +45,7 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
 
         // Assert
         assertThat(point.getUserPk()).isEqualTo(user.getId());
-        assertThat(point.getPointBalance()).isEqualTo(BigDecimal.valueOf(10000));
+        assertThat(point.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(10000));
     }
 
     @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, CoreException ErrorType.POINT_NOT_FOUND. 예외가 발생한다.")
@@ -81,7 +81,7 @@ public class PointServiceIntegrationTest extends IntegrationTestSupport {
         // Assert
         assertThat(chargedPoint).isNotNull();
         assertThat(chargedPoint.getUserPk()).isEqualTo(user.getId());
-        assertThat(chargedPoint.getPointBalance()).isEqualTo(BigDecimal.valueOf(15000));
+        assertThat(chargedPoint.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(15000));
     }
 
     @DisplayName("존재하는 유저 ID 로 충전을 시도한 경우 포인트 히스토리에 충전이력이 저장된다.")

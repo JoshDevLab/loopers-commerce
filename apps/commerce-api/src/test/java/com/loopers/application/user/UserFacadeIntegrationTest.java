@@ -43,7 +43,7 @@ public class UserFacadeIntegrationTest extends IntegrationTestSupport {
         // Assert
         Optional<Point> point = pointRepository.findByUserPk(userInfo.id());
         assertThat(point).isPresent();
-        assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(BigDecimal.ZERO);
+        assertThat(point.get().getPointBalance()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @DisplayName("회원가입이 실패하면 Point 가 부여되지않는다")
@@ -67,7 +67,7 @@ public class UserFacadeIntegrationTest extends IntegrationTestSupport {
         // Assert
         Optional<Point> point = pointRepository.findByUserPk(userInfo.id());
         assertThat(point).isPresent();
-        assertThat(point).get().extracting(Point::getPointBalance).isEqualTo(BigDecimal.ZERO);
+        assertThat(point.get().getPointBalance()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
 }

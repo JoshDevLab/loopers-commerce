@@ -58,7 +58,7 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
 
     @Autowired
     PointRepository pointRepository;
-    
+
     @Autowired
     OrderRepository orderRepository;
 
@@ -93,7 +93,8 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
 
         OrderRequest orderRequest = new OrderRequest(
                 List.of(new OrderRequest.OrderItemRequest(productOption.getId(), 5)), // 주문 수량: 5개 → 초과
-                new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+                new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                null
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -140,7 +141,8 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
 
         OrderRequest orderRequest = new OrderRequest(
                 List.of(new OrderRequest.OrderItemRequest(productOption.getId(), 1)), // 주문 금액: 10,000
-                new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+                new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                null
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -195,7 +197,8 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
         OrderRequest orderRequest = new OrderRequest(
                 List.of(new OrderRequest.OrderItemRequest(productOption1.getId(), 1),
                         new OrderRequest.OrderItemRequest(productOption2.getId(), 2)
-                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                null
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -253,7 +256,8 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
         OrderRequest orderRequest = new OrderRequest(
                 List.of(new OrderRequest.OrderItemRequest(productOption1.getId(), 1),
                         new OrderRequest.OrderItemRequest(productOption2.getId(), 2)
-                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                null
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -338,7 +342,8 @@ public class OrderV1ApiE2ETest extends E2ETestSupport {
         OrderRequest orderRequest = new OrderRequest(
                 List.of(new OrderRequest.OrderItemRequest(productOption1.getId(), 1),
                         new OrderRequest.OrderItemRequest(productOption2.getId(), 2)
-                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone")
+                ), new OrderRequest.AddressRequest("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                null
         );
 
         HttpHeaders headers = new HttpHeaders();
