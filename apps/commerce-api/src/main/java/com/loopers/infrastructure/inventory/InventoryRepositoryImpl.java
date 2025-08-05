@@ -23,4 +23,9 @@ public class InventoryRepositoryImpl implements InventoryRepository {
         return inventoryJapRepository.save(inventory);
     }
 
+    @Override
+    public Optional<Inventory> findByProductOptionWithLock(ProductOption productOption) {
+        return inventoryJapRepository.findByProductOptionWithLock(productOption);
+    }
+
 }

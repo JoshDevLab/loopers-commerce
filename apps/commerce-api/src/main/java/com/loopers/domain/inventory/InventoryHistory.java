@@ -52,7 +52,8 @@ public class InventoryHistory extends BaseEntity {
         );
     }
 
-    public void setOrder(Order order) {
+    public InventoryHistory setOrder(Order order) {
         this.order = order;
+        return this;
     }
 }

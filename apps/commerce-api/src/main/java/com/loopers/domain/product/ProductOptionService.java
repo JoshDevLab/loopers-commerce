@@ -23,8 +23,8 @@ public class ProductOptionService {
         return productOptions;
     }
 
-    public ProductOption isOnSales(Long productOptionId) {
-        ProductOption productOption = productOptionRepository.findById(productOptionId)
+    public ProductOption getOnSalesProductOption(Long productOptionId) {
+        ProductOption productOption = productOptionRepository.findByIdWithLock(productOptionId)
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_OPTION_NOT_FOUND,
                         "상품을 찾을 수 없습니다. product option id:" + productOptionId));
         productOption.isOnSales();
