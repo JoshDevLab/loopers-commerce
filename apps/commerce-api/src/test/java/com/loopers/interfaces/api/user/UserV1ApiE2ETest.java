@@ -8,7 +8,6 @@ import com.loopers.interfaces.api.user.dto.MyInfoResponse;
 import com.loopers.interfaces.api.user.dto.SignUpRequest;
 import com.loopers.interfaces.api.user.dto.SignUpResponse;
 import com.loopers.support.E2ETestSupport;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

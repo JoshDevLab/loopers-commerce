@@ -14,7 +14,6 @@ import com.loopers.interfaces.api.product.dto.ProductResponse;
 import com.loopers.support.E2ETestSupport;
 import com.loopers.support.fixture.brand.BrandFixture;
 import com.loopers.support.fixture.product.ProductFixture;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
