@@ -1,7 +1,6 @@
 package com.loopers.infrastructure.product;
 
 import com.loopers.domain.product.ProductOption;
-import com.loopers.domain.product.ProductStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

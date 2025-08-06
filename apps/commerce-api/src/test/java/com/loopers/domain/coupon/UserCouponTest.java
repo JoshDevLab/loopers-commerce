@@ -1,14 +1,14 @@
 package com.loopers.domain.coupon;
 
-import com.loopers.support.error.CoreException;
-import org.junit.jupiter.api.Test;
-import java.time.ZonedDateTime;
 import com.loopers.domain.user.User;
+import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.*;
 

@@ -41,12 +41,6 @@ class BrandV1ApiE2ETest extends E2ETestSupport {
     @Autowired
     ProductRepository productRepository;
 
-
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
-
     @DisplayName("브랜드 목록을 가져올 수 있다.")
     @Test
     void getBrandList() {

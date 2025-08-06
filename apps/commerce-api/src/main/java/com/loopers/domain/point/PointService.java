@@ -30,7 +30,7 @@ public class PointService {
 
     @Transactional
     public Point charge(Long userPk, BigDecimal chargePoint) {
-        Point point = pointRepository.findByUserPk(userPk)
+        Point point = pointRepository.findByUserPkWithLock(userPk)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.charge(chargePoint);
         pointHistoryRepository.save(PointHistory.create(point.getUserPk(), chargePoint, PointHistoryType.CHARGE));
@@ -38,10 +38,11 @@ public class PointService {
     }
 
     @Transactional
-    public void use(Long userPk, BigDecimal paidAmount) {
-        Point point = pointRepository.findByUserPk(userPk)
+    public Point use(Long userPk, BigDecimal paidAmount) {
+        Point point = pointRepository.findByUserPkWithLock(userPk)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.use(paidAmount);
         pointHistoryRepository.save(PointHistory.create(point.getUserPk(), paidAmount, PointHistoryType.USE));
+        return point;
     }
 }

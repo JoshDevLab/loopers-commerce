@@ -41,13 +41,13 @@ public class InventoryHistory extends BaseEntity {
         this.reason = reason;
     }
 
-    public static InventoryHistory createOrderHistory(Inventory inventory, int changedQuantity) {
+    public static InventoryHistory createOrderInventoryHistory(Inventory inventory, int changedQuantity) {
         return new InventoryHistory(
                 inventory,
                 InventoryHistoryType.DECREASE,
                 changedQuantity,
+                inventory.getQuantity() + changedQuantity,
                 inventory.getQuantity(),
-                inventory.getQuantity() - changedQuantity,
                 "주문"
         );
     }

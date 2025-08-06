@@ -50,11 +50,6 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
     @Autowired
     ProductLikeRepository productLikeRepository;
 
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
-
     @DisplayName("상품목록 조회 API 테스트")
     @Test
     void getProductList() {

@@ -20,24 +20,12 @@ public class OrderInfo {
     private OrderStatus status;
     private ZonedDateTime createdAt;
 
-    public OrderInfo(Long id, BigDecimal totalAmount) {
-        this.id = id;
-        this.totalAmount = totalAmount;
-    }
-
-    public OrderInfo(Long id, BigDecimal totalAmount, OrderStatus orderStatus, ZonedDateTime createdAt) {
-        this.id = id;
-        this.totalAmount = totalAmount;
-        this.status = orderStatus;
-        this.createdAt = createdAt;
-    }
-
     public static OrderInfo from(Order order) {
-        return new OrderInfo(order.getId(), order.getTotalAmount());
+        return new OrderInfo(order.getId(), order.getTotalAmount(), order.getDiscountAmount(), order.getPaidAmount(), order.getOrderStatus(), order.getCreatedAt());
     }
 
     public static OrderInfo fromForSearch(Order order) {
-        return new OrderInfo(order.getId(), order.getTotalAmount(), order.getOrderStatus(), order.getCreatedAt());
+        return new OrderInfo(order.getId(), order.getTotalAmount(), order.getDiscountAmount(), order.getPaidAmount(), order.getOrderStatus(), order.getCreatedAt());
     }
 
 }

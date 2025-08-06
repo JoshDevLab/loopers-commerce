@@ -59,11 +59,11 @@ public class Order extends BaseEntity {
         orderItem.setOrder(this);
     }
 
-    public static Order create(User user, OrderCommand.Register orderCommand, BigDecimal totalAmount, BigDecimal discountAmount) {
+    public static Order create(User user, Address address, BigDecimal totalAmount, BigDecimal discountAmount) {
         BigDecimal paidAmount = totalAmount.subtract(discountAmount);
-        if (paidAmount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "총 결제 금액은 0원 이상이어야 합니다.");
+        if (paidAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "총 결제 금액은 최소 1원 이상이어야 합니다.");
         }
-        return new Order(user, orderCommand.getAddress(), paidAmount, totalAmount, discountAmount, OrderStatus.PENDING);
+        return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.PENDING);
     }
 }

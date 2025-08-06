@@ -25,11 +25,6 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
     @Autowired
     PointRepository pointRepository;
 
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
-
     @DisplayName("포인트 조회에 성공할 경우, 보유 포인트를 응답으로 반환한다.")
     @Test
     void successGetPointThenReturnPoint() {

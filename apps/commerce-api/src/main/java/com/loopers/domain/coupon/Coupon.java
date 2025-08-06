@@ -36,7 +36,25 @@ public class Coupon extends BaseEntity {
         return coupon;
     }
 
-    public enum CouponType {
-        FIXED_AMOUNT, RATE
+    public BigDecimal calculateDiscountAmount(BigDecimal totalAmount) {
+        return type.calculateDiscount(totalAmount, discountValue);
     }
+
+    public enum CouponType {
+        RATE {
+            @Override
+            public BigDecimal calculateDiscount(BigDecimal totalAmount, BigDecimal discountValue) {
+                return totalAmount.multiply(discountValue.divide(BigDecimal.valueOf(100)));
+            }
+        },
+        FIXED_AMOUNT {
+            @Override
+            public BigDecimal calculateDiscount(BigDecimal totalAmount, BigDecimal discountValue) {
+                return discountValue;
+            }
+        };
+
+        public abstract BigDecimal calculateDiscount(BigDecimal totalAmount, BigDecimal discountValue);
+    }
+
 }

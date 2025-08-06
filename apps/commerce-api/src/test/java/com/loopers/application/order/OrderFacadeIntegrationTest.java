@@ -278,7 +278,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(result.failedCount()).isEqualTo(1);
     }
 
-    @DisplayName("동일한 유저가 여러 기기에서 동시에 주문해도, 포인트는 단 한번만 차감되어야 한다.")
+    @DisplayName("동일한 유저가 여러 기기에서 동시에 주문해도, 포인트는 정상적으로 차감되어야 한다.")
     @Test
     void raceConditionPointShouldBeDeductedOnce() {
         // Arrange
@@ -302,11 +302,10 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         ConcurrentTestUtils.Result result = ConcurrentTestUtils.runConcurrent(2, () -> orderFacade.order(register, user.getId()));
 
         // Assert
-        assertThat(result.successCount()).isEqualTo(1);
-        assertThat(result.failedCount()).isEqualTo(1);
+        assertThat(result.successCount()).isEqualTo(2);
 
         Point point = pointRepository.findByUserPk(user.getId()).orElseThrow();
-        assertThat(point.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(180000));
+        assertThat(point.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(160000));
     }
 
     @DisplayName("동일한 상품에 대해 여러 기기에서 동시에 주문해도, 재고는 정확히 차감되어야 한다.")

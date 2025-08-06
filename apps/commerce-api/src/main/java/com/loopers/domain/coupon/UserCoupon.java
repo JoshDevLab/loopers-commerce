@@ -67,14 +67,19 @@ public class UserCoupon extends BaseEntity {
         }
     }
 
-    public BigDecimal calculateDiscountAmount(BigDecimal totalAmount) {
-        if (coupon.getType() == Coupon.CouponType.RATE) {
-            return totalAmount.multiply(coupon.getDiscountValue().divide(BigDecimal.valueOf(100)));
-        }
-        return totalAmount.subtract(coupon.getDiscountValue());
-    }
-
     public boolean isExpired() {
         return expiredAt.isBefore(LocalDateTime.now());
     }
+
+    public BigDecimal calculateDiscountAmount(BigDecimal totalAmount) {
+        BigDecimal discountAmount = this.coupon.calculateDiscountAmount(totalAmount);
+
+        if (discountAmount.compareTo(totalAmount) >= 0) {
+            throw new CoreException(ErrorType.INVALID_COUPON, "할인 금액이 결제 금액보다 크거나 같습니다.");
+        }
+
+        return discountAmount;
+    }
+
+
 }

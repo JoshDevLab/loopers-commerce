@@ -13,6 +13,7 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
 
+    @Transactional
     public Inventory getEnoughQuantityInventory(ProductOption productOption, int quantity) {
         Inventory inventory = inventoryRepository.findByProductOptionWithLock(productOption)
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "상품 재고를 찾을 수 없습니다."));

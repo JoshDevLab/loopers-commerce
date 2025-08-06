@@ -25,11 +25,6 @@ public class UserV1ApiE2ETest extends E2ETestSupport {
     @Autowired
     UserRepository userRepository;
 
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
-
     @DisplayName("회원 가입이 성공할 경우, 생성된 유저 정보를 응답으로 반환한다.")
     @Test
     void successSignUpThenReturnUser() {

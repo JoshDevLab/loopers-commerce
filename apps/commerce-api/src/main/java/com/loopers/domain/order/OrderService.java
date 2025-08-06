@@ -19,8 +19,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public Order createOrder(OrderCommand.Register orderRegisterCommand, BigDecimal paidAmount, List<OrderItem> orderItems, User user) {
-        Order order = Order.create(user, orderRegisterCommand, paidAmount);
+    public Order createOrder(User user, List<OrderItem> orderItems, Address address, BigDecimal totalAmount, BigDecimal discountAmount) {
+        Order order = Order.create(user, address, totalAmount, discountAmount);
         orderItems.forEach(order::addOrderItem);
         return orderRepository.save(order);
     }
