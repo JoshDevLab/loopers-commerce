@@ -10,6 +10,7 @@ import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.support.IntegrationTestSupport;
+import com.loopers.support.util.ConcurrentTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -185,5 +188,31 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
 
         Optional<Product> updatedProduct = productRepository.findById(productId);
         assertThat(updatedProduct.get().getLikeCount()).isEqualTo(0);
+    }
+
+    @Test
+    void concurrentLikesShouldNotBreakLikeCount() {
+        // given
+        Brand brand = brandRepository.save(Brand.create("브랜드", "설명", "이미지"));
+        Product product = productRepository.save(Product.create("상품", "설명", BigDecimal.valueOf(10000), ProductCategory.CLOTHING, brand, "img"));
+
+        int threadCount = 10;
+
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < threadCount; i++) {
+            users.add(userRepository.save(User.create("user" + i, "user" + i + "@test.com", "1990-01-01", "MALE")));
+        }
+
+        // when
+        ConcurrentTestUtils.Result result = ConcurrentTestUtils.runConcurrent(threadCount, () -> {
+            User currentUser = users.get((int) (Thread.currentThread().threadId() % threadCount));
+            productFacade.likeProduct(product.getId(), currentUser.getId());
+        });
+
+        // then
+        Product updated = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(updated.getLikeCount()).isEqualTo(threadCount);
+        assertThat(result.successCount()).isEqualTo(threadCount);
+        assertThat(result.failedCount()).isEqualTo(0);
     }
 }
