@@ -6,4 +6,6 @@ public interface PointRepository {
     Point save(Point point);
 
     Optional<Point> findByUserPk(Long userPk);
+
+    Optional<Point> findByUserPkWithLock(Long userPk);
 }

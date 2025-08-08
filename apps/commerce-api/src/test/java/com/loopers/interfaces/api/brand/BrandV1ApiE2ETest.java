@@ -12,7 +12,6 @@ import com.loopers.interfaces.api.product.dto.ProductResponse;
 import com.loopers.support.E2ETestSupport;
 import com.loopers.utils.DatabaseCleanUp;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +39,6 @@ class BrandV1ApiE2ETest extends E2ETestSupport {
 
     @Autowired
     ProductRepository productRepository;
-
-
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
 
     @DisplayName("브랜드 목록을 가져올 수 있다.")
     @Test
