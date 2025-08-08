@@ -4,6 +4,7 @@ import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderCommand;
 import com.loopers.domain.order.OrderCriteria;
 import com.loopers.domain.order.OrderService;
+import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,12 +30,13 @@ public class OrderFacade {
         CouponProcessor.Result couponResult = couponProcessor.process(command.getUserCouponId(), processedItems.totalAmount());
 
         BigDecimal paidAmount = processedItems.totalAmount().subtract(couponResult.discountAmount());
-        pointService.use(userPk, paidAmount);
+        Point point = pointService.use(userPk, paidAmount);
 
         Order order = orderCreator.createOrder(userPk, processedItems.orderItems(), command.getAddress(),
                 processedItems.totalAmount(), couponResult.discountAmount());
 
         orderCreator.saveInventoryHistories(processedItems.inventoryHistories(), order);
+        pointService.createUsingPointHistory(point, paidAmount, order);
 
         if (couponResult.userCoupon() != null) {
             couponProcessor.createUsageHistory(couponResult.userCoupon(), order, couponResult.discountAmount());

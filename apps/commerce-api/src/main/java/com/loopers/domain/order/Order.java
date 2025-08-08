@@ -66,4 +66,8 @@ public class Order extends BaseEntity {
         }
         return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.PENDING);
     }
+
+    public void cancel() {
+        this.orderStatus = OrderStatus.CANCELLED;
+    }
 }

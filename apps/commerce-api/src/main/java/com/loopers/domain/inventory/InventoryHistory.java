@@ -41,7 +41,23 @@ public class InventoryHistory extends BaseEntity {
         this.reason = reason;
     }
 
-    public static InventoryHistory createOrderInventoryHistory(Inventory inventory, int changedQuantity) {
+    private InventoryHistory(Inventory inventory,
+                             Order order,
+                             InventoryHistoryType inventoryHistoryType,
+                             int changedQuantity,
+                             int quantityBefore,
+                             int quantityAfter,
+                             String reason) {
+        this.inventory = inventory;
+        this.order = order;
+        this.inventoryHistoryType = inventoryHistoryType;
+        this.quantityChanged = changedQuantity;
+        this.quantityBefore = quantityBefore;
+        this.quantityAfter = quantityAfter;
+        this.reason = reason;
+    }
+
+    public static InventoryHistory createDecrease(Inventory inventory, int changedQuantity) {
         return new InventoryHistory(
                 inventory,
                 InventoryHistoryType.DECREASE,
@@ -49,6 +65,18 @@ public class InventoryHistory extends BaseEntity {
                 inventory.getQuantity() + changedQuantity,
                 inventory.getQuantity(),
                 "주문"
+        );
+    }
+
+    public static InventoryHistory createCancel(Inventory inventory, Order order, int quantityChanged) {
+        return new InventoryHistory(
+                inventory,
+                order,
+                InventoryHistoryType.ADJUSTMENT,
+                quantityChanged,
+                inventory.getQuantity() - quantityChanged,
+                inventory.getQuantity(),
+                "결제취소로 인한 이력 생성"
         );
     }
 

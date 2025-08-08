@@ -5,6 +5,8 @@ import com.loopers.domain.coupon.CouponHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Repository
 public class CouponHistoryImpl implements CouponHistoryRepository {
@@ -13,5 +15,20 @@ public class CouponHistoryImpl implements CouponHistoryRepository {
     @Override
     public CouponHistory save(CouponHistory history) {
         return couponJpaRepository.save(history);
+    }
+
+    @Override
+    public Optional<CouponHistory> findByOrderId(Long orderId) {
+        return couponJpaRepository.findByOrderId(orderId);
+    }
+
+    @Override
+    public void delete(CouponHistory couponHistory) {
+        couponJpaRepository.delete(couponHistory);
+    }
+
+    @Override
+    public boolean existsByOrderId(Long orderId) {
+        return couponJpaRepository.existsByOrderId(orderId);
     }
 }

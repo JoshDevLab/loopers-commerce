@@ -25,6 +25,7 @@ public enum ErrorType {
     POINT_CHARGING_ERROR(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "0 이하의 정수로 포인트를 충전 시 실패"),
     POINT_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "포인트가 존재하지 않습니다."),
     POINT_USING_ERROR(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "포인트 사용이 실패하였습니다."),
+    POINT_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "포인트 이력을 찾을 수 없습니다."),
     INVALID_PRODUCT_CATEGORY(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "존재하지 않는 상품 카테고리입니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "해당 상품을 찾을 수 없습니다."),
     PRODUCT_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "해당 상품의 옵션을 찾을 수 없습니다."),
@@ -38,7 +39,12 @@ public enum ErrorType {
     EXPIRED_COUPON(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "만료된 쿠폰입니다."),
     INVALID_COUPON(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 쿠폰입니다."),
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "쿠폰을 찾을 수 없습니다."),
-    INVALID_PAID_AMOUNT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "총 결제 금액은 0원 이상이어야 합니다.");
+    INVALID_PAID_AMOUNT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "총 결제 금액은 0원 초과이어야 합니다."),
+    UNSUPPORTED_PAYMENT_TYPE(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "지원하지 않는 결제 수단입니다."),
+    INVENTORY_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "재고 이력을 찾을 수 없습니다."),
+    COUPON_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "쿠폰 이력을 찾을 수 없습니다."),
+    ALREADY_EXIST_ORDER_PAYMENT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "이미 해당 주문의 결제를 완료하였습니다."),
+    PAYMENT_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "외부 결제 서버 오류입니다.");
 
     private final HttpStatus status;
     private final String code;

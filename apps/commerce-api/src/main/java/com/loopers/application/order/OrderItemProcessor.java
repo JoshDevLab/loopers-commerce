@@ -33,7 +33,7 @@ public class OrderItemProcessor {
             Inventory inventory = inventoryService.getEnoughQuantityInventory(option, cmd.getQuantity());
 
             inventoryService.decreaseQuantity(inventory, cmd.getQuantity());
-            histories.add(InventoryHistory.createOrderInventoryHistory(inventory, cmd.getQuantity()));
+            histories.add(InventoryHistory.createDecrease(inventory, cmd.getQuantity()));
             orderItems.add(OrderItem.create(option, cmd.getQuantity()));
 
             totalAmount = totalAmount.add(option.getPrice().multiply(BigDecimal.valueOf(cmd.getQuantity())));

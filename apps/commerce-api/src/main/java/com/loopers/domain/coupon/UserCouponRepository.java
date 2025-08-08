@@ -8,4 +8,6 @@ public interface UserCouponRepository {
     Optional<UserCoupon> findByIdAndUserId(Long id, Long id1);
 
     Optional<UserCoupon> findByIdWithLock(Long userCouponId);
+
+    Optional<UserCoupon> findById(Long id);
 }

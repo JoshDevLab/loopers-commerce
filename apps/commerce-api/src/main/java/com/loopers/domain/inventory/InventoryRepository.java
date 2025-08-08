@@ -10,4 +10,6 @@ public interface InventoryRepository {
     Inventory save(Inventory inventory);
 
     Optional<Inventory> findByProductOptionWithLock(ProductOption productOption);
+
+    Optional<Inventory> findById(Long id);
 }

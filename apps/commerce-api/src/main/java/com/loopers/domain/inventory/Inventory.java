@@ -44,4 +44,8 @@ public class Inventory extends BaseEntity {
         }
         this.quantity -= quantity;
     }
+
+    public void recovery(int quantityChanged) {
+        this.quantity = quantityChanged;
+    }
 }

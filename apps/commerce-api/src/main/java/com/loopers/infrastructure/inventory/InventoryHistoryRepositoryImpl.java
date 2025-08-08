@@ -5,6 +5,8 @@ import com.loopers.domain.inventory.InventoryHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Repository
 public class InventoryHistoryRepositoryImpl implements InventoryHistoryRepository {
@@ -13,5 +15,10 @@ public class InventoryHistoryRepositoryImpl implements InventoryHistoryRepositor
     @Override
     public InventoryHistory save(InventoryHistory inventoryHistory) {
         return inventoryHistoryJpaRepository.save(inventoryHistory);
+    }
+
+    @Override
+    public Optional<InventoryHistory> findByOrderId(Long orderId) {
+        return inventoryHistoryJpaRepository.findByOrderId(orderId);
     }
 }

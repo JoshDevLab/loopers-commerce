@@ -31,4 +31,19 @@ public class InventoryService {
         inventoryHistoryRepository.save(inventoryHistory);
     }
 
+    @Transactional
+    public void recovery(Long orderId) {
+        InventoryHistory inventoryHistory = inventoryHistoryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.INVENTORY_HISTORY_NOT_FOUND, "재고 이력을 찾을 수 없습니다."));
+
+        Inventory inventory = inventoryRepository.findById(inventoryHistory.getInventory().getId())
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "재고 이력을 찾을 수 없습니다."));
+
+        inventory.recovery(inventoryHistory.getQuantityChanged());
+
+        InventoryHistory history = InventoryHistory.createCancel(inventoryHistory.getInventory(),
+                inventoryHistory.getOrder(),
+                inventoryHistory.getQuantityChanged());
+        inventoryHistoryRepository.save(history);
+    }
 }

@@ -1,0 +1,62 @@
+package com.loopers.domain.payment;
+
+import com.loopers.domain.BaseEntity;
+import com.loopers.domain.order.Order;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "payment")
+public class Payment extends BaseEntity {
+    @Enumerated(EnumType.STRING)
+    private PaymentType type;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
+
+    private BigDecimal paidAmount;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Order order;
+
+    public static Payment create(PaymentType paymentType, PaymentStatus paymentStatus, BigDecimal paidAmount, Order order) {
+        Payment payment = new Payment();
+        payment.type = paymentType;
+        payment.status = paymentStatus;
+        payment.paidAmount = paidAmount;
+        payment.order = order;
+        return payment;
+    }
+
+    public enum PaymentType {
+        CARD,
+        BANK_TRANSFER,      // 무통장입금 (계좌이체)
+        NAVER_PAY,          // 네이버페이
+        KAKAO_PAY;           // 카카오페이
+
+        public static PaymentType valueOfName(String name) {
+            String upperCaseName = name.toUpperCase();
+            try {
+                return PaymentType.valueOf(upperCaseName);
+            } catch (IllegalArgumentException e) {
+                throw new CoreException(ErrorType.UNSUPPORTED_PAYMENT_TYPE, "지원하지 않는 PAYMENT_TYPE : " + name);
+            }
+        }
+    }
+
+
+    public enum PaymentStatus {
+        PENDING,
+        SUCCESS,
+        FAILED,
+        CANCELED
+    }
+}
