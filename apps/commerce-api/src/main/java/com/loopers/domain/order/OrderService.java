@@ -19,8 +19,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public Order createOrder(OrderCommand.Register orderRegisterCommand, BigDecimal paidAmount, List<OrderItem> orderItems, User user) {
-        Order order = Order.create(user, orderRegisterCommand, paidAmount);
+    public Order createOrder(User user, List<OrderItem> orderItems, Address address, BigDecimal totalAmount, BigDecimal discountAmount) {
+        Order order = Order.create(user, address, totalAmount, discountAmount);
         orderItems.forEach(order::addOrderItem);
         return orderRepository.save(order);
     }
@@ -30,7 +30,19 @@ public class OrderService {
     }
 
     public Order getOrderById(Long orderId) {
-        return orderRepository.findByIdWithAll(orderId).orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND, "주문을 찾을 수 없습니다."));
+        return orderRepository.findById(orderId).orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND, "주문을 찾을 수 없습니다."));
     }
 
+    @Transactional
+    public void cancel(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND, "주문을 찾을 수 없습니다."));
+        order.cancel();
+    }
+
+    @Transactional
+    public Order findByIdForUpdate(Long orderId) {
+        return orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND, "주문을 찾을 수 없습니다."));
+    }
 }

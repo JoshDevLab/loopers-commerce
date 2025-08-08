@@ -10,5 +10,7 @@ public interface OrderRepository {
 
     Page<Order> findAllByCriteriaAndUserPk(OrderCriteria criteria, Long userPk, Pageable pageable);
 
-    Optional<Order> findByIdWithAll(Long orderId);
+    Optional<Order> findById(Long orderId);
+
+    Optional<Order> findByIdWithLock(Long orderId);
 }

@@ -13,8 +13,9 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
 
-    public Inventory hasEnoughQuantity(ProductOption productOption, int quantity) {
-        Inventory inventory = inventoryRepository.findByProductOption(productOption)
+    @Transactional
+    public Inventory getEnoughQuantityInventory(ProductOption productOption, int quantity) {
+        Inventory inventory = inventoryRepository.findByProductOptionWithLock(productOption)
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "상품 재고를 찾을 수 없습니다."));
         inventory.hasEnoughQuantity(quantity);
         return inventory;
@@ -25,4 +26,24 @@ public class InventoryService {
         inventory.decreaseQuantity(quantity);
     }
 
+    @Transactional
+    public void createInventoryHistory(InventoryHistory inventoryHistory) {
+        inventoryHistoryRepository.save(inventoryHistory);
+    }
+
+    @Transactional
+    public void recovery(Long orderId) {
+        InventoryHistory inventoryHistory = inventoryHistoryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.INVENTORY_HISTORY_NOT_FOUND, "재고 이력을 찾을 수 없습니다."));
+
+        Inventory inventory = inventoryRepository.findById(inventoryHistory.getInventory().getId())
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "재고 이력을 찾을 수 없습니다."));
+
+        inventory.recovery(inventoryHistory.getQuantityChanged());
+
+        InventoryHistory history = InventoryHistory.createCancel(inventoryHistory.getInventory(),
+                inventoryHistory.getOrder(),
+                inventoryHistory.getQuantityChanged());
+        inventoryHistoryRepository.save(history);
+    }
 }

@@ -70,8 +70,8 @@ public class ProductServiceIntegrationTest extends IntegrationTestSupport {
                         Product::getProductStatus
                 )
                 .containsExactlyInAnyOrder(
-                        tuple("셔츠1", "상품 설명 1", BigDecimal.valueOf(10000), ProductCategory.CLOTHING, "Brand1", ProductStatus.ON_SALE),
-                        tuple("셔츠2", "상품 설명 2", BigDecimal.valueOf(20000), ProductCategory.CLOTHING, "Brand1", ProductStatus.ON_SALE)
+                        tuple("셔츠1", "상품 설명 1", BigDecimal.valueOf(10000).setScale(2), ProductCategory.CLOTHING, "Brand1", ProductStatus.ON_SALE),
+                        tuple("셔츠2", "상품 설명 2", BigDecimal.valueOf(20000).setScale(2), ProductCategory.CLOTHING, "Brand1", ProductStatus.ON_SALE)
 
                 );
     }

@@ -5,6 +5,8 @@ import com.loopers.domain.point.PointHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Repository
 public class PointHistoryRepositoryImpl implements PointHistoryRepository {
@@ -18,6 +20,16 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
     @Override
     public boolean existsByUserId(Long userPk) {
         return pointHistoryJpaRepository.existsByUserPk(userPk);
+    }
+
+    @Override
+    public Optional<PointHistory> findByOrderId(Long orderId) {
+        return pointHistoryJpaRepository.findByOrderId(orderId);
+    }
+
+    @Override
+    public void delete(PointHistory pointHistory) {
+        pointHistoryJpaRepository.delete(pointHistory);
     }
 
 }

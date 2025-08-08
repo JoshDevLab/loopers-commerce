@@ -14,7 +14,6 @@ import com.loopers.interfaces.api.product.dto.ProductResponse;
 import com.loopers.support.E2ETestSupport;
 import com.loopers.support.fixture.brand.BrandFixture;
 import com.loopers.support.fixture.product.ProductFixture;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +48,6 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
 
     @Autowired
     ProductLikeRepository productLikeRepository;
-
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
 
     @DisplayName("상품목록 조회 API 테스트")
     @Test

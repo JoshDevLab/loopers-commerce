@@ -14,6 +14,7 @@ public class OrderCommand {
     public static class Register {
         private List<OrderItemCommand> orderItemCommands;
         private Address address;
+        private Long userCouponId;
     }
 
     @Getter

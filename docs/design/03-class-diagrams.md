@@ -83,12 +83,14 @@ classDiagram
         +User user
         +Date orderDate
         +Address shippingAddress
-        +BigDecimal totalAmount
-        +BigDecimal usedPoints
+        +BigDecimal totalAmount         
+        +BigDecimal discountAmount      
+        +BigDecimal usedPoints          
         +List<OrderItem> orderItems
-        +OrderStatus status # 예: 주문완료, 배송중 등
+        +OrderStatus status
         +boolean isOwnedBy(String userId)
         +BigDecimal calculateTotalAmount()
+        +BigDecimal calculateToPayAmount()
     }
 
     class OrderStatus {
@@ -177,6 +179,40 @@ classDiagram
         EXPIRE        // 소멸
     }
 
+    class Coupon {
+        +Long id
+        +String name
+        +CouponType type
+        +BigDecimal discountValue
+        +LocalDateTime issuedAt
+        +LocalDateTime expireAt
+        +boolean isExpired()
+    }
+
+    class CouponType {
+        <<enum>>
+        FIXED_AMOUNT  // 정액 할인
+        RATE          // 정률 할인
+    }
+
+    class UserCoupon {
+        +Long id
+        +User user
+        +Coupon coupon
+        +boolean used
+        +LocalDateTime usedAt
+        +boolean isUsable()
+    }
+
+    class CouponHistory {
+        +Long id
+        +User user
+        +Coupon coupon
+        +Order order
+        +BigDecimal discountAmount
+        +LocalDateTime usedAt
+    }
+
     Product "1" -- "0..*" ProductOption : 옵션을 가진다
     Product "1" -- "0..*" Like : 좋아요 대상이 된다
     Brand "1" -- "0..*" Product : 상품을 제공한다
@@ -190,4 +226,9 @@ classDiagram
     ProductOption "1" --> "1" Inventory
     Inventory "1" --> "0..*" InventoryHistory
     Point "1" -- "0..*" PointHistory : 포인트 이력을 관리한다
+    User "1" -- "0..*" UserCoupon : 보유 쿠폰
+    Coupon "1" -- "0..*" UserCoupon : 사용자에게 발급됨
+    User "1" -- "0..*" CouponHistory : 쿠폰 사용 기록
+    Coupon "1" -- "0..*" CouponHistory : 사용 이력 보유
+    Order "1" -- "0..1" CouponHistory : 쿠폰 사용 기록 포함 가능
 ```

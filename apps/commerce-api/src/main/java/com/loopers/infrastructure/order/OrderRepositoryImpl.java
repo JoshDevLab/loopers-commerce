@@ -53,8 +53,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findByIdWithAll(Long orderId) {
-        return orderJpaRepository.findByIdWithAll(orderId);
+    public Optional<Order> findById(Long orderId) {
+        return orderJpaRepository.findByIdWithFetch(orderId);
+    }
+
+    @Override
+    public Optional<Order> findByIdWithLock(Long orderId) {
+        return orderJpaRepository.findByIdWithLock(orderId);
     }
 
     private OrderSpecifier<?> ordersOrderBy(OrderCriteria criteria) {

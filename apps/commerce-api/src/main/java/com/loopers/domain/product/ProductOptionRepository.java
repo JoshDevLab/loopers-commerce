@@ -9,4 +9,6 @@ public interface ProductOptionRepository {
     List<ProductOption> findByProductId(Long productId);
 
     Optional<ProductOption> findById(Long productOptionId);
+
+    Optional<ProductOption> findByIdWithLock(Long productOptionId);
 }

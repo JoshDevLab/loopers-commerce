@@ -46,7 +46,7 @@ public class ProductFacade {
 
     @Transactional
     public ProductLikedInfo likeProduct(Long productId, Long userPk) {
-        Product product = productService.getProductById(productId);
+        Product product = productService.getProductByIdWithLock(productId);
         User user = userService.getMyInfoByUserPk(userPk);
         productLikeService.like(product, user);
         return new ProductLikedInfo(true, product.getLikeCount());
@@ -54,7 +54,7 @@ public class ProductFacade {
 
     @Transactional
     public ProductLikedInfo unLikeProduct(Long productId, Long userPk) {
-        Product product = productService.getProductById(productId);
+        Product product = productService.getProductByIdWithLock(productId);
         User user = userService.getMyInfoByUserPk(userPk);
         productLikeService.unLike(product, user);
         return new ProductLikedInfo(false, product.getLikeCount());

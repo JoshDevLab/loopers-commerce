@@ -18,7 +18,7 @@ class PointHistoryTest {
         PointHistoryType type = PointHistoryType.CHARGE;
 
         // when
-        PointHistory result = PointHistory.create(userPk, point, type);
+        PointHistory result = PointHistory.createChargingHistory(userPk, point, type);
 
         // then
         assertThat(result.getUserPk()).isEqualTo(userPk);

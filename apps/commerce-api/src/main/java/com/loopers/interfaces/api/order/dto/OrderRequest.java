@@ -8,14 +8,15 @@ import java.util.List;
 
 public record OrderRequest(
         List<OrderItemRequest> orderItemRequests,
-        AddressRequest addressRequest
+        AddressRequest addressRequest,
+        Long userCouponId
 ) {
     public OrderCommand.Register toRegisterCommand() {
         List<OrderCommand.OrderItemCommand> orderItemCommands = orderItemRequests.stream()
                 .sorted(Comparator.comparing(OrderItemRequest::productOptionId))
                 .map(OrderItemRequest::toCommand)
                 .toList();
-        return new OrderCommand.Register(orderItemCommands, addressRequest.to());
+        return new OrderCommand.Register(orderItemCommands, addressRequest.to(), userCouponId);
     }
 
     public record OrderItemRequest(

@@ -49,4 +49,8 @@ public class Point extends BaseEntity {
         }
         this.pointBalance = this.pointBalance.subtract(paidAmount);
     }
+
+    public void recovery(BigDecimal usedPoint) {
+        this.pointBalance = this.pointBalance.add(usedPoint);
+    }
 }

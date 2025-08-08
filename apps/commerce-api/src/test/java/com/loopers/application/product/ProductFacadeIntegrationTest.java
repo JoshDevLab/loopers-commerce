@@ -10,6 +10,7 @@ import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.support.IntegrationTestSupport;
+import com.loopers.support.util.ConcurrentTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,7 +92,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
                 ProductInfo::getBasicPrice,
                 ProductInfo::getProductStatus
         ).containsExactlyInAnyOrder(
-                tuple("셔츠1", "상품 설명 1", "CLOTHING", "Brand1", BigDecimal.valueOf(10000), ProductStatus.ON_SALE)
+                tuple("셔츠1", "상품 설명 1", "CLOTHING", "Brand1", BigDecimal.valueOf(10000).setScale(2), ProductStatus.ON_SALE)
         );
     }
 
@@ -118,10 +121,10 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
 
         productLikeRepository.save(ProductLike.create(product, user));
 
-        // when
+        // Act
         ProductInfo result = productFacade.getProductDetail(product.getId(), userInfo);
 
-        // then
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getLiked()).isTrue();
     }
@@ -130,7 +133,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
     @DisplayName("같은 유저가 같은 상품에 여러 번 좋아요 요청을 보내도 한 번만 반영되어야 한다")
     @Test
     void likeProduct_isIdempotent() {
-        // given
+        // Arrange
         Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
         Product product = productRepository.save(Product.create(
                 "셔츠1", "상품 설명 1", BigDecimal.valueOf(10000),
@@ -142,12 +145,12 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         Long productId = product.getId();
         Long userPk = user.getId();
 
-        // when
+        // Act
         ProductLikedInfo firstLike = productFacade.likeProduct(productId, userPk);
         ProductLikedInfo secondLike = productFacade.likeProduct(productId, userPk);
         ProductLikedInfo thirdLike = productFacade.likeProduct(productId, userPk);
 
-        // then
+        // Assert
         assertThat(firstLike.isLiked()).isTrue();
         assertThat(secondLike.isLiked()).isTrue();
         assertThat(thirdLike.isLiked()).isTrue();
@@ -182,8 +185,34 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(secondLike.isLiked()).isFalse();
         assertThat(thirdLike.isLiked()).isFalse();
 
-        // 좋아요 수는 한 번만 증가해야 함
+
         Optional<Product> updatedProduct = productRepository.findById(productId);
         assertThat(updatedProduct.get().getLikeCount()).isEqualTo(0);
+    }
+
+    @Test
+    void concurrentLikesShouldNotBreakLikeCount() {
+        // given
+        Brand brand = brandRepository.save(Brand.create("브랜드", "설명", "이미지"));
+        Product product = productRepository.save(Product.create("상품", "설명", BigDecimal.valueOf(10000), ProductCategory.CLOTHING, brand, "img"));
+
+        int threadCount = 10;
+
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < threadCount; i++) {
+            users.add(userRepository.save(User.create("user" + i, "user" + i + "@test.com", "1990-01-01", "MALE")));
+        }
+
+        // when
+        ConcurrentTestUtils.Result result = ConcurrentTestUtils.runConcurrent(threadCount, () -> {
+            User currentUser = users.get((int) (Thread.currentThread().threadId() % threadCount));
+            productFacade.likeProduct(product.getId(), currentUser.getId());
+        });
+
+        // then
+        Product updated = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(updated.getLikeCount()).isEqualTo(threadCount);
+        assertThat(result.successCount()).isEqualTo(threadCount);
+        assertThat(result.failedCount()).isEqualTo(0);
     }
 }
