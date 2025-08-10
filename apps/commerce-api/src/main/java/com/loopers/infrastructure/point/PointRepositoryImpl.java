@@ -22,4 +22,9 @@ public class PointRepositoryImpl implements PointRepository {
         return pointJpaRepository.findByUserPk(userPk);
     }
 
+    @Override
+    public Optional<Point> findByUserPkWithLock(Long userPk) {
+        return pointJpaRepository.findByUserPkWithLock(userPk);
+    }
+
 }

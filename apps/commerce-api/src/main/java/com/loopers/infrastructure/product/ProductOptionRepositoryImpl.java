@@ -28,4 +28,9 @@ public class ProductOptionRepositoryImpl implements ProductOptionRepository {
     public Optional<ProductOption> findById(Long productOptionId) {
         return productOptionJpaRepository.findById(productOptionId);
     }
+
+    @Override
+    public Optional<ProductOption> findByIdWithLock(Long productOptionId) {
+        return productOptionJpaRepository.findByIdWithLock(productOptionId);
+    }
 }

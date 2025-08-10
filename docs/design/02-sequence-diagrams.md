@@ -202,10 +202,12 @@ sequenceDiagram
     participant OrderFacade
     participant ProductService
     participant InventoryService
+    participant CouponService
     participant PointService
     participant OrderService
+    participant CouponHistoryService
 
-    User->>OrderController: POST /orders (X-USER-ID 포함)
+    User->>OrderController: POST /orders (X-USER-ID 포함 + couponId 선택 가능)
     alt X-USER-ID 누락
         OrderController-->>User: 401 Unauthorized
     else
@@ -223,7 +225,22 @@ sequenceDiagram
             else 재고 충분
                 OrderFacade->>InventoryService: 재고 차감 요청
                 InventoryService-->>OrderFacade: 재고 차감 완료
-                OrderFacade->>InventoryService: 재고 차감 내역 저장                
+                OrderFacade->>InventoryService: 재고 차감 내역 저장
+            end
+        end
+
+        alt couponId 포함된 경우
+            OrderFacade->>CouponService: 쿠폰 조회 및 검증
+            alt 쿠폰 유효하지 않음
+                CouponService--xOrderFacade: CoreException(INVALID_COUPON)
+                OrderFacade--xOrderController: 예외 전달
+                OrderController-->>User: 400 Bad Request
+            else
+                OrderFacade->>CouponService: 할인 금액 계산
+                CouponService-->>OrderFacade: 할인 금액 반환
+            end
+        else
+            Note over OrderFacade: 할인 없음
         end
 
         OrderFacade->>PointService: 포인트 사용 가능 여부 확인
@@ -232,19 +249,24 @@ sequenceDiagram
             OrderFacade--xOrderController: 예외 전달
             OrderController-->>User: 400 Bad Request
         else 포인트 사용 가능
-            OrderFacade->>PointService: 포인트 차감 요청 (사용할 포인트)
+            OrderFacade->>PointService: 포인트 차감 요청
             PointService-->>OrderFacade: 포인트 차감 완료
             OrderFacade->>PointService: 포인트 차감 내역 저장
         end
 
-        OrderFacade->>OrderService: 주문 저장 (상태: PENDING)
+        OrderFacade->>OrderService: 주문 저장 (상태: PENDING, 쿠폰 할인 적용된 금액 포함)
         OrderService-->>OrderFacade: 저장 완료
 
-        OrderFacade-->>OrderController: HTTP 201 Created + orderId, toPayAmount 응답
-        OrderController-->>User: 201 Created
+        alt coupon 사용한 경우
+            OrderFacade->>CouponService: 쿠폰 사용 처리 (used = true)
+            OrderFacade->>CouponHistoryService: 쿠폰 사용 이력 저장 (userId, couponId, orderId, usedAt)
+            CouponHistoryService-->>OrderFacade: 저장 완료
         end
+
+        OrderFacade-->>OrderController: HTTP 201 Created + orderId, toPayAmount
+        OrderController-->>User: 201 Created
     end
-```    
+```
 
 ## 5-2) 주문 목록 조회
 ```mermaid

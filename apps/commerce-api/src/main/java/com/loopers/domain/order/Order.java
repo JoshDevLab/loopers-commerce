@@ -2,6 +2,8 @@ package com.loopers.domain.order;
 
 import com.loopers.domain.BaseEntity;
 import com.loopers.domain.user.User;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,7 +25,13 @@ public class Order extends BaseEntity {
     @Embedded
     private Address shippingAddress;
 
+    private BigDecimal paidAmount;
+
     private BigDecimal totalAmount;
+    
+    private BigDecimal discountAmount;
+
+    private BigDecimal usedPointAmount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
@@ -31,11 +39,28 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    public Order(User user, Address shippingAddress, BigDecimal paidAmount, OrderStatus orderStatus) {
+    public Order(User user, Address shippingAddress, BigDecimal paidAmount, BigDecimal discountAmount, OrderStatus orderStatus) {
         this.user = user;
         this.shippingAddress = shippingAddress;
         this.totalAmount = paidAmount;
+        this.discountAmount = discountAmount;
         this.orderStatus = orderStatus;
+    }
+
+    public Order(User user,
+                 Address address,
+                 BigDecimal paidAmount,
+                 BigDecimal totalAmount,
+                 BigDecimal discountAmount,
+                 OrderStatus orderStatus,
+                 BigDecimal usedPointAmount) {
+        this.user = user;
+        this.shippingAddress = address;
+        this.paidAmount = paidAmount;
+        this.totalAmount = totalAmount;
+        this.discountAmount = discountAmount;
+        this.orderStatus = orderStatus;
+        this.usedPointAmount = usedPointAmount;
     }
 
     public void addOrderItem(OrderItem orderItem) {
@@ -43,7 +68,22 @@ public class Order extends BaseEntity {
         orderItem.setOrder(this);
     }
 
-    public static Order create(User user, OrderCommand.Register orderCommand, BigDecimal paidAmount) {
-        return new Order(user, orderCommand.getAddress(), paidAmount,  OrderStatus.PENDING);
+    public static Order create(User user, Address address, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal usedPoint) {
+        BigDecimal paidAmount = totalAmount.subtract(usedPoint.add(discountAmount));
+        if (paidAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "총 결제 금액은 최소 0원 이상이어야 합니다.");
+        }
+        if (paidAmount.compareTo(BigDecimal.ZERO) == 0) {
+            return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.COMPLETED, usedPoint);
+        }
+        return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.PENDING, usedPoint);
+    }
+
+    public void cancel() {
+        this.orderStatus = OrderStatus.CANCELLED;
+    }
+
+    public void complete() {
+        this.orderStatus = OrderStatus.COMPLETED;
     }
 }

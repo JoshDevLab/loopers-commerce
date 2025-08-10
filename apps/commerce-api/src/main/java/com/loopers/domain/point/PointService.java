@@ -1,5 +1,6 @@
 package com.loopers.domain.point;
 
+import com.loopers.domain.order.Order;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +31,35 @@ public class PointService {
 
     @Transactional
     public Point charge(Long userPk, BigDecimal chargePoint) {
-        Point point = pointRepository.findByUserPk(userPk)
+        Point point = pointRepository.findByUserPkWithLock(userPk)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.charge(chargePoint);
-        pointHistoryRepository.save(PointHistory.create(point.getUserPk(), chargePoint, PointHistoryType.CHARGE));
+        pointHistoryRepository.save(PointHistory.createChargingHistory(point.getUserPk(), chargePoint, PointHistoryType.CHARGE));
         return point;
     }
 
     @Transactional
-    public void use(Long userPk, BigDecimal paidAmount) {
-        Point point = pointRepository.findByUserPk(userPk)
+    public Point use(Long userPk, BigDecimal paidAmount) {
+        Point point = pointRepository.findByUserPkWithLock(userPk)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.use(paidAmount);
-        pointHistoryRepository.save(PointHistory.create(point.getUserPk(), paidAmount, PointHistoryType.USE));
+        return point;
+    }
+
+    @Transactional
+    public void createUsingPointHistory(Point point, BigDecimal paidAmount, Order order) {
+        pointHistoryRepository.save(PointHistory.createUsingHistory(point.getUserPk(), paidAmount, PointHistoryType.USE, order));
+    }
+
+    public void recovery(Long orderId) {
+        PointHistory pointHistory = pointHistoryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.POINT_HISTORY_NOT_FOUND));
+
+        Point point = pointRepository.findByUserPk(pointHistory.getUserPk())
+                .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND));
+
+        point.recovery(pointHistory.getPoint());
+
+        pointHistoryRepository.delete(pointHistory);
     }
 }

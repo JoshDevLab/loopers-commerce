@@ -6,7 +6,6 @@ import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.support.E2ETestSupport;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +23,6 @@ public class PointV1ApiE2ETest extends E2ETestSupport {
 
     @Autowired
     PointRepository pointRepository;
-
-    @BeforeEach
-    void tearDown() {
-        databaseCleanUp.truncateAllTables();
-    }
 
     @DisplayName("포인트 조회에 성공할 경우, 보유 포인트를 응답으로 반환한다.")
     @Test

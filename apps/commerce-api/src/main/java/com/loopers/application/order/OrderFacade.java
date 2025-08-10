@@ -1,14 +1,11 @@
 package com.loopers.application.order;
 
-import com.loopers.domain.inventory.Inventory;
-import com.loopers.domain.inventory.InventoryHistory;
-import com.loopers.domain.inventory.InventoryService;
-import com.loopers.domain.order.*;
+import com.loopers.domain.order.Order;
+import com.loopers.domain.order.OrderCommand;
+import com.loopers.domain.order.OrderCriteria;
+import com.loopers.domain.order.OrderService;
+import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointService;
-import com.loopers.domain.product.ProductOption;
-import com.loopers.domain.product.ProductOptionService;
-import com.loopers.domain.user.User;
-import com.loopers.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,44 +13,45 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Component
 public class OrderFacade {
     private final OrderService orderService;
-    private final ProductOptionService productOptionService;
-    private final InventoryService inventoryService;
     private final PointService pointService;
-    private final UserService userService;
+    private final OrderItemProcessor orderItemProcessor;
+    private final CouponProcessor couponProcessor;
+    private final OrderCreator orderCreator;
 
     @Transactional
-    public OrderInfo order(OrderCommand.Register orderRegisterCommand, Long userPk) {
-        BigDecimal paidAmount = BigDecimal.ZERO;
-        List<InventoryHistory> inventoryHistories = new ArrayList<>();
-        List<OrderItem> orderItems = new ArrayList<>();
+    public OrderInfo order(OrderCommand.Register command, Long userPk) {
+        Point point = null;
+        OrderItemProcessor.Result processedItems = orderItemProcessor.process(command.getOrderItemCommands());
 
-        for (OrderCommand.OrderItemCommand orderItemCommand : orderRegisterCommand.getOrderItemCommands()) {
-            ProductOption productOption = productOptionService.isOnSales(orderItemCommand.getProductOptionId());
+        CouponProcessor.Result couponResult = couponProcessor.process(command.getUserCouponId(), processedItems.totalAmount());
 
-            Inventory inventory = inventoryService.hasEnoughQuantity(productOption, orderItemCommand.getQuantity());
-            inventoryHistories.add(InventoryHistory.createOrderHistory(inventory, orderItemCommand.getQuantity()));
-            inventoryService.decreaseQuantity(inventory, orderItemCommand.getQuantity());
+        BigDecimal paidAmount = processedItems.totalAmount().subtract(couponResult.discountAmount());
 
-            orderItems.add(OrderItem.create(productOption, orderItemCommand.getQuantity()));
-
-            paidAmount = paidAmount.add(productOption.getPrice().multiply(BigDecimal.valueOf(orderItemCommand.getQuantity())));
+        if (command.getUsedPoint().compareTo(BigDecimal.ZERO) > 0) {
+            point = pointService.use(userPk, paidAmount);
         }
 
-        pointService.use(userPk, paidAmount);
+        Order order = orderCreator.createOrder(userPk, processedItems.orderItems(), command.getAddress(),
+                processedItems.totalAmount(), couponResult.discountAmount(), command.getUsedPoint());
 
-        User user = userService.getMyInfoByUserPk(userPk);
-        Order order = orderService.createOrder(orderRegisterCommand, paidAmount, orderItems, user);
+        orderCreator.saveInventoryHistories(processedItems.inventoryHistories(), order);
 
-        inventoryHistories.forEach(inventoryHistory -> inventoryHistory.setOrder(order));
+        if (command.getUsedPoint().compareTo(BigDecimal.ZERO) > 0) {
+            pointService.createUsingPointHistory(point, paidAmount, order);
+        }
+
+        if (couponResult.userCoupon() != null) {
+            couponProcessor.createUsageHistory(couponResult.userCoupon(), order, couponResult.discountAmount());
+        }
+
         return OrderInfo.from(order);
     }
+
 
     public Page<OrderInfo> getOrdersWithCondition(OrderCriteria criteria, Long userPk, Pageable pageable) {
         return orderService.getOrdersWithCondition(criteria, userPk, pageable).map(OrderInfo::fromForSearch);
@@ -63,4 +61,6 @@ public class OrderFacade {
         Order order = orderService.getOrderById(orderId);
         return OrderDetailInfo.from(order, order.getOrderItems());
     }
+
+
 }
