@@ -91,14 +91,17 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
                 new OrderCommand.OrderItemCommand(productOption1.getId(), 2),
                 new OrderCommand.OrderItemCommand(productOption2.getId(), 1)
         );
-        OrderCommand.Register register = new OrderCommand.Register(itemCommands, new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"), null);
+        OrderCommand.Register register = new OrderCommand.Register(itemCommands,
+                new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                null,
+                BigDecimal.valueOf(1000));
 
         // Act
         OrderInfo result = orderFacade.order(register, user.getId());
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(50000));
+        assertThat(result.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(49000));
 
         Order savedOrder = orderRepository.findAll().getFirst(); // 테스트라면 1건만 저장되었을 것이므로
 
@@ -106,6 +109,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(savedOrder.getUser().getId()).isEqualTo(user.getId());
         assertThat(savedOrder.getOrderItems()).hasSize(2);
         assertThat(savedOrder.getOrderStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(savedOrder.getDiscountAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(savedOrder.getUsedPointAmount()).isEqualByComparingTo("1000");
 
         assertThat(savedOrder.getShippingAddress()).isNotNull();
         assertThat(savedOrder.getShippingAddress().getZipcode()).isEqualTo("zipcode");
@@ -159,7 +164,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.ZERO);
 
         // Act
         OrderInfo result = orderFacade.order(register, user.getId());
@@ -200,7 +206,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.ZERO);
 
         // Act
         OrderInfo result = orderFacade.order(register, user.getId());
@@ -241,7 +248,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.ZERO);
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -270,7 +278,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.ZERO);
 
         // Act
         ConcurrentTestUtils.Result result = ConcurrentTestUtils.runConcurrent(2, () -> orderFacade.order(register, user.getId()));
@@ -295,7 +304,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                null // 쿠폰 없이 포인트만 사용하는 테스트
+                null, // 쿠폰 없이 포인트만 사용하는 테스트
+                BigDecimal.valueOf(4000)
         );
 
         // Act
@@ -328,7 +338,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         OrderCommand.Register register = new OrderCommand.Register(
                 itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                null // 쿠폰 없음
+                null, // 쿠폰 없음
+                BigDecimal.valueOf(1000)
         );
 
         // Act
@@ -360,7 +371,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                999L); // 존재하지 않는 쿠폰 ID
+                999L,
+                BigDecimal.ZERO); // 존재하지 않는 쿠폰 ID
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -390,7 +402,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.ZERO);
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -418,7 +431,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.ZERO);
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -443,7 +457,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                null);
+                null,
+                BigDecimal.ZERO);
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -468,7 +483,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                null);
+                null,
+                BigDecimal.ZERO);
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -493,7 +509,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                null);
+                null,
+                BigDecimal.valueOf(10000));
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))
@@ -522,7 +539,8 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         );
         OrderCommand.Register register = new OrderCommand.Register(itemCommands,
                 new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
-                userCoupon.getId());
+                userCoupon.getId(),
+                BigDecimal.valueOf(11000));
 
         // Act & Assert
         assertThatThrownBy(() -> orderFacade.order(register, user.getId()))

@@ -3,20 +3,22 @@ package com.loopers.interfaces.api.order.dto;
 import com.loopers.domain.order.Address;
 import com.loopers.domain.order.OrderCommand;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 
 public record OrderRequest(
         List<OrderItemRequest> orderItemRequests,
         AddressRequest addressRequest,
-        Long userCouponId
+        Long userCouponId,
+        BigDecimal usedPoint
 ) {
     public OrderCommand.Register toRegisterCommand() {
         List<OrderCommand.OrderItemCommand> orderItemCommands = orderItemRequests.stream()
                 .sorted(Comparator.comparing(OrderItemRequest::productOptionId))
                 .map(OrderItemRequest::toCommand)
                 .toList();
-        return new OrderCommand.Register(orderItemCommands, addressRequest.to(), userCouponId);
+        return new OrderCommand.Register(orderItemCommands, addressRequest.to(), userCouponId, usedPoint);
     }
 
     public record OrderItemRequest(

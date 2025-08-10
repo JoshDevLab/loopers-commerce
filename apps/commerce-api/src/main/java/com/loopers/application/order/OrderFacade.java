@@ -25,18 +25,25 @@ public class OrderFacade {
 
     @Transactional
     public OrderInfo order(OrderCommand.Register command, Long userPk) {
+        Point point = null;
         OrderItemProcessor.Result processedItems = orderItemProcessor.process(command.getOrderItemCommands());
 
         CouponProcessor.Result couponResult = couponProcessor.process(command.getUserCouponId(), processedItems.totalAmount());
 
         BigDecimal paidAmount = processedItems.totalAmount().subtract(couponResult.discountAmount());
-        Point point = pointService.use(userPk, paidAmount);
+
+        if (command.getUsedPoint().compareTo(BigDecimal.ZERO) > 0) {
+            point = pointService.use(userPk, paidAmount);
+        }
 
         Order order = orderCreator.createOrder(userPk, processedItems.orderItems(), command.getAddress(),
-                processedItems.totalAmount(), couponResult.discountAmount());
+                processedItems.totalAmount(), couponResult.discountAmount(), command.getUsedPoint());
 
         orderCreator.saveInventoryHistories(processedItems.inventoryHistories(), order);
-        pointService.createUsingPointHistory(point, paidAmount, order);
+
+        if (command.getUsedPoint().compareTo(BigDecimal.ZERO) > 0) {
+            pointService.createUsingPointHistory(point, paidAmount, order);
+        }
 
         if (couponResult.userCoupon() != null) {
             couponProcessor.createUsageHistory(couponResult.userCoupon(), order, couponResult.discountAmount());
@@ -54,4 +61,6 @@ public class OrderFacade {
         Order order = orderService.getOrderById(orderId);
         return OrderDetailInfo.from(order, order.getOrderItems());
     }
+
+
 }

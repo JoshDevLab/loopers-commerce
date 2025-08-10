@@ -30,9 +30,10 @@ class OrderTest {
         // Arrange
         BigDecimal totalAmount = new BigDecimal("10000");
         BigDecimal discountAmount = new BigDecimal("2000");
+        BigDecimal usedPoint = new BigDecimal("3000");
 
         // Act
-        Order order = Order.create(user, address, totalAmount, discountAmount);
+        Order order = Order.create(user, address, totalAmount, discountAmount, usedPoint);
 
         // Assert
         assertThat(order).isNotNull();
@@ -40,7 +41,7 @@ class OrderTest {
         assertThat(order.getShippingAddress()).isEqualTo(address);
         assertThat(order.getTotalAmount()).isEqualByComparingTo(totalAmount);
         assertThat(order.getDiscountAmount()).isEqualByComparingTo(discountAmount);
-        assertThat(order.getPaidAmount()).isEqualByComparingTo(new BigDecimal("8000"));
+        assertThat(order.getPaidAmount()).isEqualByComparingTo(new BigDecimal("5000"));
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.PENDING);
     }
 
@@ -52,22 +53,10 @@ class OrderTest {
         BigDecimal discountAmount = new BigDecimal("6000");
 
         // Act & Assert
-        assertThatThrownBy(() -> Order.create(user, address, totalAmount, discountAmount))
+        assertThatThrownBy(() -> Order.create(user, address, totalAmount, discountAmount, BigDecimal.ZERO))
                 .isInstanceOf(CoreException.class)
                 .hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_PAID_AMOUNT);
     }
 
-    @DisplayName("할인 금액이 총 금액과 같으면 INVALID_PAID_AMOUNT 예외가 발생한다.")
-    @Test
-    void createOrderWithEqualTotalAndDiscountAmount() {
-        // Arrange
-        BigDecimal totalAmount = new BigDecimal("10000");
-        BigDecimal discountAmount = new BigDecimal("10000");
-
-        // Act & Assert
-        assertThatThrownBy(() -> Order.create(user, address, totalAmount, discountAmount))
-                .isInstanceOf(CoreException.class)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_PAID_AMOUNT);
-    }
 }
 

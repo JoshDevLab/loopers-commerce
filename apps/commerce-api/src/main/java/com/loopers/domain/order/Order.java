@@ -31,6 +31,8 @@ public class Order extends BaseEntity {
     
     private BigDecimal discountAmount;
 
+    private BigDecimal usedPointAmount;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
@@ -45,13 +47,20 @@ public class Order extends BaseEntity {
         this.orderStatus = orderStatus;
     }
 
-    public Order(User user, Address address, BigDecimal paidAmount, BigDecimal totalAmount, BigDecimal discountAmount, OrderStatus orderStatus) {
+    public Order(User user,
+                 Address address,
+                 BigDecimal paidAmount,
+                 BigDecimal totalAmount,
+                 BigDecimal discountAmount,
+                 OrderStatus orderStatus,
+                 BigDecimal usedPointAmount) {
         this.user = user;
         this.shippingAddress = address;
         this.paidAmount = paidAmount;
         this.totalAmount = totalAmount;
         this.discountAmount = discountAmount;
         this.orderStatus = orderStatus;
+        this.usedPointAmount = usedPointAmount;
     }
 
     public void addOrderItem(OrderItem orderItem) {
@@ -59,15 +68,22 @@ public class Order extends BaseEntity {
         orderItem.setOrder(this);
     }
 
-    public static Order create(User user, Address address, BigDecimal totalAmount, BigDecimal discountAmount) {
-        BigDecimal paidAmount = totalAmount.subtract(discountAmount);
-        if (paidAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "총 결제 금액은 최소 1원 이상이어야 합니다.");
+    public static Order create(User user, Address address, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal usedPoint) {
+        BigDecimal paidAmount = totalAmount.subtract(usedPoint.add(discountAmount));
+        if (paidAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "총 결제 금액은 최소 0원 이상이어야 합니다.");
         }
-        return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.PENDING);
+        if (paidAmount.compareTo(BigDecimal.ZERO) == 0) {
+            return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.COMPLETED, usedPoint);
+        }
+        return new Order(user, address, paidAmount, totalAmount, discountAmount, OrderStatus.PENDING, usedPoint);
     }
 
     public void cancel() {
         this.orderStatus = OrderStatus.CANCELLED;
+    }
+
+    public void complete() {
+        this.orderStatus = OrderStatus.COMPLETED;
     }
 }

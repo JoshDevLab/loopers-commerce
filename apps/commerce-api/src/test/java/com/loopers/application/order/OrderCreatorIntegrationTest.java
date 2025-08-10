@@ -49,11 +49,11 @@ class OrderCreatorIntegrationTest extends IntegrationTestSupport {
         BigDecimal discountAmount = BigDecimal.valueOf(5000);
 
         // Act
-        Order order = orderCreator.createOrder(user.getId(), orderItems, address, totalAmount, discountAmount);
+        Order order = orderCreator.createOrder(user.getId(), orderItems, address, totalAmount, discountAmount, BigDecimal.valueOf(1000));
 
         // Assert
         assertThat(order).isNotNull();
-        assertThat(order.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(15000));
+        assertThat(order.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(14000));
         assertThat(order.getOrderItems()).hasSize(1);
         assertThat(order.getShippingAddress()).isEqualTo(address);
     }

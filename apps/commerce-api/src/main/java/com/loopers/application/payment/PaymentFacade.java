@@ -41,7 +41,7 @@ public class PaymentFacade {
             recoveryAll(paymentCommand.orderId());
             throw new CoreException(ErrorType.PAYMENT_FAIL, "외부 결제 실패로 복구 처리함");
         }
-
+        order.complete();
         Payment payment = paymentService.create(paymentCommand);
         return PaymentInfo.of(payment);
     }

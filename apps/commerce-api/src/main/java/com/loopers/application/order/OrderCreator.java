@@ -29,10 +29,10 @@ public class OrderCreator {
             List<OrderItem> items,
             Address address,
             BigDecimal totalAmount,
-            BigDecimal discountAmount
-    ) {
+            BigDecimal discountAmount,
+            BigDecimal usedPoint) {
         User user = userService.getMyInfoByUserPk(userPk);
-        return orderService.createOrder(user, items, address, totalAmount, discountAmount);
+        return orderService.createOrder(user, items, address, totalAmount, discountAmount, usedPoint);
     }
 
     @Transactional
