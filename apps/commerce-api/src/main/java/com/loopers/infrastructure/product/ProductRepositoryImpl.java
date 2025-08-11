@@ -58,9 +58,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .from(product)
                 .join(product.brand, brand).fetchJoin()
                 .where(
+                        productBrandEq(criteria.brandId()),
                         productNameContains(criteria.keyword()),
-                        productCategoryEq(criteria.category()),
-                        productBrandEq(criteria.brandId())
+                        productCategoryEq(criteria.category())
                 )
                 .orderBy(
                         productOrderBy(criteria.sort())
