@@ -11,16 +11,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class ProductOptionService {
-
     private final ProductOptionRepository productOptionRepository;
+    private final ProductOptionCache productOptionCache;
 
     @Transactional(readOnly = true)
     public List<ProductOption> getProductOptionsByProductId(Long productId) {
-        List<ProductOption> productOptions = productOptionRepository.findByProductId(productId);
-        if (productOptions.isEmpty()) {
+        List<ProductOption> cached = productOptionCache.getOrLoad(productId,
+                () -> productOptionRepository.findByProductId(productId)
+        );
+        if (cached.isEmpty()) {
             throw new CoreException(ErrorType.PRODUCT_OPTION_NOT_FOUND, "상품을 찾을 수 없습니다. product id:" + productId);
         }
-        return productOptions;
+        return cached;
     }
 
     public ProductOption getOnSalesProductOption(Long productOptionId) {

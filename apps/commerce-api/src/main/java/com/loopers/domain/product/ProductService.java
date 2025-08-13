@@ -14,8 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class ProductService {
-
     private final ProductRepository productRepository;
+    private final ProductCache productCache;
 
     @Transactional(readOnly = true)
     public Page<Product> searchByConditionWithPaging(ProductCriteria criteria, Pageable pageable) {
@@ -24,8 +24,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Product getProductWithBrandById(Long productId) {
-        return productRepository.findWithBrandById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
+        return productCache.getOrLoad(productId, () -> productRepository.findWithBrandById(productId)
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId)));
     }
 
     public List<Product> getProductByBrand(Brand brand) {

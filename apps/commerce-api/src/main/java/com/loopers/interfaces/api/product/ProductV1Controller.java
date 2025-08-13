@@ -33,6 +33,8 @@ public class ProductV1Controller {
     @GetMapping("/{productId}")
     public ApiResponse<ProductDetailResponse> getProductDetail(@PathVariable Long productId, @CurrentUser UserInfo userInfo) {
         ProductInfo productInfo = productFacade.getProductDetail(productId, userInfo);
+        ProductDetailResponse from = ProductDetailResponse.from(productInfo);
+        System.out.println("from = " + from);
         return ApiResponse.success(ProductDetailResponse.from(productInfo));
     }
 }

@@ -1,6 +1,6 @@
 import http from 'k6/http';
-import { check, sleep } from 'k6';
-import { Trend, Counter } from 'k6/metrics';
+import {check, sleep} from 'k6';
+import {Counter, Trend} from 'k6/metrics';
 
 // ===== ENV
 const BASE = __ENV.BASE_URL || 'http://localhost:8080';
