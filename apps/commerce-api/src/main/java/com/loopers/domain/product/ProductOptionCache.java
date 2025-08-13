@@ -25,4 +25,12 @@ public interface ProductOptionCache {
                 loader
         );
     }
+
+    default void evict(Long productId) {
+        delegate().evict(key(productId));
+    };
+
+    default void put(Long productId, List<ProductOption> productOptions, Duration ttl) {
+        delegate().put(key(productId), productOptions, ttl);
+    }
 }

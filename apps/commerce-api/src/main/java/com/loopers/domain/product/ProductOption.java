@@ -3,10 +3,7 @@ package com.loopers.domain.product;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +19,8 @@ public class ProductOption extends BaseEntity {
     private String name;
     private String size;
     private String color;
+
+    @Enumerated(EnumType.STRING)
     private ProductStatus productOptionStatus;
     private BigDecimal price;
 
