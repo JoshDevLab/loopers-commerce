@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopers.support.error.CoreException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -93,23 +95,19 @@ public class RedisGenericCachePort implements GenericCachePort {
 
     private boolean isEmptyValue(Object v) {
         switch (v) {
-            case null -> {
-                return true;
-            }
-            case CharSequence s -> {
-                return s.isEmpty();
-            }
-            case Collection<?> c -> {
-                return c.isEmpty();
-            }
-            case Map<?, ?> m -> {
-                return m.isEmpty();
-            }
-            default -> {
-            }
+            case null -> { return true; }
+            case CharSequence s -> { return s.isEmpty(); }
+            case Collection<?> c -> { return c.isEmpty(); }
+            case Map<?, ?> m -> { return m.isEmpty(); }
+            case Page<?> p -> { return p.isEmpty(); }
+            case Slice<?> s -> { return !s.hasContent(); }
+            default -> { /* fall-through */ }
         }
         if (v.getClass().isArray()) return Array.getLength(v) == 0;
         if (v instanceof Optional<?> o) return o.isEmpty();
+        if (v instanceof Iterable<?> it) {
+            return !it.iterator().hasNext();
+        }
         return false;
     }
 }

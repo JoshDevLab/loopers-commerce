@@ -28,21 +28,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
-    @Mock
-    ProductRepository productRepository;
+    @Mock ProductRepository productRepository;
+    @Mock ProductCache productCache;
+    @Mock ProductListCache productListCache;
 
-    @Mock
-    ProductCache productCache;
-
-    @Mock
-    ProductListCache productListCache;
-
-    @InjectMocks
-    ProductService sut;
+    @InjectMocks ProductService sut;
 
     @Test
-    @DisplayName("캐시 히트 시, Repository는 호출되지 않는다.")
-    void getProductWithBrandById_whenCacheHit_thenNoRepositoryCall() {
+    @DisplayName("캐시 히트면 Repository를 호출하지 않는다")
+    void getProductWithBrandById_cacheHit() {
         // Arrange
         Long id = 100L;
         Product cached = mock(Product.class);
@@ -57,8 +51,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("캐시 미스 시, Repository에서 조회하여 반환한다.")
-    void getProductWithBrandById_whenCacheMiss_thenLoadFromRepository() throws Exception {
+    @DisplayName("캐시 미스면 Repository에서 조회해 반환한다")
+    void getProductWithBrandById_cacheMiss_thenLoadFromRepository() {
         // Arrange
         Long id = 200L;
         Product loaded = mock(Product.class);
@@ -79,13 +73,14 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("캐시 미스 + Repository 조회 결과 없음 시, 예외를 던진다.")
-    void getProductWithBrandById_whenCacheMissAndNotFound_thenThrowException() {
+    @DisplayName("캐시 미스 + Repository 결과 없음이면 예외를 던진다")
+    void getProductWithBrandById_cacheMiss_andNotFound_throws() {
         // Arrange
         Long id = 300L;
         when(productRepository.findWithBrandById(id)).thenReturn(Optional.empty());
         when(productCache.getOrLoad(eq(id), any()))
                 .thenAnswer(inv -> {
+                    @SuppressWarnings("unchecked")
                     Callable<Product> loader = inv.getArgument(1);
                     try {
                         return loader.call();
@@ -100,53 +95,53 @@ class ProductServiceTest {
                 .hasMessageContaining("존재하지 않는 상품 id")
                 .extracting("errorType")
                 .isEqualTo(ErrorType.PRODUCT_NOT_FOUND);
-
         verify(productRepository, times(1)).findWithBrandById(id);
     }
 
     @Test
-    @DisplayName("기본 필터 + 1~3페이지 범위면 캐시를 사용하고, 캐시 히트 시 레포지토리를 호출하지 않는다")
-    void usesCache_whenDefaultFilter_andPageInRange_cacheHit() {
+    @DisplayName("기본 필터 + 캐싱 범위(0~2페이지) && 캐시 히트면 Repository를 호출하지 않는다")
+    void searchByCondition_cacheHit_inRange_defaultFilter() {
         // Arrange
         ProductCriteria criteria = mock(ProductCriteria.class);
         when(criteria.isDefault()).thenReturn(true);
+
         Pageable pageable = PageRequest.of(0, 20);
         Page<Product> cached = new PageImpl<>(List.of(mock(Product.class)), pageable, 100);
 
-        when(productListCache.getOrLoad(eq(0), any())).thenReturn(cached);
+        when(productListCache.getOrLoad(eq(pageable), any())).thenReturn(cached);
 
         // Act
         Page<Product> result = sut.searchByConditionWithPaging(criteria, pageable);
 
         // Assert
         assertThat(result).isSameAs(cached);
-        verify(productRepository, never()).findAllByCriteria(any(), any());
-        verify(productListCache, times(0)).getOrLoad(eq(0), any());
+        verify(productListCache, times(1)).getOrLoad(eq(pageable), any());
+        verifyNoInteractions(productRepository);
     }
 
     @Test
-    @DisplayName("기본 필터 + 1~3페이지 범위에서 캐시 미스면 로더로 DB 조회하여 반환하고, 그 결과가 캐시에 저장된다")
-    void usesCache_whenDefaultFilter_andPageInRange_cacheMiss_thenLoadAndReturn() {
+    @DisplayName("기본 필터 + 캐싱 범위(0~2페이지) && 캐시 미스면 DB 조회 후 다음엔 캐시 히트가 된다")
+    void searchByCondition_cacheMiss_thenHit_inRange_defaultFilter() {
         // Arrange
         ProductCriteria criteria = mock(ProductCriteria.class);
         when(criteria.isDefault()).thenReturn(true);
+
         Pageable pageable = PageRequest.of(1, 20);
         Page<Product> loaded = new PageImpl<>(List.of(mock(Product.class)), pageable, 40);
 
-        // 레포지토리 결과 설정
         when(productRepository.findAllByCriteria(criteria, pageable)).thenReturn(loaded);
 
-        // 캐시 미스 → 첫 호출 시 loader.call() 실행, 이후엔 캐시 히트 시나리오 흉내
         AtomicReference<Page<Product>> stored = new AtomicReference<>();
-        when(productListCache.getOrLoad(eq(1), any()))
+        when(productListCache.getOrLoad(eq(pageable), any()))
                 .thenAnswer(inv -> {
+                    @SuppressWarnings("unchecked")
                     Callable<Page<Product>> loader = inv.getArgument(1);
                     if (stored.get() == null) {
-                        Page<Product> firstLoad = loader.call(); // DB 조회
-                        stored.set(firstLoad);                   // 캐시에 저장되었다고 가정
-                        return firstLoad;
+                        Page<Product> first = loader.call(); // DB hit
+                        stored.set(first);                   // 캐시에 저장되었다고 가정
+                        return first;
                     }
-                    return stored.get(); // 두 번째부턴 캐시 히트
+                    return stored.get();                   // cache hit
                 });
 
         // Act
@@ -156,25 +151,24 @@ class ProductServiceTest {
         // Assert
         assertThat(first).isSameAs(loaded);
         assertThat(second).isSameAs(loaded);
-
         verify(productRepository, times(1)).findAllByCriteria(criteria, pageable);
 
         InOrder inOrder = inOrder(productListCache, productRepository);
-        inOrder.verify(productListCache).getOrLoad(eq(1), any());
+        inOrder.verify(productListCache).getOrLoad(eq(pageable), any());
         inOrder.verify(productRepository).findAllByCriteria(criteria, pageable);
-        inOrder.verify(productListCache).getOrLoad(eq(1), any());
+        inOrder.verify(productListCache).getOrLoad(eq(pageable), any());
         verifyNoMoreInteractions(productRepository);
     }
 
     @Test
-    @DisplayName("기본 필터가 아니면 캐시를 건너뛰고 바로 DB를 조회한다")
-    void bypassCache_whenNotDefaultFilter() {
+    @DisplayName("기본 필터가 아니면 캐시를 사용하지 않고 DB를 조회한다")
+    void searchByCondition_notDefaultFilter_bypassCache() {
         // Arrange
         ProductCriteria criteria = mock(ProductCriteria.class);
         when(criteria.isDefault()).thenReturn(false);
+
         Pageable pageable = PageRequest.of(1, 20);
         Page<Product> db = new PageImpl<>(List.of(mock(Product.class)), pageable, 10);
-
         when(productRepository.findAllByCriteria(criteria, pageable)).thenReturn(db);
 
         // Act
@@ -187,31 +181,23 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("페이지가 캐싱 범위를 벗어나면(0페이지 또는 4페이지 이상) 캐시를 건너뛰고 DB를 조회한다")
-    void bypassCache_whenPageOutOfRange() {
+    @DisplayName("페이지가 캐시 범위를 벗어나면(3페이지 이상) 캐시를 건너뛰고 DB를 조회한다")
+    void searchByCondition_pageOutOfRange_bypassCache() {
         // Arrange
         ProductCriteria criteria = mock(ProductCriteria.class);
         when(criteria.isDefault()).thenReturn(true);
 
-        // page=0 (서비스 로직상 1~3만 캐시)
-        Pageable p0 = PageRequest.of(0, 20);
-        Page<Product> db0 = new PageImpl<>(List.of(mock(Product.class)), p0, 10);
-        when(productRepository.findAllByCriteria(criteria, p0)).thenReturn(db0);
-
-        // page=4
-        Pageable p4 = PageRequest.of(3, 20);
-        Page<Product> db4 = new PageImpl<>(List.of(mock(Product.class)), p4, 10);
-        when(productRepository.findAllByCriteria(criteria, p4)).thenReturn(db4);
+        // page=3 (0-based, 즉 4페이지) → 범위 밖
+        Pageable page3 = PageRequest.of(3, 20);
+        Page<Product> db3 = new PageImpl<>(List.of(mock(Product.class)), page3, 10);
+        when(productRepository.findAllByCriteria(criteria, page3)).thenReturn(db3);
 
         // Act
-        Page<Product> r0 = sut.searchByConditionWithPaging(criteria, p0);
-        Page<Product> r4 = sut.searchByConditionWithPaging(criteria, p4);
+        Page<Product> result = sut.searchByConditionWithPaging(criteria, page3);
 
         // Assert
-        assertThat(r0).isSameAs(db0);
-        assertThat(r4).isSameAs(db4);
-        verify(productRepository, times(1)).findAllByCriteria(criteria, p0);
-        verify(productRepository, times(1)).findAllByCriteria(criteria, p4);
+        assertThat(result).isSameAs(db3);
+        verify(productRepository, times(1)).findAllByCriteria(criteria, page3);
         verifyNoInteractions(productListCache);
     }
 }

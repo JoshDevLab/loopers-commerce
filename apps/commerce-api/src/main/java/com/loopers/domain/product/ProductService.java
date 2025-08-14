@@ -25,7 +25,7 @@ public class ProductService {
         boolean isCacheablePage = page >= 0 && page <= 2;
 
         if (isDefaultFilter && isCacheablePage) {
-            return productListCache.getOrLoad(page, () -> productRepository.findAllByCriteria(criteria, pageable));
+            return productListCache.getOrLoad(pageable, () -> productRepository.findAllByCriteria(criteria, pageable));
         }
 
         return productRepository.findAllByCriteria(criteria, pageable);
