@@ -86,7 +86,6 @@ class ProductServiceTest {
         when(productRepository.findWithBrandById(id)).thenReturn(Optional.empty());
         when(productCache.getOrLoad(eq(id), any()))
                 .thenAnswer(inv -> {
-                    @SuppressWarnings("unchecked")
                     Callable<Product> loader = inv.getArgument(1);
                     try {
                         return loader.call();
@@ -127,11 +126,11 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("기본 필터 + 1~3페이지 범위에서 캐시 미스면 로더로 DB 조회하여 반환하고, 그 결과가 캐시에 저장된다")
-    void usesCache_whenDefaultFilter_andPageInRange_cacheMiss_thenLoadAndReturn() throws Exception {
+    void usesCache_whenDefaultFilter_andPageInRange_cacheMiss_thenLoadAndReturn() {
         // Arrange
         ProductCriteria criteria = mock(ProductCriteria.class);
         when(criteria.isDefault()).thenReturn(true);
-        Pageable pageable = PageRequest.of(1, 20); // page=2
+        Pageable pageable = PageRequest.of(1, 20);
         Page<Product> loaded = new PageImpl<>(List.of(mock(Product.class)), pageable, 40);
 
         // 레포지토리 결과 설정
@@ -139,9 +138,8 @@ class ProductServiceTest {
 
         // 캐시 미스 → 첫 호출 시 loader.call() 실행, 이후엔 캐시 히트 시나리오 흉내
         AtomicReference<Page<Product>> stored = new AtomicReference<>();
-        when(productListCache.getOrLoad(eq(2), any()))
+        when(productListCache.getOrLoad(eq(1), any()))
                 .thenAnswer(inv -> {
-                    @SuppressWarnings("unchecked")
                     Callable<Page<Product>> loader = inv.getArgument(1);
                     if (stored.get() == null) {
                         Page<Product> firstLoad = loader.call(); // DB 조회
@@ -162,9 +160,9 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findAllByCriteria(criteria, pageable);
 
         InOrder inOrder = inOrder(productListCache, productRepository);
-        inOrder.verify(productListCache).getOrLoad(eq(2), any());
+        inOrder.verify(productListCache).getOrLoad(eq(1), any());
         inOrder.verify(productRepository).findAllByCriteria(criteria, pageable);
-        inOrder.verify(productListCache).getOrLoad(eq(2), any());
+        inOrder.verify(productListCache).getOrLoad(eq(1), any());
         verifyNoMoreInteractions(productRepository);
     }
 
