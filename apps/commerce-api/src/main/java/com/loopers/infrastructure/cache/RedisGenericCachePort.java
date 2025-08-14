@@ -9,7 +9,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -69,7 +73,7 @@ public class RedisGenericCachePort implements GenericCachePort {
                 }
             }
 
-            // 2) 로더 실행
+            // 로더 실행
             T loaded = loader.call();
 
             // 빈 결과는 '캐시하지 않음'
@@ -95,17 +99,17 @@ public class RedisGenericCachePort implements GenericCachePort {
             case CharSequence s -> {
                 return s.isEmpty();
             }
-            case java.util.Collection<?> c -> {
+            case Collection<?> c -> {
                 return c.isEmpty();
             }
-            case java.util.Map<?, ?> m -> {
+            case Map<?, ?> m -> {
                 return m.isEmpty();
             }
             default -> {
             }
         }
-        if (v.getClass().isArray()) return java.lang.reflect.Array.getLength(v) == 0;
-        if (v instanceof java.util.Optional<?> o) return o.isEmpty();
+        if (v.getClass().isArray()) return Array.getLength(v) == 0;
+        if (v instanceof Optional<?> o) return o.isEmpty();
         return false;
     }
 }

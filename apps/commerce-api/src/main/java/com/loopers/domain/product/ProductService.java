@@ -16,9 +16,18 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductCache productCache;
+    private final ProductListCache productListCache;
 
     @Transactional(readOnly = true)
     public Page<Product> searchByConditionWithPaging(ProductCriteria criteria, Pageable pageable) {
+        int page = pageable.getPageNumber();
+        boolean isDefaultFilter = criteria.isDefault();
+        boolean isCacheablePage = page >= 0 && page <= 2;
+
+        if (isDefaultFilter && isCacheablePage) {
+            return productListCache.getOrLoad(page, () -> productRepository.findAllByCriteria(criteria, pageable));
+        }
+
         return productRepository.findAllByCriteria(criteria, pageable);
     }
 
