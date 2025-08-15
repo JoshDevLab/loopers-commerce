@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopers.support.error.CoreException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedisGenericCachePort implements GenericCachePort {
@@ -33,7 +35,8 @@ public class RedisGenericCachePort implements GenericCachePort {
         try {
             return objectMapper.readValue(json, typeRef);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.warn("[cache:get] deserialize failed. key={}, will return null (treat as miss). cause={}", key, e.toString());
+            return null;
         }
     }
 
@@ -43,7 +46,8 @@ public class RedisGenericCachePort implements GenericCachePort {
             String json = objectMapper.writeValueAsString(value);
             redis.opsForValue().set(key, json, ttl.toMillis(), TimeUnit.MILLISECONDS);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.warn("[cache:put] serialize failed. key={}, valueType={}, cause={}", key,
+                    value != null ? value.getClass().getName() : "null", e.toString());
         }
     }
 
@@ -54,8 +58,7 @@ public class RedisGenericCachePort implements GenericCachePort {
 
     @Override
     public <T> T getOrLoad(String key, Duration ttl, TypeReference<T> typeRef, Callable<T> loader) {
-        // 1) 캐시 조회: null 이거나 '빈 값'이면 미스로 처리
-        T cached = get(key, typeRef);
+        T cached = safeReadOrEvictOnCorruption(key, typeRef);
         if (cached != null && !isEmptyValue(cached)) {
             return cached;
         }
@@ -66,30 +69,44 @@ public class RedisGenericCachePort implements GenericCachePort {
         );
 
         try {
-            // 락을 못잡았으면 잠깐 대기 후 다시 확인
             if (!acquired) {
+                // 잠깐 대기 후 재확인
                 try { Thread.sleep(50); } catch (InterruptedException ignored) {}
-                T again = get(key, typeRef);
+                T again = safeReadOrEvictOnCorruption(key, typeRef);
                 if (again != null && !isEmptyValue(again)) {
                     return again;
                 }
             }
 
-            // 로더 실행
+            // 로더(DB) 실행
             T loaded = loader.call();
 
-            // 빈 결과는 '캐시하지 않음'
+            // 빈 결과는 캐시하지 않음
             if (loaded != null && !isEmptyValue(loaded)) {
                 put(key, loaded, ttl);
             }
-
             return loaded;
+
         } catch (Exception e) {
-            // CoreException만 그대로 통과, 나머지는 래핑
+            // CoreException은 그대로 전달
             if (e instanceof CoreException ce) throw ce;
+            log.warn("[cache:getOrLoad] loader failed. key={}, cause={}", key, e.toString());
             throw new RuntimeException("cache loader failed: " + e.getMessage(), e);
+
         } finally {
             if (acquired) redis.delete(lockKey);
+        }
+    }
+
+    private <T> T safeReadOrEvictOnCorruption(String key, TypeReference<T> typeRef) {
+        String json = redis.opsForValue().get(key);
+        if (json == null) return null;
+        try {
+            return objectMapper.readValue(json, typeRef);
+        } catch (IOException ex) {
+            log.warn("[cache:corruption] deserialize failed. key={} -> evict & treat as miss. cause={}", key, ex.toString());
+            evict(key);
+            return null;
         }
     }
 
@@ -105,9 +122,7 @@ public class RedisGenericCachePort implements GenericCachePort {
         }
         if (v.getClass().isArray()) return Array.getLength(v) == 0;
         if (v instanceof Optional<?> o) return o.isEmpty();
-        if (v instanceof Iterable<?> it) {
-            return !it.iterator().hasNext();
-        }
+        if (v instanceof Iterable<?> it) return !it.iterator().hasNext();
         return false;
     }
 }
