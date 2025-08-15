@@ -1,0 +1,91 @@
+spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 180000
+      use-key-prefix: true
+      key-prefix: loopers
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 1000ms
+
+---
+spring.config.activate.on-profile: local
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+  cache:
+    redis:
+      time-to-live: 60000
+
+---
+spring.config.activate.on-profile: test
+
+spring:
+  cache:
+    type: none
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+---
+spring.config.activate.on-profile: dev
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  cache:
+    redis:
+      time-to-live: 180000
+
+---
+spring.config.activate.on-profile: qa
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+  cache:
+    redis:
+      time-to-live: 300000
+
+---
+spring.config.activate.on-profile: prd
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 64
+          max-idle: 32
+          min-idle: 8
+          max-wait: 2000ms
+  cache:
+    redis:
+      time-to-live: 600000

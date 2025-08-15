@@ -1,8 +1,10 @@
 package com.loopers.domain.product.like;
 
 import com.loopers.domain.product.Product;
+import com.loopers.domain.product.ProductChangedEvent;
 import com.loopers.domain.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +14,7 @@ import java.util.List;
 @Service
 public class ProductLikeService {
     private final ProductLikeRepository productLikeRepository;
+    private final ApplicationEventPublisher publisher;
 
     public boolean existsByProductAndUser(Product product, User user) {
         return productLikeRepository.existsByProductAndUser(product, user);
@@ -23,6 +26,7 @@ public class ProductLikeService {
         if (!alreadyLiked) {
             productLikeRepository.save(ProductLike.create(product, user));
             product.increaseLikeCount();
+            publisher.publishEvent(new ProductChangedEvent(product.getId()));
         }
     }
 
@@ -32,6 +36,7 @@ public class ProductLikeService {
         if (alreadyLiked) {
             productLikeRepository.deleteByProductAndUser(product, user);
             product.decreaseLikeCount();
+            publisher.publishEvent(new ProductChangedEvent(product.getId()));
         }
     }
 

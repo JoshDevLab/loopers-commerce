@@ -53,46 +53,62 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Page<Product> findAllByCriteria(ProductCriteria criteria, Pageable pageable) {
-        List<Product> result = queryFactory
-                .select(product)
+        OrderSpecifier<?>[] orders = productOrderBy(criteria.sort());
+
+        List<Long> topIds = queryFactory
+                .select(product.id)
                 .from(product)
-                .join(product.brand, brand).fetchJoin()
                 .where(
+                        productBrandEq(criteria.brandId()),
                         productNameContains(criteria.keyword()),
-                        productCategoryEq(criteria.category()),
-                        productBrandEq(criteria.brandId())
+                        productCategoryEq(criteria.category())
                 )
-                .orderBy(
-                        productOrderBy(criteria.sort())
-                )
+                .orderBy(orders)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = Optional.ofNullable(queryFactory
-                .select(product.count())
-                .from(product)
-                .join(product.brand, brand)
-                .where(
-                        productNameContains(criteria.keyword()),
-                        productCategoryEq(criteria.category()),
-                        productBrandEq(criteria.brandId())
-                )
-                .fetchOne()
+        if (topIds.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, 0);
+        }
+
+        List<Product> result = queryFactory
+                .selectFrom(product)
+                .join(product.brand, brand).fetchJoin()
+                .where(product.id.in(topIds))
+                .orderBy(orders)                // 정렬 재적용
+                .fetch();
+
+        long total = Optional.ofNullable(
+                queryFactory.select(product.count())
+                        .from(product)
+                        .where(
+                                productBrandEq(criteria.brandId()),
+                                productNameContains(criteria.keyword()),
+                                productCategoryEq(criteria.category())
+                        )
+                        .fetchOne()
         ).orElse(0L);
 
         return new PageImpl<>(result, pageable, total);
     }
 
-    private OrderSpecifier<?> productOrderBy(String sort) {
+    private OrderSpecifier<?>[] productOrderBy(String sort) {
         if (sort == null || sort.isBlank()) {
-            return product.createdAt.desc();
+            // 기본 정렬: id DESC
+            return new OrderSpecifier<?>[]{ product.id.desc() };
         }
 
         return switch (sort.toLowerCase()) {
-            case "price_asc" -> product.basicPrice.asc();
-            case "likes_desc" -> product.likeCount.desc();
-            default -> product.createdAt.desc();
+            case "price_asc" -> new OrderSpecifier<?>[]{
+                    product.basicPrice.asc(),
+                    product.id.desc()
+            };
+            case "likes_desc" -> new OrderSpecifier<?>[]{
+                    product.likeCount.desc(),
+                    product.id.desc()
+            };
+            default -> new OrderSpecifier<?>[]{product.id.desc()};
         };
     }
 

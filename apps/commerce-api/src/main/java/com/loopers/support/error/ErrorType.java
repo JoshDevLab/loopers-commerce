@@ -44,7 +44,8 @@ public enum ErrorType {
     INVENTORY_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "재고 이력을 찾을 수 없습니다."),
     COUPON_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "쿠폰 이력을 찾을 수 없습니다."),
     ALREADY_EXIST_ORDER_PAYMENT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "이미 해당 주문의 결제를 완료하였습니다."),
-    PAYMENT_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "외부 결제 서버 오류입니다.");
+    PAYMENT_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "외부 결제 서버 오류입니다."),
+    PRODUCT_LIST_CACHING_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "상품 목록 캐싱에 실패하였습니다.");
 
     private final HttpStatus status;
     private final String code;
