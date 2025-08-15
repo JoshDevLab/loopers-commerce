@@ -2,6 +2,8 @@ package com.loopers.domain.product;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.loopers.infrastructure.cache.GenericCachePort;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +30,19 @@ public interface ProductListCache {
                 }
         );
     }
+
+    default void evictAll() {
+        for (int i = 0; i < 3; i++) {
+            delegate().evict(listKey(i));
+        }
+    };
+
+    default void loadAll() {
+        for (int i = 0; i < 3; i++) {
+            int page = i;
+            delegate().getOrLoad(listKey(i), ttl(), new TypeReference<PageImpl<Product>>() {}, () -> {
+                throw new CoreException(ErrorType.PRODUCT_LIST_CACHING_FAIL, "상품 목록 캐싱 실패: 페이지 " + page);
+            });
+        }
+    };
 }
