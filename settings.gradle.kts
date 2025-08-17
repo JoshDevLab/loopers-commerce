@@ -7,6 +7,7 @@ include(
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
+    ":apps:pg-simulator",
 )
 
 // configurations
