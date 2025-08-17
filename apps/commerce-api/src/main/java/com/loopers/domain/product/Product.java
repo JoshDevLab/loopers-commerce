@@ -11,7 +11,13 @@ import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "products")
+@Table(name = "products",
+        indexes = {
+                @Index(name = "idx_brand_like_id", columnList = "brand_id, like_count DESC, id DESC"),
+                @Index(name = "idx_brand_price_id", columnList = "brand_id, basic_price ASC, id DESC"),
+                @Index(name = "idx_brand_category_like_id", columnList = "brand_id, product_category, like_count DESC, id DESC"),
+                @Index(name = "idx_brand_category_price_id", columnList = "brand_id, product_category, basic_price ASC, id DESC")
+        })
 @Entity
 public class Product extends BaseEntity {
 

@@ -14,18 +14,27 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class ProductService {
-
     private final ProductRepository productRepository;
+    private final ProductCache productCache;
+    private final ProductListCache productListCache;
 
     @Transactional(readOnly = true)
     public Page<Product> searchByConditionWithPaging(ProductCriteria criteria, Pageable pageable) {
+        int page = pageable.getPageNumber();
+        boolean isDefaultFilter = criteria.isDefault();
+        boolean isCacheablePage = page >= 0 && page <= 2;
+
+        if (isDefaultFilter && isCacheablePage) {
+            return productListCache.getOrLoad(pageable, () -> productRepository.findAllByCriteria(criteria, pageable));
+        }
+
         return productRepository.findAllByCriteria(criteria, pageable);
     }
 
     @Transactional(readOnly = true)
     public Product getProductWithBrandById(Long productId) {
-        return productRepository.findWithBrandById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
+        return productCache.getOrLoad(productId, () -> productRepository.findWithBrandById(productId)
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId)));
     }
 
     public List<Product> getProductByBrand(Brand brand) {

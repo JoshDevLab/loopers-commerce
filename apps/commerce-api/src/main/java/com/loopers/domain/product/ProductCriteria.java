@@ -27,4 +27,8 @@ public record ProductCriteria(
             sortBy
         );
     }
+
+    public boolean isDefault() {
+        return keyword == null && category == null && brandId == null && sort == null;
+    }
 }
