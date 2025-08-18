@@ -70,7 +70,6 @@ public class PgSimulatorErrorDecoder implements ErrorDecoder {
         return "PG 응답 메시지 없음";
     }
 
-    // PG 전용 내부 예외 클래스들
     @Getter
     public static class PgClientException extends RuntimeException {
         private final int status;

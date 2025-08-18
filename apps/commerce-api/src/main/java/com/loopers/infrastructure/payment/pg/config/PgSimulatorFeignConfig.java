@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class PgSimulatorFeignConfig {
 
-    @Value("${app.pg-simulator.user-id}")
+    @Value("${app.pg-simulator.user-id:135135}")
     private String defaultUserId;
     
     @Value("${app.pg-simulator.timeout.connect:3000}")

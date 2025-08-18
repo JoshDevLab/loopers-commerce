@@ -17,6 +17,10 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "payment")
 public class Payment extends BaseEntity {
+    private String pgTransactionId;
+
+    private String callbackUrl;
+
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
 

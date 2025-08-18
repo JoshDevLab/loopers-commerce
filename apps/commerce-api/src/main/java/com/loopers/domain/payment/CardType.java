@@ -14,7 +14,7 @@ public enum CardType {
         try {
             return CardType.valueOf(upperCaseName);
         } catch (IllegalArgumentException e) {
-            throw new CoreException(ErrorType.UNSUPPORTED_PAYMENT_TYPE, "지원하지 않는 CardType : " + cardType);
+            throw new CoreException(ErrorType.UNSUPPORTED_CARD_TYPE, "지원하지 않는 CardType : " + cardType);
         }
     }
 }

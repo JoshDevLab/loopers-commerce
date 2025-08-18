@@ -41,11 +41,14 @@ public enum ErrorType {
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "쿠폰을 찾을 수 없습니다."),
     INVALID_PAID_AMOUNT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "총 결제 금액은 0원 초과이어야 합니다."),
     UNSUPPORTED_PAYMENT_TYPE(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "지원하지 않는 결제 수단입니다."),
+    UNSUPPORTED_CARD_TYPE(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "지원하지 않는 카드사 결제입니다."),
     INVENTORY_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "재고 이력을 찾을 수 없습니다."),
     COUPON_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "쿠폰 이력을 찾을 수 없습니다."),
     ALREADY_EXIST_ORDER_PAYMENT(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "이미 해당 주문의 결제를 완료하였습니다."),
     PAYMENT_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "외부 결제 서버 오류입니다."),
-    PRODUCT_LIST_CACHING_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "상품 목록 캐싱에 실패하였습니다.");
+    PRODUCT_LIST_CACHING_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "상품 목록 캐싱에 실패하였습니다."),
+    INVALID_PAYMENT_REQUEST_TYPE(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "결제 벤더사에 맞지 않는 요청타입니다."),
+    INVALID_CARD_NO(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 형식의 카드번호 입니다.");
 
     private final HttpStatus status;
     private final String code;

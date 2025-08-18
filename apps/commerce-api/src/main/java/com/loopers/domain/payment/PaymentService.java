@@ -20,12 +20,13 @@ public class PaymentService {
         Order order = orderRepository.findById(paymentCommand.orderId())
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
 
-        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
-            PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(paymentCommand.paymentType());
-            if (!paymentProcessor.payment(order.getPaidAmount())) {
-                throw new PGPaymentException("PG사 응답 오류");
-            }
+        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "결제금액은 0원 초과이어야 합니다");
         }
+
+        PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(paymentCommand.paymentType());
+        ExternalPaymentRequest request = paymentProcessor.createRequest(paymentCommand, order.getPaidAmount());
+        paymentProcessor.payment(request);
     }
 
     public Payment create(PaymentCommand.Request paymentCommand) {

@@ -1,5 +1,7 @@
 package com.loopers.interfaces.api.payment.dto;
 
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,7 +25,7 @@ public class CardNo {
 
     public static CardNo valueOfName(String cardNo) {
         if (cardNo == null || !PATTERN.matcher(cardNo).matches()) {
-            throw new IllegalArgumentException("잘못된 카드번호 형식입니다. 형식: xxxx-xxxx-xxxx-xxxx");
+            throw new CoreException(ErrorType.INVALID_CARD_NO, "잘못된 카드번호 형식입니다. 형식: xxxx-xxxx-xxxx-xxxx");
         }
         return new CardNo(cardNo);
     }

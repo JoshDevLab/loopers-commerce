@@ -1,5 +1,4 @@
 package com.loopers.infrastructure.payment;
 
-public class LoopersPgClient {
-
+public class ExternalPaymentResponse {
 }
