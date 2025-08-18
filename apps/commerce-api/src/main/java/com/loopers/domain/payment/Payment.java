@@ -2,6 +2,7 @@ package com.loopers.domain.payment;
 
 import com.loopers.domain.BaseEntity;
 import com.loopers.domain.order.Order;
+import com.loopers.interfaces.api.payment.dto.CardNo;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
@@ -17,7 +18,13 @@ import java.math.BigDecimal;
 @Table(name = "payment")
 public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
-    private PaymentType type;
+    private PaymentType paymentType;
+
+    @Enumerated(EnumType.STRING)
+    private CardType cardType;
+
+    @Embedded
+    private CardNo cardNo;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
@@ -27,9 +34,17 @@ public class Payment extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private Order order;
 
-    public static Payment create(PaymentType paymentType, PaymentStatus paymentStatus, BigDecimal paidAmount, Order order) {
+    public static Payment create(PaymentType paymentType,
+                                 CardType cardType,
+                                 CardNo cardNo,
+                                 PaymentStatus paymentStatus,
+                                 BigDecimal paidAmount,
+                                 Order order)
+    {
         Payment payment = new Payment();
-        payment.type = paymentType;
+        payment.paymentType = paymentType;
+        payment.cardType = cardType;
+        payment.cardNo = cardNo;
         payment.status = paymentStatus;
         payment.paidAmount = paidAmount;
         payment.order = order;
@@ -51,8 +66,6 @@ public class Payment extends BaseEntity {
             }
         }
     }
-
-
     public enum PaymentStatus {
         PENDING,
         SUCCESS,

@@ -26,7 +26,6 @@ public class PaymentFacade {
     private final CouponService couponService;
     private final PointService pointService;
 
-    @Transactional
     public PaymentInfo payment(PaymentCommand.Request paymentCommand) {
         Order order = orderService.findByIdForUpdate(paymentCommand.orderId());
 

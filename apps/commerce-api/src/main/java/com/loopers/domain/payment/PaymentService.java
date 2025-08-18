@@ -20,7 +20,7 @@ public class PaymentService {
         Order order = orderRepository.findById(paymentCommand.orderId())
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
 
-        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) == 0) {
+        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
             PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(paymentCommand.paymentType());
             if (!paymentProcessor.payment(order.getPaidAmount())) {
                 throw new PGPaymentException("PG사 응답 오류");
@@ -32,7 +32,13 @@ public class PaymentService {
         Order order = orderRepository.findById(paymentCommand.orderId())
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
 
-        Payment payment = Payment.create(paymentCommand.paymentType(), Payment.PaymentStatus.SUCCESS, order.getPaidAmount(), order);
+        Payment payment = Payment.create(
+                paymentCommand.paymentType(),
+                paymentCommand.cardType(),
+                paymentCommand.cardNo(),
+                Payment.PaymentStatus.SUCCESS,
+                order.getPaidAmount(),
+                order);
         paymentRepository.save(payment);
         return payment;
     }
