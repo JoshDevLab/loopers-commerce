@@ -1,0 +1,73 @@
+# PG 시뮬레이터 설정
+app:
+  pg-simulator:
+    base-url: "http://localhost:8082"
+    user-id: "commerce-api-default"
+    merchant-id: "LOOPERS_COMMERCE"
+    timeout:
+      connect: 3000
+      read: 15000
+    retry:
+      enabled: false  # 결제 요청은 재시도하지 않음
+    circuit-breaker:
+      name: "pg-simulator"
+      failure-rate-threshold: 60
+      wait-duration-in-open-state: 30s
+
+---
+# 로컬/개발 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local, dev
+
+app:
+  pg-simulator:
+    base-url: "http://localhost:8082"
+    user-id: "dev-commerce-api"
+    merchant-id: "DEV_LOOPERS_COMMERCE"
+
+---
+# 테스트 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: test
+
+app:
+  pg-simulator:
+    base-url: "http://localhost:8082"
+    user-id: "test-commerce-api"
+    merchant-id: "TEST_LOOPERS_COMMERCE"
+
+---
+# QA 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+app:
+  pg-simulator:
+    base-url: "https://pg-simulator-qa.loopers.com"
+    user-id: "qa-commerce-api"
+    merchant-id: "QA_LOOPERS_COMMERCE"
+
+---
+# 운영 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+app:
+  pg-simulator:
+    base-url: "https://pg-simulator.loopers.com"
+    user-id: "prd-commerce-api"
+    merchant-id: "LOOPERS_COMMERCE"
+    timeout:
+      connect: 2000
+      read: 10000
+    circuit-breaker:
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 60s

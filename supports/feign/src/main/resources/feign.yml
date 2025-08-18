@@ -1,0 +1,112 @@
+# Feign Client 기본 설정
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: full
+  
+  # Circuit Breaker 활성화
+  circuitbreaker:
+    enabled: true
+
+spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+# Resilience4j Circuit Breaker 설정
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+      
+      # PG 시스템용 Circuit Breaker 설정
+      pg-simulator:
+        failure-rate-threshold: 60  # PG 성공률이 60%이므로 여유있게 설정
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+
+  # Retry 설정
+  retry:
+    instances:
+      default:
+        max-attempts: 2
+        wait-duration: 1s
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+      
+      # PG 결제 요청은 재시도하지 않음 (중복 결제 방지)
+      pg-payment:
+        max-attempts: 1
+        
+      # PG 상태 조회는 재시도 허용
+      pg-status-check:
+        max-attempts: 3
+        wait-duration: 2s
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - feign.RetryableException
+
+  # Time Limiter 설정
+  timelimiter:
+    instances:
+      default:
+        timeout-duration: 10s
+      pg-simulator:
+        timeout-duration: 15s  # PG 응답 지연을 고려해 여유있게 설정
+
+---
+# 개발 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local, dev
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pg-simulator:
+        # 개발환경에서는 더 관대하게 설정
+        failure-rate-threshold: 70
+        wait-duration-in-open-state: 20s
+
+---
+# 운영 환경 설정  
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: basic
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pg-simulator:
+        # 운영환경에서는 더 엄격하게 설정
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 60s
