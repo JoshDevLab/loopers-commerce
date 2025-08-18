@@ -2,7 +2,7 @@
 app:
   pg-simulator:
     base-url: "http://localhost:8082"
-    user-id: "commerce-api-default"
+    user-id: 135135
     merchant-id: "LOOPERS_COMMERCE"
     timeout:
       connect: 3000
@@ -24,7 +24,7 @@ spring:
 app:
   pg-simulator:
     base-url: "http://localhost:8082"
-    user-id: "dev-commerce-api"
+    user-id: 135135
     merchant-id: "DEV_LOOPERS_COMMERCE"
 
 ---
@@ -37,7 +37,7 @@ spring:
 app:
   pg-simulator:
     base-url: "http://localhost:8082"
-    user-id: "test-commerce-api"
+    user-id: 135135
     merchant-id: "TEST_LOOPERS_COMMERCE"
 
 ---

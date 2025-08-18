@@ -17,9 +17,6 @@ public class PgSimulatorFeignConfig {
     @Value("${app.pg-simulator.user-id}")
     private String defaultUserId;
     
-    @Value("${app.pg-simulator.merchant-id}")
-    private String merchantId;
-    
     @Value("${app.pg-simulator.timeout.connect:3000}")
     private int connectTimeout;
     
@@ -51,9 +48,7 @@ public class PgSimulatorFeignConfig {
         return requestTemplate -> {
             requestTemplate.header("Content-Type", "application/json");
             requestTemplate.header("Accept", "application/json");
-            requestTemplate.header("X-Client-Name", "Commerce-API");
-            requestTemplate.header("X-Merchant-ID", merchantId);
-            
+
             // X-USER-ID 헤더가 없으면 기본값 설정
             if (!requestTemplate.headers().containsKey("X-USER-ID")) {
                 requestTemplate.header("X-USER-ID", defaultUserId);

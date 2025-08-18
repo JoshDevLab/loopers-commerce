@@ -3,6 +3,7 @@ package com.loopers.infrastructure.payment.pg.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class PgSimulatorErrorDecoder implements ErrorDecoder {
         try {
             if (response.body() != null) {
                 String body = new String(response.body().asInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                
+
                 try {
                     var errorNode = objectMapper.readTree(body);
                     
@@ -70,6 +71,7 @@ public class PgSimulatorErrorDecoder implements ErrorDecoder {
     }
 
     // PG 전용 내부 예외 클래스들
+    @Getter
     public static class PgClientException extends RuntimeException {
         private final int status;
 
@@ -78,11 +80,9 @@ public class PgSimulatorErrorDecoder implements ErrorDecoder {
             this.status = status;
         }
 
-        public int getStatus() {
-            return status;
-        }
     }
 
+    @Getter
     public static class PgServerException extends RuntimeException {
         private final int status;
 
@@ -91,8 +91,5 @@ public class PgSimulatorErrorDecoder implements ErrorDecoder {
             this.status = status;
         }
 
-        public int getStatus() {
-            return status;
-        }
     }
 }
