@@ -48,7 +48,8 @@ public enum ErrorType {
     PAYMENT_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "외부 결제 서버 오류입니다."),
     PRODUCT_LIST_CACHING_FAIL(HttpStatus.BAD_GATEWAY, HttpStatus.BAD_GATEWAY.getReasonPhrase(), "상품 목록 캐싱에 실패하였습니다."),
     INVALID_PAYMENT_REQUEST_TYPE(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "결제 벤더사에 맞지 않는 요청타입니다."),
-    INVALID_CARD_NO(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 형식의 카드번호 입니다.");
+    INVALID_CARD_NO(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 형식의 카드번호 입니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "결제 정보를 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;

@@ -6,6 +6,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -29,6 +30,7 @@ public class PaymentService {
         paymentProcessor.payment(request);
     }
 
+    @Transactional
     public Payment create(PaymentCommand.Request paymentCommand) {
         Order order = orderRepository.findById(paymentCommand.orderId())
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
@@ -37,7 +39,7 @@ public class PaymentService {
                 paymentCommand.paymentType(),
                 paymentCommand.cardType(),
                 paymentCommand.cardNo(),
-                Payment.PaymentStatus.SUCCESS,
+                Payment.PaymentStatus.PENDING,
                 order.getPaidAmount(),
                 order);
         paymentRepository.save(payment);
@@ -46,5 +48,13 @@ public class PaymentService {
 
     public boolean existsByOrderId(Long orderId) {
         return paymentRepository.existsByOrderId(orderId);
+    }
+
+    @Transactional
+    public Payment updateSuccessStatus(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.success();
+        return payment;
     }
 }

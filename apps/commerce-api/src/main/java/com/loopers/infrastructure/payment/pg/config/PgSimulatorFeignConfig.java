@@ -4,7 +4,6 @@ import feign.Logger;
 import feign.Request;
 import feign.RequestInterceptor;
 import feign.Retryer;
-import feign.codec.ErrorDecoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,8 +59,4 @@ public class PgSimulatorFeignConfig {
         };
     }
 
-    @Bean
-    public ErrorDecoder pgSimulatorErrorDecoder() {
-        return new PgSimulatorErrorDecoder();
-    }
 }

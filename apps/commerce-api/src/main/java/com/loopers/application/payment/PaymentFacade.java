@@ -4,7 +4,6 @@ import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.inventory.InventoryService;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderService;
-import com.loopers.domain.payment.PGPaymentException;
 import com.loopers.domain.payment.Payment;
 import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.domain.payment.PaymentService;
@@ -32,18 +31,22 @@ public class PaymentFacade {
             throw new CoreException(ErrorType.ALREADY_EXIST_ORDER_PAYMENT, order.getId() + " 는 이미 결제가 완료된 주문입니다.");
         }
 
+        Payment payment = paymentService.create(paymentCommand);
+
         try {
             paymentService.payment(paymentCommand);
-        } catch (PGPaymentException e) {
+        } catch (CoreException e) {
             log.error("외부 PG 결제 실패", e);
             recoveryAll(paymentCommand.orderId());
             throw new CoreException(ErrorType.PAYMENT_FAIL, "외부 결제 실패로 복구 처리함");
         }
+
         order.complete();
-        Payment payment = paymentService.create(paymentCommand);
-        return PaymentInfo.of(payment);
+        Payment updated = paymentService.updateSuccessStatus(payment.getId());
+        return PaymentInfo.of(updated);
     }
 
+    // Todo: 이벤트 발행 코드로 변경
     private void recoveryAll(Long orderId) {
         orderService.cancel(orderId);
         inventoryService.recovery(orderId);

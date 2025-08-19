@@ -55,6 +55,10 @@ public class Payment extends BaseEntity {
         return payment;
     }
 
+    public void success() {
+        this.status = PaymentStatus.SUCCESS;
+    }
+
     public enum PaymentType {
         CARD,
         BANK_TRANSFER,      // 무통장입금 (계좌이체)

@@ -1,9 +1,12 @@
 package com.loopers.domain.payment;
 
+import lombok.Getter;
+
 import java.math.BigDecimal;
 
-public class ExternalPaymentRequest {
-    BigDecimal amount;
+@Getter
+public abstract class ExternalPaymentRequest {
+    protected BigDecimal amount;
 
     public ExternalPaymentRequest(BigDecimal amount) {
         this.amount = amount;
