@@ -71,6 +71,6 @@ public class PaymentFacade {
         // 알림 발송
         notificationService.sendPaymentSyncFailureAlert(command);
         
-        throw new PaymentProcessingException("콜백 데이터 동기화 최종 실패 - 수동 확인 필요", ex);
+        throw new CoreException(ErrorType.PAYMENT_FAIL, "콜백 데이터 동기화 최종 실패 - transactionKey: " + command.transactionKey());
     }
 }
