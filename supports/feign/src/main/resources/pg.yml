@@ -4,13 +4,13 @@ app:
     base-url: "http://localhost:8082"
     user-id: 135135
     timeout:
-      connect: 3000
-      read: 15000
+      connect: 500    # 요청 지연 100ms ~ 500ms 고려하여 500ms로 설정
+      read: 6000      # 처리 지연 1s ~ 5s 고려하여 6초로 설정 (여유분 포함)
     retry:
       enabled: false  # 결제 요청은 재시도하지 않음
     circuit-breaker:
-      name: "pg-simulator"
-      failure-rate-threshold: 60
+      name: "pgPayment"
+      failure-rate-threshold: 50
       wait-duration-in-open-state: 30s
 
 ---
@@ -24,7 +24,9 @@ app:
   pg-simulator:
     base-url: "http://localhost:8082"
     user-id: 135135
-    merchant-id: "DEV_LOOPERS_COMMERCE"
+    timeout:
+      connect: 500
+      read: 6000
 
 ---
 # 테스트 환경 설정
@@ -37,7 +39,9 @@ app:
   pg-simulator:
     base-url: "http://localhost:8082"
     user-id: 135135
-    merchant-id: "TEST_LOOPERS_COMMERCE"
+    timeout:
+      connect: 500
+      read: 6000
 
 ---
 # QA 환경 설정
@@ -50,7 +54,9 @@ app:
   pg-simulator:
     base-url: "https://pg-simulator-qa.loopers.com"
     user-id: "qa-commerce-api"
-    merchant-id: "QA_LOOPERS_COMMERCE"
+    timeout:
+      connect: 400    # 네트워크가 안정적이므로 조금 줄임
+      read: 5000
 
 ---
 # 운영 환경 설정
@@ -63,10 +69,6 @@ app:
   pg-simulator:
     base-url: "https://pg-simulator.loopers.com"
     user-id: "prd-commerce-api"
-    merchant-id: "LOOPERS_COMMERCE"
     timeout:
-      connect: 2000
-      read: 10000
-    circuit-breaker:
-      failure-rate-threshold: 50
-      wait-duration-in-open-state: 60s
+      connect: 300    # 운영에서는 더 짧게
+      read: 4000

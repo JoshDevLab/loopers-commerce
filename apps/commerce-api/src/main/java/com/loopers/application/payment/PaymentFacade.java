@@ -27,7 +27,7 @@ public class PaymentFacade {
     public PaymentInfo payment(PaymentCommand.Request paymentCommand) {
         Order order = orderService.findByIdForUpdate(paymentCommand.orderId());
 
-        if (paymentService.existsByOrderId(order.getId())) {
+        if (paymentService.existsByOrderIdAndStatus(order.getId(), Payment.PaymentStatus.SUCCESS)) {
             throw new CoreException(ErrorType.ALREADY_EXIST_ORDER_PAYMENT, order.getId() + " 는 이미 결제가 완료된 주문입니다.");
         }
 

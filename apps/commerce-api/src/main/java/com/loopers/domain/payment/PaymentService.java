@@ -46,8 +46,8 @@ public class PaymentService {
         return payment;
     }
 
-    public boolean existsByOrderId(Long orderId) {
-        return paymentRepository.existsByOrderId(orderId);
+    public boolean existsByOrderIdAndStatus(Long orderId, Payment.PaymentStatus status) {
+        return paymentRepository.existsByOrderIdAndStatus(orderId, status);
     }
 
     @Transactional

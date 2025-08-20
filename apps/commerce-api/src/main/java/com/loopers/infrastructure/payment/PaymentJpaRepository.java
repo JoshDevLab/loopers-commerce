@@ -4,5 +4,5 @@ import com.loopers.domain.payment.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PaymentJpaRepository extends JpaRepository<Payment, Long> {
-    boolean existsByOrderId(Long orderId);
+    boolean existsByOrderIdAndStatus(Long order_id, Payment.PaymentStatus status);
 }

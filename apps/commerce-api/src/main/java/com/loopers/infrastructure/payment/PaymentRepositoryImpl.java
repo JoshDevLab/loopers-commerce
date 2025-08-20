@@ -18,8 +18,8 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public boolean existsByOrderId(Long orderId) {
-        return paymentJpaRepository.existsByOrderId(orderId);
+    public boolean existsByOrderIdAndStatus(Long orderId, Payment.PaymentStatus status) {
+        return paymentJpaRepository.existsByOrderIdAndStatus(orderId, status);
     }
 
     @Override

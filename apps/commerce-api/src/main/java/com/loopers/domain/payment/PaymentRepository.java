@@ -5,7 +5,7 @@ import java.util.Optional;
 public interface PaymentRepository {
     Payment save(Payment payment);
 
-    boolean existsByOrderId(Long orderId);
+    boolean existsByOrderIdAndStatus(Long orderId, Payment.PaymentStatus status);
 
     Optional<Payment> findById(Long paymentId);
 }

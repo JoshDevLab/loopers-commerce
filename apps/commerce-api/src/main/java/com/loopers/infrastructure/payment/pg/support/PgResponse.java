@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * PG 시뮬레이터 API 응답 구조에 맞는 Response 클래스
+ */
 @Setter
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -11,19 +14,19 @@ public class PgResponse<T> {
     private Meta meta;
     private T data;
 
-    // 성공 여부 확인 메서드 추가
+    // 성공 여부 확인 메서드
     public boolean isSuccess() {
-        return meta != null && "SUCCESS".equals(meta.getResult());
+        return meta != null && Meta.Result.SUCCESS.equals(meta.getResult());
     }
 
-    // 실패 여부 확인 메서드 추가  
+    // 실패 여부 확인 메서드  
     public boolean isFailure() {
         return !isSuccess();
     }
 
     // result 값을 직접 가져오는 편의 메서드
     public String getResult() {
-        return meta != null ? meta.getResult() : null;
+        return meta != null && meta.getResult() != null ? meta.getResult().name() : null;
     }
 
     // errorCode 값을 직접 가져오는 편의 메서드
@@ -43,7 +46,7 @@ public class PgResponse<T> {
         }
         
         StringBuilder sb = new StringBuilder();
-        sb.append("Result: ").append(meta.getResult());
+        sb.append("Result: ").append(getResult());
         
         if (meta.getErrorCode() != null) {
             sb.append(", ErrorCode: ").append(meta.getErrorCode());
@@ -60,8 +63,12 @@ public class PgResponse<T> {
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Meta {
-        private String result;
+        private Result result;
         private String errorCode;
         private String message;
+        
+        public enum Result {
+            SUCCESS, FAIL
+        }
     }
 }

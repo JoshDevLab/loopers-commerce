@@ -1,0 +1,184 @@
+# Resilience4j 공통 설정
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        # 기본 Circuit Breaker 설정
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        max-wait-duration-in-half-open-state: 10s
+        automatic-transition-from-open-to-half-open-enabled: true
+        # 공통 예외 설정
+        record-exceptions:
+          - feign.FeignException.InternalServerError
+          - feign.FeignException.ServiceUnavailable
+          - feign.FeignException.GatewayTimeout
+          - java.net.SocketTimeoutException
+          - java.net.ConnectException
+        ignore-exceptions:
+          - feign.FeignException.BadRequest
+          - feign.FeignException.Unauthorized
+          - feign.FeignException.Forbidden
+          - feign.FeignException.NotFound
+    instances:
+      # PG 결제 전용 Circuit Breaker
+      pgPayment:
+        base-config: default
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        sliding-window-size: 10
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        # PG 전용 예외 설정
+        record-exceptions:
+          - com.loopers.infrastructure.payment.pg.exception.PgServerErrorException
+          - com.loopers.infrastructure.payment.pg.exception.PgServiceUnavailableException  
+          - com.loopers.infrastructure.payment.pg.exception.PgTimeoutException
+          - com.loopers.infrastructure.payment.pg.exception.PgGeneralException
+          - feign.FeignException.InternalServerError
+          - feign.FeignException.ServiceUnavailable
+          - feign.FeignException.GatewayTimeout
+          - java.net.SocketTimeoutException
+          - java.net.ConnectException
+        ignore-exceptions:
+          - com.loopers.infrastructure.payment.pg.exception.PgBadRequestException
+          - com.loopers.infrastructure.payment.pg.exception.PgValidationException
+          - com.loopers.infrastructure.payment.pg.exception.PgBusinessException
+          - feign.FeignException.BadRequest
+          - feign.FeignException.Unauthorized
+          - feign.FeignException.Forbidden
+          - feign.FeignException.NotFound
+
+  retry:
+    configs:
+      default:
+        # 기본 Retry 설정 (대부분의 API 호출용)
+        max-attempts: 3
+        wait-duration: 1000ms
+        retry-exceptions:
+          - feign.FeignException.InternalServerError
+          - feign.FeignException.ServiceUnavailable
+          - feign.FeignException.GatewayTimeout
+          - java.net.SocketTimeoutException
+          - java.net.ConnectException
+        ignore-exceptions:
+          - feign.FeignException.BadRequest
+          - feign.FeignException.Unauthorized
+          - feign.FeignException.Forbidden
+          - feign.FeignException.NotFound
+    instances:
+      # PG 결제는 재시도 금지
+      pgPayment:
+        max-attempts: 1
+        wait-duration: 0ms
+        enable-exponential-backoff: false
+        ignore-exceptions:
+          - java.lang.Exception  # 모든 예외에 대해 재시도하지 않음
+
+  timelimiter:
+    configs:
+      default:
+        # 기본 타임아웃 설정
+        timeout-duration: 10s
+        cancel-running-future: true
+    instances:
+      # PG 결제 전용 타임아웃
+      pgPayment:
+        timeout-duration: 8s
+        cancel-running-future: true
+
+# 모니터링 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,retries,timelimiters
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  health:
+    circuitbreakers:
+      enabled: true
+    retries:
+      enabled: true
+    timelimiters:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name:unknown}
+    export:
+      prometheus:
+        enabled: true
+
+---
+# 로컬/개발 환경
+spring:
+  config:
+    activate:
+      on-profile: local, dev
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pgPayment:
+        failure-rate-threshold: 60  # 로컬에서는 좀 더 관대하게
+        minimum-number-of-calls: 3  # 로컬에서는 더 적은 호출로 테스트
+
+---
+# 테스트 환경
+spring:
+  config:
+    activate:
+      on-profile: test
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pgPayment:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+
+---
+# QA 환경
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pgPayment:
+        failure-rate-threshold: 45
+        minimum-number-of-calls: 8
+        wait-duration-in-open-state: 45s
+
+  timelimiter:
+    instances:
+      pgPayment:
+        timeout-duration: 7s
+
+---
+# 운영 환경
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      pgPayment:
+        failure-rate-threshold: 40  # 운영에서는 더 엄격하게
+        minimum-number-of-calls: 10 # 운영에서는 더 많은 데이터로 판단
+        wait-duration-in-open-state: 60s
+
+  timelimiter:
+    instances:
+      pgPayment:
+        timeout-duration: 6s    # 운영에서는 더 짧게

@@ -1,62 +1,30 @@
 package com.loopers.infrastructure.payment.pg.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.loopers.infrastructure.payment.pg.exception.PgErrorDecoder;
 import feign.Logger;
-import feign.Request;
-import feign.RequestInterceptor;
-import feign.Retryer;
-import org.springframework.beans.factory.annotation.Value;
+import feign.codec.ErrorDecoder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.TimeUnit;
-
 @Configuration
+@RequiredArgsConstructor
 public class PgSimulatorFeignConfig {
 
-    @Value("${app.pg-simulator.user-id:135135}")
-    private String defaultUserId;
-    
-    @Value("${app.pg-simulator.timeout.connect:3000}")
-    private int connectTimeout;
-    
-    @Value("${app.pg-simulator.timeout.read:15000}")
-    private int readTimeout;
+    private final ObjectMapper objectMapper;
 
     @Bean
-    public Logger.Level pgSimulatorLoggerLevel() {
+    public Logger.Level feignLoggerLevel() {
         return Logger.Level.FULL;
     }
 
+    /**
+     * PG 시뮬레이터 전용 ErrorDecoder
+     * HTTP 에러 응답을 적절한 PG 예외로 변환
+     */
     @Bean
-    public Request.Options pgSimulatorOptions() {
-        return new Request.Options(
-                connectTimeout, TimeUnit.MILLISECONDS,   // connect timeout
-                readTimeout, TimeUnit.MILLISECONDS,      // read timeout
-                true                                     // follow redirects
-        );
+    public ErrorDecoder errorDecoder() {
+        return new PgErrorDecoder(objectMapper);
     }
-
-    @Bean
-    public Retryer pgSimulatorRetryer() {
-        // PG 결제는 중복 방지를 위해 재시도 하지 않음
-        return Retryer.NEVER_RETRY;
-    }
-
-    @Bean
-    public RequestInterceptor pgSimulatorRequestInterceptor() {
-        return requestTemplate -> {
-            requestTemplate.header("Content-Type", "application/json");
-            requestTemplate.header("Accept", "application/json");
-
-            // X-USER-ID 헤더가 없으면 기본값 설정
-            if (!requestTemplate.headers().containsKey("X-USER-ID")) {
-                requestTemplate.header("X-USER-ID", defaultUserId);
-            }
-            
-            // 요청 추적을 위한 ID 추가
-            String requestId = "PG_REQ_" + System.currentTimeMillis();
-            requestTemplate.header("X-Request-ID", requestId);
-        };
-    }
-
 }

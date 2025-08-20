@@ -17,10 +17,14 @@ dependencies {
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 
+    // aop for circuit breaker
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:redis")))
-
-    implementation("org.springframework.boot:spring-boot-starter-aop")
+    
+    // test dependencies for wiremock
+    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
 
 }
