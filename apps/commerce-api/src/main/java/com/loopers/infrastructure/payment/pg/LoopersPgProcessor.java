@@ -4,13 +4,10 @@ import com.loopers.domain.payment.*;
 import com.loopers.infrastructure.payment.pg.exception.PgBusinessException;
 import com.loopers.infrastructure.payment.pg.exception.PgException;
 import com.loopers.infrastructure.payment.pg.exception.PgGeneralException;
-import com.loopers.infrastructure.payment.pg.exception.PgServerErrorException;
-import com.loopers.infrastructure.payment.pg.exception.PgServiceUnavailableException;
 import com.loopers.infrastructure.payment.pg.support.PgResponse;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +43,6 @@ public class LoopersPgProcessor implements PaymentProcessor {
 
     @Override
     @CircuitBreaker(name = "pgPayment", fallbackMethod = "paymentFallback")
-    @TimeLimiter(name = "pgPayment")
     public ExternalPaymentResponse payment(ExternalPaymentRequest paymentRequest) {
         if (!(paymentRequest instanceof LoopersPgFeginClient.LoopersPaymentRequest loopersPaymentRequest)) {
             throw new CoreException(ErrorType.INVALID_PAYMENT_REQUEST_TYPE, "결제 벤더사에 맞지 않는 요청타입 입니다.");
@@ -104,7 +100,6 @@ public class LoopersPgProcessor implements PaymentProcessor {
 
     @Override
     @CircuitBreaker(name = "pgPayment", fallbackMethod = "getByTransactionKeyFallback")
-    @TimeLimiter(name = "pgPayment")
     public ExternalPaymentResponse getByTransactionKey(String transactionId) {
         log.info("Requesting payment status from PG - TransactionKey: {}", transactionId);
         

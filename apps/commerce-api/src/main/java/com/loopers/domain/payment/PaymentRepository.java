@@ -8,4 +8,6 @@ public interface PaymentRepository {
     boolean existsByOrderIdAndStatus(Long orderId, Payment.PaymentStatus status);
 
     Optional<Payment> findById(Long paymentId);
+
+    Optional<Payment> findByPgTransactionId(String transactionKey);
 }

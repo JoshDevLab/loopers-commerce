@@ -3,13 +3,17 @@ package com.loopers.interfaces.api.payment;
 import com.loopers.application.payment.PaymentFacade;
 import com.loopers.application.payment.PaymentInfo;
 import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.interfaces.api.payment.dto.PaymentCallbackRequest;
 import com.loopers.interfaces.api.payment.dto.PaymentRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/payment")
@@ -19,5 +23,10 @@ public class PaymentV1Controller {
     @PostMapping
     public ApiResponse<PaymentInfo> payment(@RequestBody PaymentRequest paymentRequest) {
         return ApiResponse.success(paymentFacade.payment(paymentRequest.toCommand()));
+    }
+
+    @PostMapping("/callback")
+    public ApiResponse<PaymentInfo> receivePaymentCallback(@RequestBody PaymentCallbackRequest callbackRequest) {
+        return ApiResponse.success(paymentFacade.processCallback(callbackRequest.toCommand()));
     }
 }

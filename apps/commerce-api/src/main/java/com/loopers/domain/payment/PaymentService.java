@@ -17,7 +17,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentProcessorManager paymentProcessorManager;
 
-    public void payment(PaymentCommand.Request paymentCommand) {
+    public ExternalPaymentResponse payment(PaymentCommand.Request paymentCommand) {
         Order order = orderRepository.findById(paymentCommand.orderId())
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
 
@@ -27,7 +27,7 @@ public class PaymentService {
 
         PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(paymentCommand.paymentType());
         ExternalPaymentRequest request = paymentProcessor.createRequest(paymentCommand, order.getPaidAmount());
-        paymentProcessor.payment(request);
+        return paymentProcessor.payment(request);
     }
 
     @Transactional
@@ -56,5 +56,32 @@ public class PaymentService {
                 .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
         payment.success();
         return payment;
+    }
+
+    @Transactional
+    public void updateTransactionId(Long paymentId, String transactionId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.updateTransactionId(transactionId);
+    }
+
+    public Payment findByTransactionId(String transactionKey) {
+        return paymentRepository.findByPgTransactionId(transactionKey)
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+    }
+
+    @Transactional
+    public Payment updateFailedStatus(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.failed();
+        return payment;
+    }
+
+    public ExternalPaymentResponse getTransactionIdFromExternal(String transactionKey) {
+        Payment payment = paymentRepository.findByPgTransactionId(transactionKey)
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        PaymentProcessor processor = paymentProcessorManager.getProcessor(payment.getPaymentType());
+        return processor.getByTransactionKey(transactionKey);
     }
 }

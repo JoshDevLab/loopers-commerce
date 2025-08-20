@@ -10,5 +10,19 @@ public class PaymentCommand {
             CardNo cardNo,
             String callbackUrl
     ) {}
+
+    public record CallbackRequest(
+            String transactionKey,
+            String orderId,
+            String cardType,
+            String cardNo,
+            Long amount,
+            String status,
+            String reason
+    ) {
+        public boolean isSuccess() {
+            return status.equals("SUCCESS");
+        }
+    }
 }
 

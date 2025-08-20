@@ -78,6 +78,15 @@ resilience4j:
         enable-exponential-backoff: false
         ignore-exceptions:
           - java.lang.Exception  # 모든 예외에 대해 재시도하지 않음
+      
+      # 결제 콜백 동기화 재시도
+      payment-callback-sync:
+        max-attempts: 3
+        wait-duration: 2s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2  # 2초 → 4초 → 8초
+        retry-exceptions:
+          - com.loopers.application.payment.DataSyncException
 
   timelimiter:
     configs:
@@ -126,8 +135,8 @@ resilience4j:
   circuitbreaker:
     instances:
       pgPayment:
-        failure-rate-threshold: 60  # 로컬에서는 좀 더 관대하게
-        minimum-number-of-calls: 3  # 로컬에서는 더 적은 호출로 테스트
+        failure-rate-threshold: 60
+        minimum-number-of-calls: 3
 
 ---
 # 테스트 환경
@@ -174,11 +183,11 @@ resilience4j:
   circuitbreaker:
     instances:
       pgPayment:
-        failure-rate-threshold: 40  # 운영에서는 더 엄격하게
-        minimum-number-of-calls: 10 # 운영에서는 더 많은 데이터로 판단
+        failure-rate-threshold: 40
+        minimum-number-of-calls: 10
         wait-duration-in-open-state: 60s
 
   timelimiter:
     instances:
       pgPayment:
-        timeout-duration: 6s    # 운영에서는 더 짧게
+        timeout-duration: 6s

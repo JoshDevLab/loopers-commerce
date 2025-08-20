@@ -26,4 +26,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public Optional<Payment> findById(Long paymentId) {
         return paymentJpaRepository.findById(paymentId);
     }
+
+    @Override
+    public Optional<Payment> findByPgTransactionId(String transactionKey) {
+        return paymentJpaRepository.findByPgTransactionId(transactionKey);
+    }
 }

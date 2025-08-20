@@ -1,9 +1,7 @@
 package com.loopers.infrastructure.payment.pg;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.loopers.domain.payment.CardType;
-import com.loopers.domain.payment.ExternalPaymentRequest;
-import com.loopers.domain.payment.ExternalPaymentResponse;
+import com.loopers.domain.payment.*;
 import com.loopers.infrastructure.payment.pg.config.PgSimulatorFeignConfig;
 import com.loopers.infrastructure.payment.pg.support.PgResponse;
 import com.loopers.interfaces.api.payment.dto.CardNo;
@@ -129,11 +127,10 @@ public interface LoopersPgFeginClient {
         }
 
         public PgPaymentRequest toPgRequest() {
-            // PG 시뮬레이터가 요구하는 카드번호 형식: xxxx-xxxx-xxxx-xxxx
             String formattedCardNo = formatCardNumber(cardNo.getValue());
             
             return new PgPaymentRequest(
-                    orderId.toString(),
+                    PgOrderIdGenerator.generate(orderId),
                     cardType.name(),
                     formattedCardNo,
                     super.getAmount().longValue(),
@@ -166,7 +163,13 @@ public interface LoopersPgFeginClient {
         public String getTransactionId() {
             return transactionKey;
         }
-        
+
+        @Override
+        public boolean checkSync(PaymentCommand.CallbackRequest command) {
+            return this.transactionKey.equals(command.transactionKey())
+                    && command.status().equals(this.status);
+        }
+
         public boolean isSuccess() {
             return "SUCCESS".equals(status);
         }
@@ -196,6 +199,14 @@ public interface LoopersPgFeginClient {
         @Override
         public String getTransactionId() {
             return transactionKey;
+        }
+
+        @Override
+        public boolean checkSync(PaymentCommand.CallbackRequest command) {
+            return this.transactionKey.equals(command.transactionKey())
+                    && this.orderId.equals(command.orderId())
+                    && this.amount.equals(command.amount())
+                    && command.status().equals(this.status);
         }
 
         public boolean isSuccess() {
