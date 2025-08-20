@@ -19,6 +19,7 @@ public class PaymentFacade {
     private final OrderPaymentProcessor orderPaymentProcessor;
     private final PaymentEventPublisher paymentEventPublisher;
     private final NotificationService notificationService;
+    private final PaymentExceptionTranslator exceptionTranslator;
 
     public PaymentInfo payment(PaymentCommand.Request paymentCommand) {
         ExternalPaymentResponse response;
@@ -31,7 +32,9 @@ public class PaymentFacade {
         Payment payment = paymentService.create(paymentCommand);
 
         try {
-            response = paymentService.payment(paymentCommand);
+            response = exceptionTranslator.execute(
+                () -> paymentService.payment(paymentCommand)
+            );
         } catch (CoreException e) {
             log.error("외부 PG 결제 실패", e);
             paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(order.getId()));
@@ -46,7 +49,10 @@ public class PaymentFacade {
     public PaymentInfo processCallback(PaymentCommand.CallbackRequest command) {
         log.info("콜백 데이터 동기화 시도 - transactionKey: {}", command.transactionKey());
         
-        ExternalPaymentResponse response = paymentService.getTransactionIdFromExternal(command.transactionKey());
+        ExternalPaymentResponse response = exceptionTranslator.executeForCallback(
+            () -> paymentService.getTransactionIdFromExternal(command.transactionKey())
+        );
+        
         boolean isSync = response.checkSync(command);
         
         if (!isSync) {
