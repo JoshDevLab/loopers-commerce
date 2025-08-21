@@ -2,10 +2,10 @@ dependencies {
     // add-ons
     implementation(project(":modules:jpa"))
     implementation(project(":modules:redis"))
+    implementation(project(":modules:feign"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
-    implementation(project(":supports:feign"))
 
     // web
     implementation("org.springframework.boot:spring-boot-starter-web")

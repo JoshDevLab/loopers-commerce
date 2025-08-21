@@ -75,7 +75,6 @@ resilience4j:
       pgPayment:
         max-attempts: 1
         wait-duration: 0ms
-        enable-exponential-backoff: false
         ignore-exceptions:
           - java.lang.Exception  # 모든 예외에 대해 재시도하지 않음
       
@@ -83,7 +82,6 @@ resilience4j:
       payment-callback-sync:
         max-attempts: 3
         wait-duration: 2s
-        enable-exponential-backoff: true
         exponential-backoff-multiplier: 2  # 2초 → 4초 → 8초
         retry-exceptions:
           - com.loopers.application.payment.DataSyncException

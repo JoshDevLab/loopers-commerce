@@ -4,10 +4,10 @@ include(
     ":apps:commerce-api",
     ":modules:jpa",
     ":modules:redis",
+    ":modules:feign",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
-    ":supports:feign",
     ":apps:pg-simulator"
 )
 
