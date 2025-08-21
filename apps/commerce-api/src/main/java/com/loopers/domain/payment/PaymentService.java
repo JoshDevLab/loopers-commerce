@@ -1,15 +1,22 @@
 package com.loopers.domain.payment;
 
+import com.loopers.application.payment.PaymentInfo;
+import com.loopers.application.payment.PaymentSyncScheduler;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
@@ -83,5 +90,61 @@ public class PaymentService {
                 .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
         PaymentProcessor processor = paymentProcessorManager.getProcessor(payment.getPaymentType());
         return processor.getByTransactionKey(transactionKey);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Payment> findPendingPayments() {
+        return paymentRepository.findByStatus(Payment.PaymentStatus.PENDING);
+    }
+
+    public boolean hasSyncPaymentStatus(Payment payment) {
+        try {
+            PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(payment.getPaymentType());
+            ExternalPaymentResponse response = paymentProcessor.getByTransactionKey(payment.getTransactionId());
+
+            if (response == null || !response.isSuccess()) {
+                return false;
+            }
+
+            // PG 상태를 내부 상태로 변환
+            Payment.PaymentStatus newStatus = convertPgStatusToPaymentStatus(response.getStatus());
+
+            if (newStatus == Payment.PaymentStatus.PENDING) {
+                return true;
+            }
+
+            int updatedRows = paymentRepository.updatePaymentStatus(
+                    payment.getId(),
+                    newStatus,
+                    LocalDateTime.now()
+            );
+
+            if (updatedRows > 0) {
+
+                // 결제 완료 시 후속 처리
+                if (newStatus == Payment.PaymentStatus.SUCCESS) {
+                    return true;
+                } else return newStatus != Payment.PaymentStatus.FAILED;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            log.error("결제 상태 동기화 중 오류 발생: paymentId={}", payment.getId(), e);
+            return false;
+        }
+    }
+
+    private Payment.PaymentStatus convertPgStatusToPaymentStatus(String pgStatus) {
+        return switch (pgStatus.toUpperCase()) {
+            case "SUCCESS", "COMPLETED", "PAID" -> Payment.PaymentStatus.SUCCESS;
+            case "FAILED", "CANCELLED", "REJECTED" -> Payment.PaymentStatus.FAILED;
+            case "CANCELED" -> Payment.PaymentStatus.CANCELED;
+            case "PENDING", "PROCESSING", "IN_PROGRESS" -> Payment.PaymentStatus.PENDING;
+            default -> {
+                log.warn("알 수 없는 PG 상태: {}", pgStatus);
+                yield Payment.PaymentStatus.PENDING;
+            }
+        };
     }
 }

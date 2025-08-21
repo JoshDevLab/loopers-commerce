@@ -1,0 +1,98 @@
+# Loopers 스케줄링 설정
+loopers:
+  scheduling:
+    # 스레드 풀 크기
+    pool-size: 10
+    # 스레드 이름 접두사
+    thread-name-prefix: "loopers-scheduler-"
+    # 종료 시 대기 시간 (초)
+    await-termination-seconds: 30
+    # 종료 시 작업 완료까지 대기 여부
+    wait-for-tasks-to-complete-on-shutdown: true
+
+# Spring 기본 스케줄링 설정
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 10
+      thread-name-prefix: "spring-scheduler-"
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+
+# 스케줄링 작업 설정
+scheduling:
+  tasks:
+    # 결제 상태 동기화 작업
+    payment-sync:
+      enabled: true
+      pending-check-minutes: 10  # 10분 이상 PENDING 상태일 때 알림
+
+# 환경별 설정
+---
+# 로컬/개발 환경
+spring:
+  config:
+    activate:
+      on-profile: local, dev
+
+loopers:
+  scheduling:
+    pool-size: 5
+
+scheduling:
+  tasks:
+    payment-sync:
+      enabled: true   # 로컬에서는 결제 동기화 활성화 (테스트용)
+
+---
+# 테스트 환경
+spring:
+  config:
+    activate:
+      on-profile: test
+
+loopers:
+  scheduling:
+    pool-size: 3
+    await-termination-seconds: 10
+
+scheduling:
+  tasks:
+    payment-sync:
+      enabled: false  # 테스트에서는 비활성화
+
+---
+# QA 환경
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+loopers:
+  scheduling:
+    pool-size: 8
+    await-termination-seconds: 45
+
+scheduling:
+  tasks:
+    payment-sync:
+      enabled: true
+
+---
+# 운영 환경
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+loopers:
+  scheduling:
+    pool-size: 15
+    await-termination-seconds: 60
+
+scheduling:
+  tasks:
+    payment-sync:
+      enabled: true

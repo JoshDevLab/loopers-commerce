@@ -3,6 +3,7 @@ dependencies {
     implementation(project(":modules:jpa"))
     implementation(project(":modules:redis"))
     implementation(project(":modules:feign"))
+    implementation(project(":modules:scheduling"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
@@ -17,7 +18,6 @@ dependencies {
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 
-    // aop for circuit breaker
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
     // test-fixtures

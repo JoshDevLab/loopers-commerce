@@ -5,6 +5,8 @@ import com.loopers.domain.payment.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -30,5 +32,15 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public Optional<Payment> findByPgTransactionId(String transactionKey) {
         return paymentJpaRepository.findByPgTransactionId(transactionKey);
+    }
+
+    @Override
+    public List<Payment> findByStatus(Payment.PaymentStatus status) {
+        return paymentJpaRepository.findByStatus(status);
+    }
+
+    @Override
+    public int updatePaymentStatus(Long paymentId, Payment.PaymentStatus status, LocalDateTime updatedAt) {
+        return paymentJpaRepository.updatePaymentStatus(paymentId, status, updatedAt);
     }
 }

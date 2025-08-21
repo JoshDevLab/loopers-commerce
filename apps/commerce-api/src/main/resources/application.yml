@@ -25,6 +25,7 @@ spring:
       - monitoring.yml
       - feign.yml
       - pg.yml
+      - scheduling.yml
 
 springdoc:
   use-fqn: true
@@ -36,6 +37,11 @@ spring:
   config:
     activate:
       on-profile: local, test
+
+# 테스트 스케줄러 활성화 (로컬 환경)
+scheduling:
+  test:
+    enabled: true
 
 ---
 spring:

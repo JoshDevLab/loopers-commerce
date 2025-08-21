@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "payment")
 public class Payment extends BaseEntity {
-    private String pgTransactionId;
+    private String transactionId;
 
     private String callbackUrl;
 
@@ -64,7 +64,7 @@ public class Payment extends BaseEntity {
     }
 
     public void updateTransactionId(String transactionId) {
-        this.pgTransactionId = transactionId;
+        this.transactionId = transactionId;
     }
 
     public enum PaymentType {

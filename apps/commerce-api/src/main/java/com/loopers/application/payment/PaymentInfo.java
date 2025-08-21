@@ -20,6 +20,7 @@ public class PaymentInfo {
     private Payment.PaymentType type;
     private Payment.PaymentStatus status;
     private BigDecimal paidAmount;
+    private String transactionId;
 
     public static PaymentInfo of(Payment payment) {
         return new PaymentInfo(payment.getId(),
@@ -28,6 +29,8 @@ public class PaymentInfo {
                 payment.getCardNo(),
                 payment.getPaymentType(),
                 payment.getStatus(),
-                payment.getPaidAmount());
+                payment.getPaidAmount()
+                payment.getTransactionId()
+        );
     }
 }

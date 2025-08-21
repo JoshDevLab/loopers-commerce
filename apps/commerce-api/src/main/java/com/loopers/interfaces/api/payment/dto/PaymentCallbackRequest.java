@@ -4,6 +4,8 @@ import com.loopers.domain.payment.PaymentCommand;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+
 /**
  * PG 시뮬레이터에서 전송하는 콜백 데이터
  */
@@ -14,7 +16,7 @@ public class PaymentCallbackRequest {
     private String orderId;
     private String cardType;
     private String cardNo;
-    private Long amount;
+    private BigDecimal amount;
     private String status;
     private String reason;
 

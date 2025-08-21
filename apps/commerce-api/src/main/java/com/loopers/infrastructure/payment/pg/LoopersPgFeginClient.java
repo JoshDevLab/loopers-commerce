@@ -170,8 +170,19 @@ public interface LoopersPgFeginClient {
                     && command.status().equals(this.status);
         }
 
+        @Override
         public boolean isSuccess() {
             return "SUCCESS".equals(status);
+        }
+        
+        @Override
+        public String getStatus() {
+            return status;
+        }
+        
+        @Override
+        public String getReason() {
+            return reason;
         }
         
         public boolean isFailed() {
@@ -209,8 +220,24 @@ public interface LoopersPgFeginClient {
                     && command.status().equals(this.status);
         }
 
+        @Override
         public boolean isSuccess() {
             return "SUCCESS".equals(status);
+        }
+
+        @Override
+        public String getStatus() {
+            return status;
+        }
+        
+        @Override
+        public String getReason() {
+            return reason;
+        }
+        
+        @Override
+        public BigDecimal getAmount() {
+            return amount != null ? BigDecimal.valueOf(amount) : null;
         }
 
         public boolean isFailed() {

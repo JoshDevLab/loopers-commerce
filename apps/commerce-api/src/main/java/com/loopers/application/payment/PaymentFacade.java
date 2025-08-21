@@ -48,8 +48,6 @@ public class PaymentFacade {
 
     @Retry(name = "payment-callback-sync", fallbackMethod = "fallbackProcessCallback")
     public PaymentInfo processCallback(PaymentCommand.CallbackRequest command) {
-        log.info("콜백 데이터 동기화 시도 - transactionKey: {}", command.transactionKey());
-        
         ExternalPaymentResponse response = exceptionTranslator.executeForCallback(
             () -> paymentService.getTransactionIdFromExternal(command.transactionKey())
         );
@@ -57,12 +55,9 @@ public class PaymentFacade {
         boolean isSync = response.checkSync(command);
         
         if (!isSync) {
-            log.warn("콜백 데이터 불일치 감지 - transactionKey: {}", command.transactionKey());
             throw new DataSyncException("콜백 데이터 동기화 실패");
         }
-        
-        log.info("콜백 데이터 동기화 성공 - transactionKey: {}", command.transactionKey());
-        
+
         if (command.isSuccess()) {
             return PaymentInfo.of(orderPaymentProcessor.completeOrderAndPayment(command));
         }
@@ -76,7 +71,7 @@ public class PaymentFacade {
         log.error("콜백 데이터 동기화 최종 실패 - transactionKey: {}", command.transactionKey(), ex);
         
         // 알림 발송
-        notificationService.sendPaymentSyncFailureAlert(command);
+        notificationService.sendPaymentSyncFailureAlert(command.transactionKey());
         
         throw new CoreException(ErrorType.PAYMENT_FAIL, "콜백 데이터 동기화 최종 실패 - transactionKey: " + command.transactionKey());
     }
