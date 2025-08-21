@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface PaymentJpaRepository extends JpaRepository<Payment, Long> {
     boolean existsByOrderIdAndStatus(Long order_id, PaymentStatus status);
-    Optional<Payment> findByPgTransactionId(String transactionKey);
+    Optional<Payment> findByTransactionId(String transactionKey);
     
     /**
      * 특정 상태의 결제 건들 조회

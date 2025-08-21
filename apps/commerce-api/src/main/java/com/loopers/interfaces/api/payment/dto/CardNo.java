@@ -24,8 +24,8 @@ public class CardNo {
     }
 
     public static CardNo valueOfName(String cardNo) {
-        if (cardNo == null || !PATTERN.matcher(cardNo).matches()) {
-            throw new CoreException(ErrorType.INVALID_CARD_NO, "잘못된 카드번호 형식입니다. 형식: xxxx-xxxx-xxxx-xxxx");
+        if (cardNo == null || cardNo.length() != 16) {
+            throw new CoreException(ErrorType.INVALID_CARD_NO, "잘못된 카드번호 형식입니다.(16자리 숫자)");
         }
         return new CardNo(cardNo);
     }

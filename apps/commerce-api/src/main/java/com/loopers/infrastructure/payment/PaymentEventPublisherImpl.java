@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @RequiredArgsConstructor
 @Component
-public class PaymentCoreEventPublisher implements PaymentEventPublisher {
+public class PaymentEventPublisherImpl implements PaymentEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override

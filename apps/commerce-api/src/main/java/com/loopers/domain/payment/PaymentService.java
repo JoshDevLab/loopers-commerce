@@ -73,7 +73,7 @@ public class PaymentService {
     }
 
     public Payment findByTransactionId(String transactionKey) {
-        return paymentRepository.findByPgTransactionId(transactionKey)
+        return paymentRepository.findByTransactionId(transactionKey)
                 .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
     }
 
@@ -86,7 +86,7 @@ public class PaymentService {
     }
 
     public ExternalPaymentResponse getTransactionIdFromExternal(String transactionKey) {
-        Payment payment = paymentRepository.findByPgTransactionId(transactionKey)
+        Payment payment = paymentRepository.findByTransactionId(transactionKey)
                 .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
         PaymentProcessor processor = paymentProcessorManager.getProcessor(payment.getPaymentType());
         return processor.getByTransactionKey(transactionKey);

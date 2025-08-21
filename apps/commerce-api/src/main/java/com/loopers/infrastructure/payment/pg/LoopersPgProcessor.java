@@ -48,9 +48,6 @@ public class LoopersPgProcessor implements PaymentProcessor {
             throw new CoreException(ErrorType.INVALID_PAYMENT_REQUEST_TYPE, "결제 벤더사에 맞지 않는 요청타입 입니다.");
         }
 
-        log.info("Sending payment request to PG - OrderId: {}, Amount: {}", 
-                loopersPaymentRequest.getOrderId(), loopersPaymentRequest.getAmount());
-
         try {
             PgResponse<LoopersPgFeginClient.PgTransactionResponse> pgResponse = client.processPayment(
                     loopersPaymentRequest.getUserId(),
@@ -60,13 +57,9 @@ public class LoopersPgProcessor implements PaymentProcessor {
             // PG API 응답 처리
             if (pgResponse.isSuccess() && pgResponse.getData() != null) {
                 LoopersPgFeginClient.PgTransactionResponse data = pgResponse.getData();
-                log.info("PG payment response received - TransactionKey: {}, Status: {}", 
-                        data.getTransactionKey(), data.getStatus());
                 
                 // PG 시뮬레이터의 비즈니스 로직 실패 확인 (HTTP 200이지만 status가 FAILED)
                 if (data.isFailed()) {
-                    log.warn("PG 비즈니스 로직 실패 - TransactionKey: {}, Reason: {}", 
-                            data.getTransactionKey(), data.getReason());
                     throw new PgBusinessException(
                             data.getTransactionKey(),
                             data.getStatus(),
@@ -139,10 +132,6 @@ public class LoopersPgProcessor implements PaymentProcessor {
         }
     }
 
-    /**
-     * 결제 요청 실패 시 폴백 메서드
-     * Circuit Breaker가 OPEN 상태이거나 타임아웃 발생 시 호출됨
-     */
     public ExternalPaymentResponse paymentFallback(ExternalPaymentRequest paymentRequest, Exception ex) {
         log.error("Payment fallback triggered for orderId: {}, reason: {}", 
                 ((LoopersPgFeginClient.LoopersPaymentRequest) paymentRequest).getOrderId(), 
@@ -153,9 +142,6 @@ public class LoopersPgProcessor implements PaymentProcessor {
                 "PG 서비스가 일시적으로 이용 불가능합니다. 잠시 후 다시 시도해주세요.", ex);
     }
 
-    /**
-     * 결제 상태 조회 실패 시 폴백 메서드
-     */
     public ExternalPaymentResponse getByTransactionKeyFallback(String transactionId, Exception ex) {
         log.error("Payment status check fallback triggered for transactionId: {}, reason: {}", 
                 transactionId, ex.getMessage());

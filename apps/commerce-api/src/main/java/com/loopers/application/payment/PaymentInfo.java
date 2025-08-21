@@ -29,7 +29,7 @@ public class PaymentInfo {
                 payment.getCardNo(),
                 payment.getPaymentType(),
                 payment.getStatus(),
-                payment.getPaidAmount()
+                payment.getPaidAmount(),
                 payment.getTransactionId()
         );
     }

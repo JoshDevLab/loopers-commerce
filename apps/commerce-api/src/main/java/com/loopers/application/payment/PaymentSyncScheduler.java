@@ -75,8 +75,7 @@ public class PaymentSyncScheduler {
                 }
             }
             
-            log.info("결제 상태 동기화 완료 - 성공: {}, 실패: {}, 알림: {}", 
-                successCount, failCount, notificationCount);
+            log.info("결제 상태 동기화 완료 - 성공: {}, 실패: {}, 알림: {}", successCount, failCount, notificationCount);
             
         } catch (Exception e) {
             log.error("결제 상태 동기화 작업 실패", e);

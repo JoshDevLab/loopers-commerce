@@ -11,7 +11,7 @@ public interface PaymentRepository {
 
     Optional<Payment> findById(Long paymentId);
 
-    Optional<Payment> findByPgTransactionId(String transactionKey);
+    Optional<Payment> findByTransactionId(String transactionKey);
     
     /**
      * 특정 상태의 결제 건들 조회
