@@ -17,11 +17,9 @@ public class ProductListCacheRefresher {
     private final ProductListCache productListCache;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public void addedProduct(ProductListAddedEvent event) {
         try {
             productListCache.evictAll();
-            productListCache.loadAll();
             log.info("[ProductListCacheRefresher] refreshed product list cache");
         } catch (Exception e) {
             log.warn("[ProductListCacheRefresher] failed to refresh product list cache", e);

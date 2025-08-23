@@ -35,14 +35,5 @@ public interface ProductListCache {
         for (int i = 0; i < 3; i++) {
             delegate().evict(listKey(i));
         }
-    };
-
-    default void loadAll() {
-        for (int i = 0; i < 3; i++) {
-            int page = i;
-            delegate().getOrLoad(listKey(i), ttl(), new TypeReference<PageImpl<Product>>() {}, () -> {
-                throw new CoreException(ErrorType.PRODUCT_LIST_CACHING_FAIL, "상품 목록 캐싱 실패: 페이지 " + page);
-            });
-        }
-    };
+    }
 }
