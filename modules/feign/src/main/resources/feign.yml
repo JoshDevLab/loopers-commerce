@@ -1,0 +1,47 @@
+# Feign Client 기본 설정
+spring:
+  config:
+    import:
+      - optional:classpath:resilience4j.yml
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: false
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: full
+  
+  # Circuit Breaker 활성화
+  circuitbreaker:
+    enabled: true
+
+---
+# 개발 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local, dev
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+
+---
+# 운영 환경 설정  
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: basic

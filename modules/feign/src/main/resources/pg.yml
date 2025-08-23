@@ -1,0 +1,74 @@
+# PG 시뮬레이터 설정
+app:
+  pg-simulator:
+    base-url: "http://localhost:8082"
+    user-id: 135135
+    timeout:
+      connect: 500    # 요청 지연 100ms ~ 500ms 고려하여 500ms로 설정
+      read: 6000      # 처리 지연 1s ~ 5s 고려하여 6초로 설정 (여유분 포함)
+    retry:
+      enabled: false  # 결제 요청은 재시도하지 않음
+    circuit-breaker:
+      name: "pgPayment"
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 30s
+
+---
+# 로컬/개발 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local, dev
+
+app:
+  pg-simulator:
+    base-url: "http://localhost:8082"
+    user-id: 135135
+    timeout:
+      connect: 500
+      read: 6000
+
+---
+# 테스트 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: test
+
+app:
+  pg-simulator:
+    base-url: "http://localhost:8082"
+    user-id: 135135
+    timeout:
+      connect: 500
+      read: 6000
+
+---
+# QA 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+app:
+  pg-simulator:
+    base-url: "https://pg-simulator-qa.loopers.com"
+    user-id: "qa-commerce-api"
+    timeout:
+      connect: 400    # 네트워크가 안정적이므로 조금 줄임
+      read: 5000
+
+---
+# 운영 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+app:
+  pg-simulator:
+    base-url: "https://pg-simulator.loopers.com"
+    user-id: "prd-commerce-api"
+    timeout:
+      connect: 300    # 운영에서는 더 짧게
+      read: 4000

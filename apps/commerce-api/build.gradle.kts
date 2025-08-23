@@ -2,6 +2,8 @@ dependencies {
     // add-ons
     implementation(project(":modules:jpa"))
     implementation(project(":modules:redis"))
+    implementation(project(":modules:feign"))
+    implementation(project(":modules:scheduling"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
@@ -16,10 +18,13 @@ dependencies {
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:redis")))
-
-    implementation("org.springframework.boot:spring-boot-starter-aop")
+    
+    // test dependencies for wiremock
+    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
 
 }

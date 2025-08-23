@@ -4,9 +4,12 @@ include(
     ":apps:commerce-api",
     ":modules:jpa",
     ":modules:redis",
+    ":modules:feign",
+    ":modules:scheduling",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
+    ":apps:pg-simulator"
 )
 
 // configurations
