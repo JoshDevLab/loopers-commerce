@@ -25,7 +25,6 @@ public class OrderFacade {
     private final OrderCreator orderCreator;
     private final UserService userService;
 
-    @Transactional
     public OrderInfo order(OrderCommand.Register command, Long userPk) {
 //        Point point = null;
 //        OrderItemProcessor.Result processedItems = orderItemProcessor.process(command.getOrderItemCommands());

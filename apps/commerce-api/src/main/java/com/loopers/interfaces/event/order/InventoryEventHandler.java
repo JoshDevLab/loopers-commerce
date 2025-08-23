@@ -6,7 +6,6 @@ import com.loopers.domain.order.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -18,8 +17,7 @@ import java.text.MessageFormat;
 public class InventoryEventHandler {
     private final InventoryService inventoryService;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleOrderCreated(OrderCreatedEvent event) {
         log.info("Handling order created event: {}", event);
 
