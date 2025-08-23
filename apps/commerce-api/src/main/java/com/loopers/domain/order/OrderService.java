@@ -17,6 +17,8 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderEventPublisher orderEventPublisher;
+
 
     @Transactional
     public Order createOrder(User user, List<OrderItem> orderItems, Address address, BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal usedPoint) {
@@ -44,5 +46,23 @@ public class OrderService {
     public Order findByIdForUpdate(Long orderId) {
         return orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND, "주문을 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public Order order(User user,
+                       List<OrderItem> orderItems,
+                       List<OrderCommand.OrderItemCommand> orderItemCommands,
+                       Address address,
+                       BigDecimal totalAmount,
+                       BigDecimal discountAmount,
+                       BigDecimal usedPoint,
+                       Long userCouponId) {
+        Order order = Order.create(user, address, totalAmount, discountAmount, usedPoint);
+        orderItems.forEach(order::addOrderItem);
+        Order savedOrder = orderRepository.save(order);
+        orderEventPublisher.publish(
+                new OrderCreatedEvent(savedOrder.getId(), orderItemCommands, usedPoint, userCouponId, order.getPaidAmount())
+        );
+        return null;
     }
 }

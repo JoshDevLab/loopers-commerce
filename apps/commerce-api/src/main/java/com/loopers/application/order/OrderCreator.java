@@ -35,9 +35,5 @@ public class OrderCreator {
         return orderService.createOrder(user, items, address, totalAmount, discountAmount, usedPoint);
     }
 
-    @Transactional
-    public void saveInventoryHistories(List<InventoryHistory> histories, Order order) {
-        histories.forEach(h -> inventoryService.createInventoryHistory(h.setOrder(order)));
-    }
 }
 

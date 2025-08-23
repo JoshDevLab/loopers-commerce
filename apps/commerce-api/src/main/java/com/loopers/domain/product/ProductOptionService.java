@@ -20,7 +20,7 @@ public class ProductOptionService {
                 () -> productOptionRepository.findByProductId(productId)
         );
         if (cached.isEmpty()) {
-            throw new CoreException(ErrorType.PRODUCT_OPTION_NOT_FOUND, "상품을 찾을 수 없습니다. product id:" + productId);
+            throw new CoreException(ErrorType.PRODUCT_OPTION_NOT_FOUND, "상품을 찾을 수 없습니다. product orderId:" + productId);
         }
         return cached;
     }
@@ -28,7 +28,7 @@ public class ProductOptionService {
     public ProductOption getOnSalesProductOption(Long productOptionId) {
         ProductOption productOption = productOptionRepository.findByIdWithLock(productOptionId)
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_OPTION_NOT_FOUND,
-                        "상품을 찾을 수 없습니다. product option id:" + productOptionId));
+                        "상품을 찾을 수 없습니다. product option orderId:" + productOptionId));
         productOption.isOnSales();
         return productOption;
     }

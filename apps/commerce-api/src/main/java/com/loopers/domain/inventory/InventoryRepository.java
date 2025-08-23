@@ -12,4 +12,6 @@ public interface InventoryRepository {
     Optional<Inventory> findByProductOptionWithLock(ProductOption productOption);
 
     Optional<Inventory> findById(Long id);
+
+    Optional<Inventory> findByProductOptionIdWithLock(Long productOptionId);
 }

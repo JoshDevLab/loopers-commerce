@@ -17,8 +17,8 @@ public class InventoryHistory extends BaseEntity {
     @JoinColumn(name = "inventory_id")
     private Inventory inventory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Order order;
+    @Column(name = "order_id", insertable = false, updatable = false)
+    private Long orderId;
 
     @Enumerated(EnumType.STRING)
     private InventoryHistoryType inventoryHistoryType;
@@ -26,6 +26,7 @@ public class InventoryHistory extends BaseEntity {
     private int quantityBefore;
     private int quantityAfter;
     private String reason;
+
 
     private InventoryHistory(Inventory inventory,
                             InventoryHistoryType inventoryHistoryType,
@@ -42,14 +43,14 @@ public class InventoryHistory extends BaseEntity {
     }
 
     private InventoryHistory(Inventory inventory,
-                             Order order,
+                             Long orderId,
                              InventoryHistoryType inventoryHistoryType,
                              int changedQuantity,
                              int quantityBefore,
                              int quantityAfter,
                              String reason) {
         this.inventory = inventory;
-        this.order = order;
+        this.orderId = orderId;
         this.inventoryHistoryType = inventoryHistoryType;
         this.quantityChanged = changedQuantity;
         this.quantityBefore = quantityBefore;
@@ -57,21 +58,21 @@ public class InventoryHistory extends BaseEntity {
         this.reason = reason;
     }
 
-    public static InventoryHistory createDecrease(Inventory inventory, int changedQuantity) {
-        return new InventoryHistory(
-                inventory,
-                InventoryHistoryType.DECREASE,
-                changedQuantity,
-                inventory.getQuantity() + changedQuantity,
-                inventory.getQuantity(),
-                "주문"
-        );
+    public static InventoryHistory createDecrease(Inventory inventory, int changedQuantity, Long orderId, String reason) {
+        InventoryHistory inventoryHistory = new InventoryHistory();
+        inventoryHistory.inventory = inventory;
+        inventoryHistory.orderId = orderId;
+        inventoryHistory.quantityChanged = changedQuantity;
+        inventoryHistory.quantityBefore = inventory.getQuantity() + changedQuantity;
+        inventoryHistory.quantityAfter = inventory.getQuantity();
+        inventoryHistory.reason = reason;
+        return inventoryHistory;
     }
 
-    public static InventoryHistory createCancel(Inventory inventory, Order order, int quantityChanged) {
+    public static InventoryHistory createCancel(Inventory inventory, Long orderId, int quantityChanged) {
         return new InventoryHistory(
                 inventory,
-                order,
+                orderId,
                 InventoryHistoryType.ADJUSTMENT,
                 quantityChanged,
                 inventory.getQuantity() - quantityChanged,
@@ -80,8 +81,4 @@ public class InventoryHistory extends BaseEntity {
         );
     }
 
-    public InventoryHistory setOrder(Order order) {
-        this.order = order;
-        return this;
-    }
 }

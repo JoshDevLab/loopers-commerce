@@ -20,7 +20,7 @@ public class CouponProcessor {
         if (userCouponId == null) return new Result(null, BigDecimal.ZERO);
 
         UserCoupon coupon = couponService.getUserCoupon(userCouponId);
-        couponService.use(coupon);
+//        couponService.use(coupon);
         BigDecimal discountAmount = couponService.calculateDiscountAmount(coupon, totalAmount);
 
         return new Result(coupon, discountAmount);

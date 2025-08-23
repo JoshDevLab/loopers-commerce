@@ -30,7 +30,7 @@ public class ProductCacheRefresher {
 
             Product p = productRepository.findWithBrandById(productId)
                     .orElseThrow(() -> new CoreException(
-                            ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품입니다. id=" + productId));
+                            ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품입니다. orderId=" + productId));
 
             productCache.put(productId, p, productCache.ttl());
             log.info("[ProductCacheRefresher] refreshed cache for productId={}", productId);

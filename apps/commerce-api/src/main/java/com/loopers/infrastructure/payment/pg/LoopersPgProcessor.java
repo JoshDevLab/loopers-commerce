@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 public class LoopersPgProcessor implements PaymentProcessor {
     private final LoopersPgFeginClient client;
 
-    @Value("${app.pg-simulator.user-id:135135}")
+    @Value("${app.pg-simulator.user-orderId:135135}")
     private String userId;
 
     @Override

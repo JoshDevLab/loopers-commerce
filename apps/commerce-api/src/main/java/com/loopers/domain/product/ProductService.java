@@ -34,7 +34,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProductWithBrandById(Long productId) {
         return productCache.getOrLoad(productId, () -> productRepository.findWithBrandById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId)));
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 orderId: " + productId)));
     }
 
     public List<Product> getProductByBrand(Brand brand) {
@@ -43,11 +43,11 @@ public class ProductService {
 
     public Product getProductById(Long productId) {
         return productRepository.findById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 orderId: " + productId));
     }
 
     public Product getProductByIdWithLock(Long productId) {
         return productRepository.findByIdWithLock(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 orderId: " + productId));
     }
 }

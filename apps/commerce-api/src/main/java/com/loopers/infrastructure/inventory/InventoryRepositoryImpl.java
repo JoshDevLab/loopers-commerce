@@ -33,4 +33,9 @@ public class InventoryRepositoryImpl implements InventoryRepository {
         return inventoryJapRepository.findById(id);
     }
 
+    @Override
+    public Optional<Inventory> findByProductOptionIdWithLock(Long productOptionId) {
+        return inventoryJapRepository.findByProductOptionIdWithLock(productOptionId);
+    }
+
 }

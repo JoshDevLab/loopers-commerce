@@ -15,4 +15,8 @@ public interface InventoryJapRepository extends JpaRepository<Inventory, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Inventory i where i.productOption = :productOption")
     Optional<Inventory> findByProductOptionWithLock(ProductOption productOption);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select i from Inventory i where i.productOption.id = :productOptionId")
+    Optional<Inventory> findByProductOptionIdWithLock(Long productOptionId);
 }
