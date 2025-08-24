@@ -1,8 +1,10 @@
 package com.loopers.domain.point;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.order.Order;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

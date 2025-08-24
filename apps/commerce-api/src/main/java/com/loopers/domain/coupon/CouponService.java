@@ -1,6 +1,5 @@
 package com.loopers.domain.coupon;
 
-import com.loopers.domain.order.Order;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -17,21 +16,21 @@ public class CouponService {
     private final CouponHistoryRepository couponHistoryRepository;
 
     public UserCoupon getUserCoupon(Long userCouponId) {
-        return userCouponRepository.findByIdWithLock(userCouponId)
+        return userCouponRepository.findById(userCouponId)
                 .orElseThrow(() -> new CoreException(ErrorType.COUPON_NOT_FOUND, "사용자의 쿠폰을 찾을 수 없습니다."));
     }
 
-    public void use(UserCoupon userCoupon) {
+    @Transactional
+    public void use(Long userCouponId, Long orderId, BigDecimal discountAmount) {
+        UserCoupon userCoupon = userCouponRepository.findByIdWithLock(userCouponId)
+                .orElseThrow(() -> new CoreException(ErrorType.COUPON_NOT_FOUND, "사용자의 쿠폰을 찾을 수 없습니다."));
         userCoupon.use();
+        CouponHistory couponHistory = CouponHistory.create(userCoupon, orderId, CouponHistory.CouponUsingType.ORDER_USE, discountAmount);
+        couponHistoryRepository.save(couponHistory);
     }
 
     public BigDecimal calculateDiscountAmount(UserCoupon userCoupon, BigDecimal totalAmount) {
         return userCoupon.calculateDiscountAmount(totalAmount);
-    }
-
-    public void createCouponUsingHistory(UserCoupon userCoupon, Order order, BigDecimal discountAmount) {
-        CouponHistory history = CouponHistory.create(userCoupon, order, CouponHistory.CouponUsingType.ORDER_USE, discountAmount);
-        couponHistoryRepository.save(history);
     }
 
     @Transactional

@@ -1,7 +1,5 @@
 package com.loopers.domain.payment;
 
-import com.loopers.application.payment.PaymentInfo;
-import com.loopers.application.payment.PaymentSyncScheduler;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderRepository;
 import com.loopers.support.error.CoreException;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor

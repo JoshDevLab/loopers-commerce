@@ -1,7 +1,6 @@
 package com.loopers.domain.inventory;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.order.Order;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,21 +25,6 @@ public class InventoryHistory extends BaseEntity {
     private int quantityBefore;
     private int quantityAfter;
     private String reason;
-
-
-    private InventoryHistory(Inventory inventory,
-                            InventoryHistoryType inventoryHistoryType,
-                            int changedQuantity,
-                            int quantityBefore,
-                            int quantityAfter,
-                            String reason) {
-        this.inventory = inventory;
-        this.inventoryHistoryType = inventoryHistoryType;
-        this.quantityChanged = changedQuantity;
-        this.quantityBefore = quantityBefore;
-        this.quantityAfter = quantityAfter;
-        this.reason = reason;
-    }
 
     private InventoryHistory(Inventory inventory,
                              Long orderId,

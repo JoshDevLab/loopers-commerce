@@ -44,6 +44,6 @@ class CouponProcessorIntegrationTest extends IntegrationTestSupport {
 
         // Assert
         assertThat(result.discountAmount()).isEqualByComparingTo(BigDecimal.valueOf(10000));
-        assertThat(result.userCoupon().isUsed()).isTrue();
+        assertThat(result.userCoupon().isUsed()).isFalse();
     }
 }

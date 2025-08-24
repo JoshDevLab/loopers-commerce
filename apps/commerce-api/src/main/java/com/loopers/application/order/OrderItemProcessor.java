@@ -23,32 +23,24 @@ public class OrderItemProcessor {
     @Transactional
     public Result process(List<OrderCommand.OrderItemCommand> commands) {
         BigDecimal totalAmount = BigDecimal.ZERO;
-        List<InventoryResult> inventoryResults = new ArrayList<>();
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (OrderCommand.OrderItemCommand cmd : commands) {
             ProductOption option = productOptionService.getOnSalesProductOption(cmd.getProductOptionId());
             inventoryService.hasEnoughQuantityInventory(option, cmd.getQuantity());
 
-//            inventoryService.decreaseQuantity(inventory, cmd.getQuantity()); 삭제
-//            histories.add(InventoryHistory.createDecrease(inventory, cmd.getQuantity()));
             orderItems.add(OrderItem.create(option, cmd.getQuantity()));
 
             totalAmount = totalAmount.add(option.getPrice().multiply(BigDecimal.valueOf(cmd.getQuantity())));
         }
 
-        return new Result(totalAmount, orderItems, inventoryResults);
+        return new Result(totalAmount, orderItems);
     }
 
     public record Result(
             BigDecimal totalAmount,
-            List<OrderItem> orderItems,
-            List<InventoryResult> inventoryResults
+            List<OrderItem> orderItems
     ) {}
 
-    public record InventoryResult(
-            Long productOptionId,
-            int quantity
-    ) {}
 }
 

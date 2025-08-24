@@ -1,6 +1,5 @@
 package com.loopers.domain.point;
 
-import com.loopers.domain.order.Order;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;

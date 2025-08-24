@@ -8,5 +8,7 @@ public record OrderCreatedEvent(
         List<OrderCommand.OrderItemCommand> orderItemCommands,
         BigDecimal usedPoint,
         Long userCouponId,
-        BigDecimal paidAmount) {
+        BigDecimal paidAmount,
+        Long userPk,
+        BigDecimal discountAmount) {
 }

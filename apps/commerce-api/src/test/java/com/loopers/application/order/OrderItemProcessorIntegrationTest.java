@@ -52,7 +52,6 @@ class OrderItemProcessorIntegrationTest extends IntegrationTestSupport {
         // Assert
         assertThat(result.totalAmount()).isEqualByComparingTo(BigDecimal.valueOf(10000));
         assertThat(result.orderItems()).hasSize(1);
-        assertThat(result.inventoryHistories()).hasSize(1);
     }
 
 }

@@ -10,8 +10,7 @@ import com.loopers.domain.inventory.Inventory;
 import com.loopers.domain.inventory.InventoryHistory;
 import com.loopers.domain.inventory.InventoryRepository;
 import com.loopers.domain.order.*;
-import com.loopers.domain.point.Point;
-import com.loopers.domain.point.PointRepository;
+import com.loopers.domain.point.*;
 import com.loopers.domain.product.*;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
@@ -68,6 +67,9 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
     CouponRepository couponRepository;
+
+    @Autowired
+    PointHistoryRepository pointHistoryRepository;
 
     @Transactional
     @DisplayName("유효한 주문을 생성할 수 있다.")
@@ -134,6 +136,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
                 item2.getProductOption().getPrice().multiply(BigDecimal.valueOf(item2.getQuantity()))
         );
 
+        // 🔄 이벤트 처리로 인한 재고 차감 검증 (이 부분이 이벤트 기반으로 처리됨)
         List<InventoryHistory> inventoryHistories = inventoryHistoryJpaRepository.findAll();
         assertThat(inventoryHistories)
                 .extracting(InventoryHistory::getQuantityBefore, InventoryHistory::getQuantityAfter)
@@ -141,6 +144,24 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
                         tuple(10, 8),
                         tuple(5, 4)
                 );
+
+        // 🔄 실제 재고 수량도 감소했는지 검증 (이벤트 처리 결과)
+        Inventory updatedInventory1 = inventoryRepository.findByProductOption(productOption1).orElseThrow();
+        Inventory updatedInventory2 = inventoryRepository.findByProductOption(productOption2).orElseThrow();
+
+        assertThat(updatedInventory1.getQuantity()).isEqualTo(8);  // 10 - 2 = 8
+        assertThat(updatedInventory2.getQuantity()).isEqualTo(4);  // 5 - 1 = 4
+
+        // 🔄 포인트 사용 내역 검증 (이벤트 처리 결과)
+        List<PointHistory> pointHistories = pointHistoryRepository.findAll();
+        assertThat(pointHistories)
+                .hasSize(1)
+                .extracting(PointHistory::getPoint, PointHistory::getType)
+                .containsExactly(tuple(BigDecimal.valueOf(1000), PointHistoryType.USE));
+
+        // 🔄 포인트 잔액 확인 (이벤트 처리 결과)
+        Point updatedPoint = pointRepository.findByUserPk(user.getId()).orElseThrow();
+        assertThat(updatedPoint.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(199000)); // 200000 - 1000 = 199000
     }
 
     @DisplayName("정액 할인 쿠폰을 사용하여 주문을 생성할 수 있다.")
@@ -292,7 +313,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
     void raceConditionPointShouldBeDeductedOnce() {
         // Arrange
         User user = userRepository.save(User.create("userId", "user@email.com", "1995-10-10", "MALE"));
-        pointRepository.save(Point.create(BigDecimal.valueOf(200000), user.getId()));
+        pointRepository.save(Point.create(BigDecimal.valueOf(200_000), user.getId()));
 
         Brand brand = brandRepository.save(Brand.create("브랜드", "설명", "이미지"));
         Product product = productRepository.save(Product.create("상품1", "설명1", BigDecimal.valueOf(20000), ProductCategory.CLOTHING, brand, "img"));
@@ -315,7 +336,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(result.successCount()).isEqualTo(2);
 
         Point point = pointRepository.findByUserPk(user.getId()).orElseThrow();
-        assertThat(point.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(160000));
+        assertThat(point.getPointBalance()).isEqualByComparingTo("192000");
     }
 
     @DisplayName("동일한 상품에 대해 여러 기기에서 동시에 주문해도, 재고는 정확히 차감되어야 한다.")

@@ -1,6 +1,9 @@
 package com.loopers.infrastructure.payment.pg;
 
-import com.loopers.domain.payment.*;
+import com.loopers.domain.payment.CardType;
+import com.loopers.domain.payment.ExternalPaymentRequest;
+import com.loopers.domain.payment.ExternalPaymentResponse;
+import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.infrastructure.payment.pg.exception.PgBusinessException;
 import com.loopers.infrastructure.payment.pg.exception.PgGeneralException;
 import com.loopers.infrastructure.payment.pg.support.PgResponse;
@@ -20,8 +23,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static com.loopers.domain.payment.Payment.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.loopers.domain.payment.Payment.PaymentType;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;

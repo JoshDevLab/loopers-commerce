@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-public class CouponHistoryImpl implements CouponHistoryRepository {
+public class CouponHistoryRepositoryImpl implements CouponHistoryRepository {
     private final CouponHistoryJpaRepository couponJpaRepository;
 
     @Override
