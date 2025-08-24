@@ -5,9 +5,10 @@ import com.loopers.domain.order.OrderCommand;
 import com.loopers.domain.order.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.text.MessageFormat;
 
@@ -18,7 +19,7 @@ public class InventoryEventHandler {
     private final InventoryService inventoryService;
 
     @Order(1)
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleOrderCreated(OrderCreatedEvent event) {
         log.info("Handling order created event InventoryEventHandler: {}", event);
 

@@ -5,6 +5,7 @@ import com.loopers.domain.coupon.CouponHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -30,5 +31,10 @@ public class CouponHistoryRepositoryImpl implements CouponHistoryRepository {
     @Override
     public boolean existsByOrderId(Long orderId) {
         return couponJpaRepository.existsByOrderId(orderId);
+    }
+
+    @Override
+    public List<CouponHistory> findAll() {
+        return couponJpaRepository.findAll();
     }
 }

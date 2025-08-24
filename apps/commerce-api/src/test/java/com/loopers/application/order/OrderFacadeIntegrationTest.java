@@ -2,10 +2,7 @@ package com.loopers.application.order;
 
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandRepository;
-import com.loopers.domain.coupon.Coupon;
-import com.loopers.domain.coupon.CouponRepository;
-import com.loopers.domain.coupon.UserCoupon;
-import com.loopers.domain.coupon.UserCouponRepository;
+import com.loopers.domain.coupon.*;
 import com.loopers.domain.inventory.Inventory;
 import com.loopers.domain.inventory.InventoryHistory;
 import com.loopers.domain.inventory.InventoryRepository;
@@ -71,7 +68,9 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
     @Autowired
     PointHistoryRepository pointHistoryRepository;
 
-    @Transactional
+    @Autowired
+    CouponHistoryRepository couponHistoryRepository;
+
     @DisplayName("유효한 주문을 생성할 수 있다.")
     @Test
     void order() {
@@ -105,7 +104,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
         assertThat(result).isNotNull();
         assertThat(result.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(49000));
 
-        Order savedOrder = orderRepository.findAll().getFirst(); // 테스트라면 1건만 저장되었을 것이므로
+        Order savedOrder = orderRepository.findByIdWithFetch(result.getId()).orElseThrow(); // 테스트라면 1건만 저장되었을 것이므로
 
         assertThat(savedOrder.getTotalAmount()).isEqualByComparingTo(BigDecimal.valueOf(50000));
         assertThat(savedOrder.getUser().getId()).isEqualTo(user.getId());
@@ -136,7 +135,7 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
                 item2.getProductOption().getPrice().multiply(BigDecimal.valueOf(item2.getQuantity()))
         );
 
-        // 🔄 이벤트 처리로 인한 재고 차감 검증 (이 부분이 이벤트 기반으로 처리됨)
+        // 이벤트 처리로 인한 재고 차감 검증 (이 부분이 이벤트 기반으로 처리됨)
         List<InventoryHistory> inventoryHistories = inventoryHistoryJpaRepository.findAll();
         assertThat(inventoryHistories)
                 .extracting(InventoryHistory::getQuantityBefore, InventoryHistory::getQuantityAfter)
@@ -145,23 +144,141 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
                         tuple(5, 4)
                 );
 
-        // 🔄 실제 재고 수량도 감소했는지 검증 (이벤트 처리 결과)
+        // 실제 재고 수량도 감소했는지 검증 (이벤트 처리 결과)
         Inventory updatedInventory1 = inventoryRepository.findByProductOption(productOption1).orElseThrow();
         Inventory updatedInventory2 = inventoryRepository.findByProductOption(productOption2).orElseThrow();
 
         assertThat(updatedInventory1.getQuantity()).isEqualTo(8);  // 10 - 2 = 8
         assertThat(updatedInventory2.getQuantity()).isEqualTo(4);  // 5 - 1 = 4
 
-        // 🔄 포인트 사용 내역 검증 (이벤트 처리 결과)
+        // 포인트 사용 내역 검증 (이벤트 처리 결과)
         List<PointHistory> pointHistories = pointHistoryRepository.findAll();
         assertThat(pointHistories)
                 .hasSize(1)
                 .extracting(PointHistory::getPoint, PointHistory::getType)
-                .containsExactly(tuple(BigDecimal.valueOf(1000), PointHistoryType.USE));
+                .containsExactly(tuple(BigDecimal.valueOf(1000).setScale(2), PointHistoryType.USE));
 
-        // 🔄 포인트 잔액 확인 (이벤트 처리 결과)
+        // 포인트 잔액 확인 (이벤트 처리 결과)
         Point updatedPoint = pointRepository.findByUserPk(user.getId()).orElseThrow();
         assertThat(updatedPoint.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(199000)); // 200000 - 1000 = 199000
+    }
+
+    @DisplayName("쿠폰을 사용한 유효한 주문을 생성할 수 있다.")
+    @Test
+    void orderWithCoupon() {
+        // Arrange
+        User user = userRepository.save(User.create("userId", "user@email.com", "1995-10-10", "MALE"));
+        pointRepository.save(Point.create(BigDecimal.valueOf(200000), user.getId()));
+
+        Brand brand = brandRepository.save(Brand.create("브랜드", "설명", "이미지"));
+        Product product1 = productRepository.save(Product.create("상품1", "설명1", BigDecimal.valueOf(20000), ProductCategory.CLOTHING, brand, "img"));
+        Product product2 = productRepository.save(Product.create("상품2", "설명2", BigDecimal.valueOf(30000), ProductCategory.CLOTHING, brand, "img"));
+
+        ProductOption productOption1 = productOptionRepository.save(ProductOption.create("옵션1", "L", "Red", ProductStatus.ON_SALE, BigDecimal.valueOf(10000), product1));
+        ProductOption productOption2 = productOptionRepository.save(ProductOption.create("옵션2", "M", "Blue", ProductStatus.ON_SALE, BigDecimal.valueOf(30000), product2));
+
+        inventoryRepository.save(Inventory.create(productOption1, 10));
+        inventoryRepository.save(Inventory.create(productOption2, 5));
+
+        // 쿠폰 생성
+        Coupon coupon = couponRepository.save(
+                Coupon.create("welcome coupon", Coupon.CouponType.RATE, BigDecimal.valueOf(10))
+        );
+
+        // 유저 쿠폰 발급
+        UserCoupon userCoupon = userCouponRepository.save(UserCoupon.create(user, coupon, ZonedDateTime.now().plusDays(1)));
+
+        List<OrderCommand.OrderItemCommand> itemCommands = List.of(
+                new OrderCommand.OrderItemCommand(productOption1.getId(), 2),
+                new OrderCommand.OrderItemCommand(productOption2.getId(), 1)
+        );
+
+        OrderCommand.Register register = new OrderCommand.Register(itemCommands,
+                new Address("zipcode", "roadAddress", "detailAddress", "receiverName", "receiverPhone"),
+                userCoupon.getId(), // 쿠폰 사용
+                BigDecimal.valueOf(1000));
+
+        // Act
+        OrderInfo result = orderFacade.order(register, user.getId());
+
+        // Assert
+        assertThat(result).isNotNull();
+
+        // 총 금액: 50000원 (10000*2 + 30000*1)
+        // 쿠폰 할인: 5000원 (50000의 10%, 최대 할인 금액 적용)
+        // 포인트 사용: 1000원
+        // 최종 결제 금액: 44000원 (50000 - 5000 - 1000)
+        assertThat(result.getPaidAmount()).isEqualByComparingTo(BigDecimal.valueOf(44000));
+
+        Order savedOrder = orderRepository.findByIdWithFetch(result.getId()).orElseThrow();
+
+        assertThat(savedOrder.getTotalAmount()).isEqualByComparingTo(BigDecimal.valueOf(50000));
+        assertThat(savedOrder.getUser().getId()).isEqualTo(user.getId());
+        assertThat(savedOrder.getOrderItems()).hasSize(2);
+        assertThat(savedOrder.getOrderStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(savedOrder.getDiscountAmount()).isEqualByComparingTo(BigDecimal.valueOf(5000)); // 쿠폰 할인 금액
+        assertThat(savedOrder.getUsedPointAmount()).isEqualByComparingTo("1000");
+
+        assertThat(savedOrder.getShippingAddress()).isNotNull();
+        assertThat(savedOrder.getShippingAddress().getZipcode()).isEqualTo("zipcode");
+        assertThat(savedOrder.getShippingAddress().getRoadAddress()).isEqualTo("roadAddress");
+        assertThat(savedOrder.getShippingAddress().getDetailAddress()).isEqualTo("detailAddress");
+
+        OrderItem item1 = savedOrder.getOrderItems().get(0);
+        OrderItem item2 = savedOrder.getOrderItems().get(1);
+
+        assertThat(item1.getProductOption()).isNotNull();
+        assertThat(item1.getQuantity()).isEqualTo(2);
+        assertThat(item1.getOrderPrice()).isEqualByComparingTo(item1.getProductOption().getPrice());
+        assertThat(item1.calculateTotalPrice()).isEqualByComparingTo(
+                item1.getProductOption().getPrice().multiply(BigDecimal.valueOf(item1.getQuantity()))
+        );
+
+        assertThat(item2.getProductOption()).isNotNull();
+        assertThat(item2.getQuantity()).isEqualTo(1);
+        assertThat(item2.getOrderPrice()).isEqualByComparingTo(item2.getProductOption().getPrice());
+        assertThat(item2.calculateTotalPrice()).isEqualByComparingTo(
+                item2.getProductOption().getPrice().multiply(BigDecimal.valueOf(item2.getQuantity()))
+        );
+
+        // 이벤트 처리로 인한 재고 차감 검증
+        List<InventoryHistory> inventoryHistories = inventoryHistoryJpaRepository.findAll();
+        assertThat(inventoryHistories)
+                .extracting(InventoryHistory::getQuantityBefore, InventoryHistory::getQuantityAfter)
+                .containsExactlyInAnyOrder(
+                        tuple(10, 8),
+                        tuple(5, 4)
+                );
+
+        // 실제 재고 수량도 감소했는지 검증
+        Inventory updatedInventory1 = inventoryRepository.findByProductOption(productOption1).orElseThrow();
+        Inventory updatedInventory2 = inventoryRepository.findByProductOption(productOption2).orElseThrow();
+
+        assertThat(updatedInventory1.getQuantity()).isEqualTo(8);
+        assertThat(updatedInventory2.getQuantity()).isEqualTo(4);
+
+        // 포인트 사용 내역 검증
+        List<PointHistory> pointHistories = pointHistoryRepository.findAll();
+        assertThat(pointHistories)
+                .hasSize(1)
+                .extracting(PointHistory::getPoint, PointHistory::getType)
+                .containsExactly(tuple(BigDecimal.valueOf(1000).setScale(2), PointHistoryType.USE));
+
+        // 포인트 잔액 확인
+        Point updatedPoint = pointRepository.findByUserPk(user.getId()).orElseThrow();
+        assertThat(updatedPoint.getPointBalance()).isEqualByComparingTo(BigDecimal.valueOf(199000));
+
+        // 쿠폰 사용 내역 검증 (이벤트 처리 결과)
+        List<CouponHistory> couponHistories = couponHistoryRepository.findAll();
+        assertThat(couponHistories)
+                .hasSize(1)
+                .extracting(couponHistory -> couponHistory.getUserCoupon().getId(), CouponHistory::getOrderId, CouponHistory::getDiscountAmount)
+                .containsExactly(tuple(userCoupon.getId(), savedOrder.getId(), BigDecimal.valueOf(5000).setScale(2)));
+
+        // 유저 쿠폰 상태 확인 (사용됨으로 변경)
+        UserCoupon updatedUserCoupon = userCouponRepository.findById(userCoupon.getId()).orElseThrow();
+        assertThat(updatedUserCoupon.isUsed()).isTrue();
+        assertThat(updatedUserCoupon.getUsedAt()).isNotNull();
     }
 
     @DisplayName("정액 할인 쿠폰을 사용하여 주문을 생성할 수 있다.")
