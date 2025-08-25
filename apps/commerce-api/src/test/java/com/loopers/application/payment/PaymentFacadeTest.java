@@ -84,7 +84,8 @@ class PaymentFacadeTest {
         when(externalPaymentResponse.getTransactionId()).thenReturn("TXN123456");
         when(exceptionTranslator.execute(any())).thenReturn(externalPaymentResponse);
 
-        // Mock PaymentInfo.of(payment)
+        when(paymentService.updateTransactionId(2L, "TXN123456")).thenReturn(payment);
+
         when(payment.getOrderId()).thenReturn(1L);
         when(payment.getCardType()).thenReturn(CardType.SAMSUNG);
         when(payment.getCardNo()).thenReturn(CardNo.valueOfName("1234567890123456"));
@@ -113,7 +114,7 @@ class PaymentFacadeTest {
 
         // Act & Assert
         assertThatThrownBy(() -> sut.processCallback(command))
-                .isInstanceOf(DataSyncException.class)
+                .isInstanceOf(CoreException.class)
                 .hasMessage("콜백 데이터 동기화 실패");
     }
 
@@ -188,7 +189,7 @@ class PaymentFacadeTest {
 
         // Act & Assert
         assertThatThrownBy(() -> sut.processCallback(command))
-                .isInstanceOf(DataSyncException.class)
+                .isInstanceOf(CoreException.class)
                 .hasMessage("콜백 데이터 동기화 실패");
     }
 

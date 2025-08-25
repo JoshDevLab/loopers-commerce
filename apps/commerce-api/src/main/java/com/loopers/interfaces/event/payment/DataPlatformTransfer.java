@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class DataPlatformTransfer {
-    void send(DataPlatformService.DataPlatformRequest request) {
+public class DataPlatformTransfer implements DataPlatformGateway {
+    @Override
+    public void send(DataPlatformService.DataPlatformRequest request) {
         log.info("[데이터 플랫폼 전송] request = {}", request);
+
     }
 }
