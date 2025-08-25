@@ -18,6 +18,7 @@ import java.util.List;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final OrderEventPublisher orderEventPublisher;
 
     public Page<Order> getOrdersWithCondition(OrderCriteria criteria, Long userPk, Pageable pageable) {
@@ -69,5 +70,10 @@ public class OrderService {
         Order order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
         order.complete();
+    }
+
+    public Order findById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
     }
 }

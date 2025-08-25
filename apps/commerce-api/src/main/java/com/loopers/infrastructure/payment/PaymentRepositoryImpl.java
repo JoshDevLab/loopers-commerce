@@ -43,4 +43,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public int updatePaymentStatus(Long paymentId, Payment.PaymentStatus status, LocalDateTime updatedAt) {
         return paymentJpaRepository.updatePaymentStatus(paymentId, status, updatedAt);
     }
+
+    @Override
+    public List<Payment> findByOrderId(Long orderId) {
+        return paymentJpaRepository.findByOrderId(orderId);
+    }
 }

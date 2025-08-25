@@ -1,6 +1,5 @@
 package com.loopers.application.payment;
 
-import com.loopers.domain.notification.NotificationService;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.*;
@@ -19,14 +18,14 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentFacadeTest {
 
     @Mock PaymentService paymentService;
     @Mock OrderService orderService;
-    @Mock NotificationService notificationService;
     @Mock PaymentExceptionTranslator exceptionTranslator;
     @Mock Order order;
     @Mock Payment payment;

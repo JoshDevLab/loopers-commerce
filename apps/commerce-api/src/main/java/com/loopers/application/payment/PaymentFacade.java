@@ -3,7 +3,10 @@ package com.loopers.application.payment;
 import com.loopers.domain.notification.NotificationService;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderService;
-import com.loopers.domain.payment.*;
+import com.loopers.domain.payment.ExternalPaymentResponse;
+import com.loopers.domain.payment.Payment;
+import com.loopers.domain.payment.PaymentCommand;
+import com.loopers.domain.payment.PaymentService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -21,7 +24,6 @@ public class PaymentFacade {
     private final PaymentExceptionTranslator exceptionTranslator;
 
     public PaymentInfo payment(PaymentCommand.Request paymentCommand) {
-        ExternalPaymentResponse response;
         Order order = orderService.findByIdWithLock(paymentCommand.orderId());
 
         if (paymentService.existsByOrderIdAndStatus(order.getId(), Payment.PaymentStatus.SUCCESS)) {
@@ -29,18 +31,10 @@ public class PaymentFacade {
         }
 
         Payment payment = paymentService.create(paymentCommand, order.getPaidAmount());
+        ExternalPaymentResponse response = exceptionTranslator.execute(() -> paymentService.payment(payment));
 
-        try {
-            response = exceptionTranslator.execute(
-                () -> paymentService.payment(payment)
-            );
-        } catch (CoreException e) {
-            log.error("외부 PG 결제 실패", e);
-            throw new CoreException(ErrorType.PAYMENT_FAIL, "외부 결제 실패로 복구 처리함");
-        }
-
-        paymentService.updateTransactionId(payment.getId(), response.getTransactionId());
-        return PaymentInfo.of(payment);
+        Payment updatedPayment = paymentService.updateTransactionId(payment.getId(), response.getTransactionId());
+        return PaymentInfo.of(updatedPayment);
     }
 
     @Retry(name = "payment-callback-sync", fallbackMethod = "fallbackProcessCallback")
@@ -52,7 +46,7 @@ public class PaymentFacade {
         boolean isSync = response.checkSync(command);
         
         if (!isSync) {
-            throw new DataSyncException("콜백 데이터 동기화 실패");
+            throw new CoreException(ErrorType.CALLBACK_DATA_SYNC_FAILED, "콜백 데이터 동기화 실패");
         }
 
         if (response.isSuccess()) {

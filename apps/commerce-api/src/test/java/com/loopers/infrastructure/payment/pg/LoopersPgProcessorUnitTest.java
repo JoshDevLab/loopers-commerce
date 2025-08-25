@@ -3,7 +3,6 @@ package com.loopers.infrastructure.payment.pg;
 import com.loopers.domain.payment.CardType;
 import com.loopers.domain.payment.ExternalPaymentRequest;
 import com.loopers.domain.payment.ExternalPaymentResponse;
-import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.infrastructure.payment.pg.exception.PgBusinessException;
 import com.loopers.infrastructure.payment.pg.exception.PgGeneralException;
 import com.loopers.infrastructure.payment.pg.support.PgResponse;

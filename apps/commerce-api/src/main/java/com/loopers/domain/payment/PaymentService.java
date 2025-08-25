@@ -1,7 +1,5 @@
 package com.loopers.domain.payment;
 
-import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -67,10 +65,11 @@ public class PaymentService {
     }
 
     @Transactional
-    public void updateTransactionId(Long paymentId, String transactionId) {
+    public Payment updateTransactionId(Long paymentId, String transactionId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
         payment.updateTransactionId(transactionId);
+        return payment;
     }
 
     public Payment findByTransactionId(String transactionKey) {
@@ -166,4 +165,7 @@ public class PaymentService {
         };
     }
 
+    public List<Payment> findByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId);
+    }
 }

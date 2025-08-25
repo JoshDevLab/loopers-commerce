@@ -1,6 +1,9 @@
 package com.loopers.infrastructure.payment.pg;
 
-import com.loopers.domain.payment.*;
+import com.loopers.domain.payment.ExternalPaymentRequest;
+import com.loopers.domain.payment.ExternalPaymentResponse;
+import com.loopers.domain.payment.Payment;
+import com.loopers.domain.payment.PaymentProcessor;
 import com.loopers.infrastructure.payment.pg.exception.PgBusinessException;
 import com.loopers.infrastructure.payment.pg.exception.PgException;
 import com.loopers.infrastructure.payment.pg.exception.PgGeneralException;
@@ -12,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
 
 @Slf4j
 @RequiredArgsConstructor
