@@ -36,7 +36,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order findByIdForUpdate(Long orderId) {
+    public Order findByIdWithLock(Long orderId) {
         return orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND, "주문을 찾을 수 없습니다."));
     }
@@ -63,5 +63,11 @@ public class OrderService {
                         discountAmount)
         );
         return savedOrder;
+    }
+
+    public void complete(Long orderId) {
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
+        order.complete();
     }
 }

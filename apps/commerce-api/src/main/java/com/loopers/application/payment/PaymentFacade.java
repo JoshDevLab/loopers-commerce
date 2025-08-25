@@ -17,28 +17,25 @@ import org.springframework.stereotype.Component;
 public class PaymentFacade {
     private final PaymentService paymentService;
     private final OrderService orderService;
-    private final OrderPaymentProcessor orderPaymentProcessor;
-    private final PaymentEventPublisher paymentEventPublisher;
     private final NotificationService notificationService;
     private final PaymentExceptionTranslator exceptionTranslator;
 
     public PaymentInfo payment(PaymentCommand.Request paymentCommand) {
         ExternalPaymentResponse response;
-        Order order = orderService.findByIdForUpdate(paymentCommand.orderId());
+        Order order = orderService.findByIdWithLock(paymentCommand.orderId());
 
         if (paymentService.existsByOrderIdAndStatus(order.getId(), Payment.PaymentStatus.SUCCESS)) {
             throw new CoreException(ErrorType.ALREADY_EXIST_ORDER_PAYMENT, order.getId() + " 는 이미 결제가 완료된 주문입니다.");
         }
 
-        Payment payment = paymentService.create(paymentCommand);
+        Payment payment = paymentService.create(paymentCommand, order.getPaidAmount());
 
         try {
             response = exceptionTranslator.execute(
-                () -> paymentService.payment(paymentCommand)
+                () -> paymentService.payment(payment)
             );
         } catch (CoreException e) {
             log.error("외부 PG 결제 실패", e);
-            paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(order.getId()));
             throw new CoreException(ErrorType.PAYMENT_FAIL, "외부 결제 실패로 복구 처리함");
         }
 
@@ -58,12 +55,11 @@ public class PaymentFacade {
             throw new DataSyncException("콜백 데이터 동기화 실패");
         }
 
-        if (command.isSuccess()) {
-            return PaymentInfo.of(orderPaymentProcessor.completeOrderAndPayment(command));
+        if (response.isSuccess()) {
+            return PaymentInfo.of(paymentService.complete(command));
         }
-        
-        paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(PgOrderIdGenerator.extractOrderId(command.orderId())));
-        return PaymentInfo.of(orderPaymentProcessor.failedOrderAndPayment(command));
+
+        return PaymentInfo.of(paymentService.failed(command));
     }
 
     // Fallback 메서드

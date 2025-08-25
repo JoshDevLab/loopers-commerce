@@ -30,13 +30,13 @@ public class LoopersPgProcessor implements PaymentProcessor {
     }
 
     @Override
-    public ExternalPaymentRequest createRequest(PaymentCommand.Request paymentCommand, BigDecimal paidAmount) {
+    public ExternalPaymentRequest createRequest(Payment payment) {
         return new LoopersPgFeginClient.LoopersPaymentRequest(
-                paymentCommand.orderId(),
-                paymentCommand.cardType(),
-                paymentCommand.cardNo(),
-                paymentCommand.callbackUrl(),
-                paidAmount,
+                payment.getOrderId(),
+                payment.getCardType(),
+                payment.getCardNo(),
+                payment.getCallbackUrl(),
+                payment.getPaidAmount(),
                 userId
         );
     }

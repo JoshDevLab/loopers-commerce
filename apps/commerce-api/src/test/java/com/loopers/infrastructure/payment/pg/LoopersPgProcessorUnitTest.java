@@ -67,20 +67,21 @@ class LoopersPgProcessorUnitTest {
     class CreateRequest {
 
         @Test
-        @DisplayName("PaymentCommand.Request로부터 LoopersPaymentRequest를 생성한다")
+        @DisplayName("Payment로부터 LoopersPaymentRequest를 생성한다")
         void shouldCreateLoopersPaymentRequest() {
             // given
-            PaymentCommand.Request paymentCommand = new PaymentCommand.Request(
-                100L,
+            com.loopers.domain.payment.Payment payment = com.loopers.domain.payment.Payment.create(
                 PaymentType.CARD,
                 CardType.SAMSUNG,
                 CardNo.valueOfName("1234567890123456"),
+                com.loopers.domain.payment.Payment.PaymentStatus.PENDING,
+                BigDecimal.valueOf(10000),
+                100L,
                 "http://callback.url"
             );
-            BigDecimal paidAmount = BigDecimal.valueOf(10000);
 
             // when
-            ExternalPaymentRequest result = processor.createRequest(paymentCommand, paidAmount);
+            ExternalPaymentRequest result = processor.createRequest(payment);
 
             // then
             assertThat(result).isInstanceOf(LoopersPgFeginClient.LoopersPaymentRequest.class);
@@ -89,7 +90,7 @@ class LoopersPgProcessorUnitTest {
             
             assertThat(request.getOrderId()).isEqualTo(100L);
             assertThat(request.getCardType()).isEqualTo(CardType.SAMSUNG);
-            assertThat(request.getAmount()).isEqualTo(paidAmount);
+            assertThat(request.getAmount()).isEqualTo(BigDecimal.valueOf(10000));
             assertThat(request.getCallbackUrl()).isEqualTo("http://callback.url");
             // ReflectionTestUtils가 제대로 적용되었는지 확인
             assertThat(request.getUserId()).isEqualTo("test-user-123");

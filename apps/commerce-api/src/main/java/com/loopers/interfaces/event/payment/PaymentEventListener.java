@@ -21,20 +21,21 @@ public class PaymentEventListener {
     private final PointService pointService;
     private final CouponService couponService;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handle(PaymentEvent.PaymentFailedRecovery event) {
         log.info("결제 실패 복구 이벤트 처리 시작: orderId={}", event.orderId());
-        
-        try {
-            orderService.cancel(event.orderId());
-            inventoryService.recovery(event.orderId());
-            pointService.recovery(event.orderId());
-            couponService.recovery(event.orderId());
-            
-            log.info("결제 실패 복구 이벤트 처리 완료: orderId={}", event.orderId());
-        } catch (Exception e) {
-            log.error("결제 실패 복구 이벤트 처리 중 오류 발생: orderId={}", event.orderId(), e);
-        }
+        orderService.cancel(event.orderId());
+        inventoryService.recovery(event.orderId());
+        pointService.recovery(event.orderId());
+        couponService.recovery(event.orderId());
+        log.info("결제 실패 복구 이벤트 처리 완료: orderId={}", event.orderId());
+
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handle(PaymentEvent.PaymentSuccess event) {
+        log.info("결제 성공 주문성공 이벤트 처리 시작: orderId={}", event.orderId());
+        orderService.complete(event.orderId());
+        log.info("결제 성공 주문성공 이벤트 처리 완료: orderId={}", event.orderId());
     }
 }

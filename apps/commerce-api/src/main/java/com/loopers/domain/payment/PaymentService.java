@@ -17,35 +17,39 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
-    private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentProcessorManager paymentProcessorManager;
+    private final PaymentEventPublisher paymentEventPublisher;
 
-    public ExternalPaymentResponse payment(PaymentCommand.Request paymentCommand) {
-        Order order = orderRepository.findById(paymentCommand.orderId())
-                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
-
-        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) <= 0) {
+    public ExternalPaymentResponse payment(Payment payment) {
+        ExternalPaymentResponse response = null;
+        if (payment.getPaidAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "결제금액은 0원 초과이어야 합니다");
         }
 
-        PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(paymentCommand.paymentType());
-        ExternalPaymentRequest request = paymentProcessor.createRequest(paymentCommand, order.getPaidAmount());
-        return paymentProcessor.payment(request);
+        PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(payment.getPaymentType());
+        ExternalPaymentRequest request = paymentProcessor.createRequest(payment);
+
+        try {
+            response = paymentProcessor.payment(request);
+        } catch (Exception e) {
+            paymentEventPublisher.publish(new PaymentEvent.PaymentFailedRecovery(payment.getOrderId()));
+            throw e;
+        }
+
+        return response;
     }
 
     @Transactional
-    public Payment create(PaymentCommand.Request paymentCommand) {
-        Order order = orderRepository.findById(paymentCommand.orderId())
-                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
-
+    public Payment create(PaymentCommand.Request paymentCommand, BigDecimal paidAmount) {
         Payment payment = Payment.create(
                 paymentCommand.paymentType(),
                 paymentCommand.cardType(),
                 paymentCommand.cardNo(),
                 Payment.PaymentStatus.PENDING,
-                order.getPaidAmount(),
-                order);
+                paidAmount,
+                paymentCommand.orderId(),
+                paymentCommand.callbackUrl());
         paymentRepository.save(payment);
         return payment;
     }
@@ -132,6 +136,23 @@ public class PaymentService {
         }
     }
 
+    @Transactional
+    public Payment complete(final PaymentCommand.CallbackRequest command) {
+        Payment payment = paymentRepository.findByTransactionId(command.transactionKey())
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.success();
+        paymentEventPublisher.publish(new PaymentEvent.PaymentSuccess(PgOrderIdGenerator.extractOrderId(command.orderId())));
+        return payment;
+    }
+
+    public Payment failed(PaymentCommand.CallbackRequest command) {
+        Payment payment = paymentRepository.findByTransactionId(command.transactionKey())
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.failed();
+        paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(PgOrderIdGenerator.extractOrderId(command.orderId())));
+        return payment;
+    }
+
     private Payment.PaymentStatus convertPgStatusToPaymentStatus(String pgStatus) {
         return switch (pgStatus.toUpperCase()) {
             case "SUCCESS", "COMPLETED", "PAID" -> Payment.PaymentStatus.SUCCESS;
@@ -144,4 +165,5 @@ public class PaymentService {
             }
         };
     }
+
 }

@@ -18,4 +18,9 @@ public class PaymentEventPublisherImpl implements PaymentEventPublisher {
     public void publish(PaymentEvent.PaymentFailedRecovery event) {
         applicationEventPublisher.publishEvent(event);
     }
+
+    @Override
+    public void publish(PaymentEvent.PaymentSuccess event) {
+        applicationEventPublisher.publishEvent(event);
+    }
 }

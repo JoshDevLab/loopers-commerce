@@ -1,6 +1,7 @@
 package com.loopers.application.payment;
 
 import com.loopers.domain.notification.NotificationService;
+import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.*;
 import com.loopers.scheduling.annotation.LoopersScheduled;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class PaymentSyncScheduler {
 
     private final PaymentService paymentService;
     private final NotificationService notificationService;
-    private final OrderPaymentProcessor orderPaymentProcessor;
+    private final OrderService orderService;
     private final PaymentEventPublisher paymentEventPublisher;
 
     /**
@@ -46,7 +47,7 @@ public class PaymentSyncScheduler {
                 try {
                     // 10분 이상 PENDING 상태인 경우 알림 처리하고, 원복
                     if (isOverTenMinutes(payment.getCreatedAt())) {
-                        paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(payment.getOrder().getId()));
+                        paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(payment.getOrderId()));
                         notificationService.sendPaymentSyncFailureAlert(payment.getTransactionId());
                         notificationCount++;
                     }
@@ -55,13 +56,10 @@ public class PaymentSyncScheduler {
                     
                     if (syncResult) {
                         successCount++;
-                        orderPaymentProcessor.completeOrderAndPayment(PaymentCommand.CallbackRequest.create(payment.getTransactionId(),
-                                payment.getOrder().getId().toString(),
-                                payment.getCardType().name(),
-                                payment.getCardNo().getValue(),
-                                payment.getPaidAmount(),
-                                payment.getStatus().toString(),
-                                "결제성공"));
+                        // 결제 성공 시 주문 완료 처리
+                        if (payment.getStatus() == Payment.PaymentStatus.SUCCESS) {
+                            orderService.complete(payment.getOrderId());
+                        }
                     } else {
                         failCount++;
                     }
