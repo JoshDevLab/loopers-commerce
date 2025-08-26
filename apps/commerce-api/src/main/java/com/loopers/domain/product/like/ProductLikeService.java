@@ -15,6 +15,7 @@ import java.util.List;
 public class ProductLikeService {
     private final ProductLikeRepository productLikeRepository;
     private final ApplicationEventPublisher publisher;
+    private final ProductLikeEventPublisher productLikeEventPublisher;
 
     public boolean existsByProductAndUser(Product product, User user) {
         return productLikeRepository.existsByProductAndUser(product, user);
@@ -25,7 +26,7 @@ public class ProductLikeService {
         boolean alreadyLiked = productLikeRepository.existsByProductAndUser(product, user);
         if (!alreadyLiked) {
             productLikeRepository.save(ProductLike.create(product, user));
-            product.increaseLikeCount();
+            productLikeEventPublisher.publish(new ProductLikeEvent(product.getId()));
             publisher.publishEvent(new ProductChangedEvent(product.getId()));
         }
     }
@@ -35,7 +36,7 @@ public class ProductLikeService {
         boolean alreadyLiked = productLikeRepository.existsByProductAndUser(product, user);
         if (alreadyLiked) {
             productLikeRepository.deleteByProductAndUser(product, user);
-            product.decreaseLikeCount();
+            productLikeEventPublisher.publish(new ProductUnLikeEvent(product.getId()));
             publisher.publishEvent(new ProductChangedEvent(product.getId()));
         }
     }
