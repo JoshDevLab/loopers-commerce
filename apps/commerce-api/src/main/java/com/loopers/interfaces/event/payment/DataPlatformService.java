@@ -2,6 +2,7 @@ package com.loopers.interfaces.event.payment;
 
 import com.loopers.application.order.OrderInfo;
 import com.loopers.application.payment.PaymentInfo;
+import com.loopers.domain.payment.DataPlatformGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

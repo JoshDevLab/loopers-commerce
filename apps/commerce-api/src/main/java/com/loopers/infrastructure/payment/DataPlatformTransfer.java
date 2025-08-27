@@ -1,5 +1,7 @@
-package com.loopers.interfaces.event.payment;
+package com.loopers.infrastructure.payment;
 
+import com.loopers.domain.payment.DataPlatformGateway;
+import com.loopers.interfaces.event.payment.DataPlatformService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
