@@ -1,7 +1,6 @@
 package com.loopers.domain.coupon;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.order.Order;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,9 +17,7 @@ public class CouponHistory extends BaseEntity {
     @JoinColumn(name = "user_coupon_id", nullable = false)
     private UserCoupon userCoupon;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private Long orderId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -29,10 +26,10 @@ public class CouponHistory extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal discountAmount;
 
-    public static CouponHistory create(UserCoupon userCoupon, Order order, CouponUsingType usingType, BigDecimal discountAmount) {
+    public static CouponHistory create(UserCoupon userCoupon, Long orderId, CouponUsingType usingType, BigDecimal discountAmount) {
         CouponHistory history = new CouponHistory();
         history.userCoupon = userCoupon;
-        history.order = order;
+        history.orderId = orderId;
         history.usingType = usingType;
         history.discountAmount = discountAmount;
         return history;

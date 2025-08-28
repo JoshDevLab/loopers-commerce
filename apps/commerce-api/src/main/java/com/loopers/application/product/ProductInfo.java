@@ -1,5 +1,6 @@
 package com.loopers.application.product;
 
+import com.loopers.domain.brand.Brand;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductOption;
 import com.loopers.domain.product.ProductStatus;
@@ -56,7 +57,7 @@ public class ProductInfo {
             product.getBasicPrice(),
             product.getProductStatus(),
             product.getLikeCount(),
-            null
+            List.of() // 빈 리스트로 설정
         );
     }
 
@@ -73,6 +74,22 @@ public class ProductInfo {
                 product.getProductStatus(),
                 product.getLikeCount(),
                 productOptions.stream().map(ProductOptionInfo::from).toList()
+        );
+    }
+
+    public static ProductInfo from(Product product, Brand brand) {
+        return new ProductInfo(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getProductCategory().name(),
+                product.getBrand().getId(),
+                brand.getName(),
+                product.getImageUrl(),
+                product.getBasicPrice(),
+                product.getProductStatus(),
+                product.getLikeCount(),
+                List.of()
         );
     }
 

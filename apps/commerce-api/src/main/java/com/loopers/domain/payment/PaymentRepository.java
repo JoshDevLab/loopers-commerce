@@ -22,4 +22,6 @@ public interface PaymentRepository {
      * 결제 상태 업데이트
      */
     int updatePaymentStatus(Long paymentId, Payment.PaymentStatus status, LocalDateTime updatedAt);
+
+    List<Payment> findByOrderId(Long orderId);
 }

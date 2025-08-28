@@ -24,7 +24,7 @@ public class PaymentInfo {
 
     public static PaymentInfo of(Payment payment) {
         return new PaymentInfo(payment.getId(),
-                payment.getOrder().getId(),
+                payment.getOrderId(),
                 payment.getCardType(),
                 payment.getCardNo(),
                 payment.getPaymentType(),

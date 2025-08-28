@@ -4,6 +4,7 @@ import com.loopers.domain.product.ProductChangedEvent;
 import com.loopers.domain.product.ProductOption;
 import com.loopers.domain.product.ProductOptionCache;
 import com.loopers.domain.product.ProductOptionRepository;
+import com.loopers.interfaces.event.product.ProductOptionCacheRefresher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

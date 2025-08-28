@@ -1,5 +1,6 @@
 package com.loopers.domain.point;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PointHistoryRepository {
@@ -10,4 +11,6 @@ public interface PointHistoryRepository {
     Optional<PointHistory> findByOrderId(Long orderId);
 
     void delete(PointHistory pointHistory);
+
+    List<PointHistory> findAll();
 }

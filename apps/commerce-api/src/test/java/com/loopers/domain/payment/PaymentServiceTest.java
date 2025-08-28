@@ -1,7 +1,5 @@
 package com.loopers.domain.payment;
 
-import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderRepository;
 import com.loopers.interfaces.api.payment.dto.CardNo;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -26,51 +24,22 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
-    @Mock OrderRepository orderRepository;
     @Mock PaymentRepository paymentRepository;
     @Mock PaymentProcessorManager paymentProcessorManager;
+    @Mock PaymentEventPublisher paymentEventPublisher;
     @Mock PaymentProcessor paymentProcessor;
-    @Mock Order order;
     @Mock Payment payment;
 
     @InjectMocks PaymentService sut;
 
     @Test
-    @DisplayName("payment - 주문을 찾을 수 없으면 예외를 던진다")
-    void payment_orderNotFound_throws() {
-        // Arrange
-        PaymentCommand.Request command = new PaymentCommand.Request(
-                1L,
-                Payment.PaymentType.CARD,
-                CardType.SAMSUNG,
-                CardNo.valueOfName("1234567890123456"),
-                "http://callback.url"
-        );
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> sut.payment(command))
-                .isInstanceOf(CoreException.class)
-                .extracting("errorType")
-                .isEqualTo(ErrorType.ORDER_NOT_FOUND);
-    }
-
-    @Test
     @DisplayName("payment - 결제금액이 0원 이하면 예외를 던진다")
     void payment_invalidPaidAmount_throws() {
         // Arrange
-        PaymentCommand.Request command = new PaymentCommand.Request(
-                1L,
-                Payment.PaymentType.CARD,
-                CardType.SAMSUNG,
-                CardNo.valueOfName("1234567890123456"),
-                "http://callback.url"
-        );
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(order.getPaidAmount()).thenReturn(BigDecimal.ZERO);
+        when(payment.getPaidAmount()).thenReturn(BigDecimal.ZERO);
 
         // Act & Assert
-        assertThatThrownBy(() -> sut.payment(command))
+        assertThatThrownBy(() -> sut.payment(payment))
                 .isInstanceOf(CoreException.class)
                 .extracting("errorType")
                 .isEqualTo(ErrorType.INVALID_PAID_AMOUNT);
@@ -80,29 +49,44 @@ class PaymentServiceTest {
     @DisplayName("payment - 정상적인 경우 외부 결제 응답을 반환한다")
     void payment_success() {
         // Arrange
-        PaymentCommand.Request command = new PaymentCommand.Request(
-                1L,
-                Payment.PaymentType.CARD,
-                CardType.SAMSUNG,
-                CardNo.valueOfName("1234567890123456"),
-                "http://callback.url"
-        );
         BigDecimal paidAmount = BigDecimal.valueOf(10000);
         ExternalPaymentRequest externalRequest = mock(ExternalPaymentRequest.class);
         ExternalPaymentResponse expectedResponse = mock(ExternalPaymentResponse.class);
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(order.getPaidAmount()).thenReturn(paidAmount);
+        when(payment.getPaidAmount()).thenReturn(paidAmount);
+        when(payment.getPaymentType()).thenReturn(Payment.PaymentType.CARD);
         when(paymentProcessorManager.getProcessor(Payment.PaymentType.CARD)).thenReturn(paymentProcessor);
-        when(paymentProcessor.createRequest(command, paidAmount)).thenReturn(externalRequest);
+        when(paymentProcessor.createRequest(payment)).thenReturn(externalRequest);
         when(paymentProcessor.payment(externalRequest)).thenReturn(expectedResponse);
 
         // Act
-        ExternalPaymentResponse result = sut.payment(command);
+        ExternalPaymentResponse result = sut.payment(payment);
 
         // Assert
         assertThat(result).isSameAs(expectedResponse);
         verify(paymentProcessor).payment(externalRequest);
+    }
+
+    @Test
+    @DisplayName("payment - 결제 실패 시 복구 이벤트를 발행한다")
+    void payment_failure_publishesRecoveryEvent() {
+        // Arrange
+        BigDecimal paidAmount = BigDecimal.valueOf(10000);
+        ExternalPaymentRequest externalRequest = mock(ExternalPaymentRequest.class);
+        RuntimeException paymentException = new RuntimeException("결제 실패");
+
+        when(payment.getPaidAmount()).thenReturn(paidAmount);
+        when(payment.getPaymentType()).thenReturn(Payment.PaymentType.CARD);
+        when(payment.getOrderId()).thenReturn(1L);
+        when(paymentProcessorManager.getProcessor(Payment.PaymentType.CARD)).thenReturn(paymentProcessor);
+        when(paymentProcessor.createRequest(payment)).thenReturn(externalRequest);
+        when(paymentProcessor.payment(externalRequest)).thenThrow(paymentException);
+
+        // Act & Assert
+        assertThatThrownBy(() -> sut.payment(payment))
+                .isSameAs(paymentException);
+        
+        verify(paymentEventPublisher).publish(new PaymentEvent.PaymentFailedRecovery(1L));
     }
 
     @Test
@@ -118,12 +102,10 @@ class PaymentServiceTest {
         );
         BigDecimal paidAmount = BigDecimal.valueOf(10000);
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(order.getPaidAmount()).thenReturn(paidAmount);
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        Payment result = sut.create(command);
+        Payment result = sut.create(command, paidAmount);
 
         // Assert
         assertThat(result).isNotNull();
@@ -429,70 +411,52 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("hasSyncPaymentStatus - SUCCESS 상태를 SUCCESS로 변환한다")
-    void hasSyncPaymentStatus_successStatus_convertsToSuccess() {
+    @DisplayName("complete - 결제를 성공 상태로 변경하고 이벤트를 발행한다")
+    void complete_success() {
         // Arrange
-        ExternalPaymentResponse response = mock(ExternalPaymentResponse.class);
-        when(payment.getPaymentType()).thenReturn(Payment.PaymentType.CARD);
-        when(payment.getTransactionId()).thenReturn("TXN123456");
-        when(payment.getId()).thenReturn(1L);
-        when(paymentProcessorManager.getProcessor(Payment.PaymentType.CARD)).thenReturn(paymentProcessor);
-        when(paymentProcessor.getByTransactionKey("TXN123456")).thenReturn(response);
-        when(response.isSuccess()).thenReturn(true);
-        when(response.getStatus()).thenReturn("SUCCESS");
-        when(paymentRepository.updatePaymentStatus(eq(1L), eq(Payment.PaymentStatus.SUCCESS), any(LocalDateTime.class)))
-                .thenReturn(1);
+        PaymentCommand.CallbackRequest command = PaymentCommand.CallbackRequest.create(
+                "TXN123456",
+                "ORDER_1",
+                "SAMSUNG",
+                "1234567890123456",
+                BigDecimal.valueOf(10000),
+                "SUCCESS",
+                "결제성공"
+        );
+        
+        when(paymentRepository.findByTransactionId("TXN123456")).thenReturn(Optional.of(payment));
 
         // Act
-        boolean result = sut.hasSyncPaymentStatus(payment);
+        Payment result = sut.complete(command);
 
         // Assert
-        assertThat(result).isTrue();
-        verify(paymentRepository).updatePaymentStatus(eq(1L), eq(Payment.PaymentStatus.SUCCESS), any(LocalDateTime.class));
+        assertThat(result).isSameAs(payment);
+        verify(payment).success();
+        verify(paymentEventPublisher).publish(any(PaymentEvent.PaymentSuccess.class));
     }
 
     @Test
-    @DisplayName("hasSyncPaymentStatus - FAILED 상태를 FAILED로 변환한다")
-    void hasSyncPaymentStatus_failedStatus_convertsToFailed() {
+    @DisplayName("failed - 결제를 실패 상태로 변경하고 복구 이벤트를 발행한다")
+    void failed_success() {
         // Arrange
-        ExternalPaymentResponse response = mock(ExternalPaymentResponse.class);
-        when(payment.getPaymentType()).thenReturn(Payment.PaymentType.CARD);
-        when(payment.getTransactionId()).thenReturn("TXN123456");
-        when(payment.getId()).thenReturn(1L);
-        when(paymentProcessorManager.getProcessor(Payment.PaymentType.CARD)).thenReturn(paymentProcessor);
-        when(paymentProcessor.getByTransactionKey("TXN123456")).thenReturn(response);
-        when(response.isSuccess()).thenReturn(true);
-        when(response.getStatus()).thenReturn("FAILED");
-        when(paymentRepository.updatePaymentStatus(eq(1L), eq(Payment.PaymentStatus.FAILED), any(LocalDateTime.class)))
-                .thenReturn(1);
+        PaymentCommand.CallbackRequest command = PaymentCommand.CallbackRequest.create(
+                "TXN123456",
+                "ORDER_1",
+                "SAMSUNG",
+                "1234567890123456",
+                BigDecimal.valueOf(10000),
+                "FAILED",
+                "결제실패"
+        );
+        
+        when(paymentRepository.findByTransactionId("TXN123456")).thenReturn(Optional.of(payment));
 
         // Act
-        boolean result = sut.hasSyncPaymentStatus(payment);
+        Payment result = sut.failed(command);
 
         // Assert
-        assertThat(result).isFalse();
-        verify(paymentRepository).updatePaymentStatus(eq(1L), eq(Payment.PaymentStatus.FAILED), any(LocalDateTime.class));
-    }
-
-
-
-    @Test
-    @DisplayName("hasSyncPaymentStatus - PENDING 상태는 업데이트하지 않고 true를 반환한다")
-    void hasSyncPaymentStatus_pendingStatus_returnsTrue() {
-        // Arrange
-        ExternalPaymentResponse response = mock(ExternalPaymentResponse.class);
-        when(payment.getPaymentType()).thenReturn(Payment.PaymentType.CARD);
-        when(payment.getTransactionId()).thenReturn("TXN123456");
-        when(paymentProcessorManager.getProcessor(Payment.PaymentType.CARD)).thenReturn(paymentProcessor);
-        when(paymentProcessor.getByTransactionKey("TXN123456")).thenReturn(response);
-        when(response.isSuccess()).thenReturn(true);
-        when(response.getStatus()).thenReturn("PROCESSING");
-
-        // Act
-        boolean result = sut.hasSyncPaymentStatus(payment);
-
-        // Assert
-        assertThat(result).isTrue();
-        verify(paymentRepository, never()).updatePaymentStatus(any(), any(), any());
+        assertThat(result).isSameAs(payment);
+        verify(payment).failed();
+        verify(paymentEventPublisher).publish(any(PaymentEvent.PaymentFailedRecovery.class));
     }
 }

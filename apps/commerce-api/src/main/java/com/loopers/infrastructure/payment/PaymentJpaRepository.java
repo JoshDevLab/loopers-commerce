@@ -28,4 +28,6 @@ public interface PaymentJpaRepository extends JpaRepository<Payment, Long> {
     int updatePaymentStatus(@Param("paymentId") Long paymentId, 
                            @Param("status") PaymentStatus status, 
                            @Param("updatedAt") LocalDateTime updatedAt);
+
+    List<Payment> findByOrderId(Long orderId);
 }

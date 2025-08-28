@@ -50,7 +50,6 @@ public enum ErrorType {
     INVALID_CARD_NO(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 형식의 카드번호 입니다."),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase(), "결제 정보를 찾을 수 없습니다."),
     
-    // 사용자 친화적 결제 오류 메시지들
     INVALID_CARD_NUMBER(HttpStatus.BAD_REQUEST, "INVALID_CARD_NUMBER", "입력하신 카드번호가 올바르지 않습니다."),
     EXPIRED_CARD(HttpStatus.BAD_REQUEST, "EXPIRED_CARD", "카드 유효기간이 만료되었습니다."),
     INVALID_CARD_EXPIRY(HttpStatus.BAD_REQUEST, "INVALID_CARD_EXPIRY", "카드 유효기간이 올바르지 않습니다."),
@@ -63,7 +62,10 @@ public enum ErrorType {
     PAYMENT_AUTHENTICATION_FAILED(HttpStatus.BAD_REQUEST, "AUTHENTICATION_FAILED", "카드 인증에 실패했습니다."),
     PAYMENT_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "PAYMENT_NOT_SUPPORTED", "해당 카드로는 결제할 수 없습니다."),
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT_FAILED", "결제 처리 중 오류가 발생했습니다."),
-    PAYMENT_SYSTEM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_SYSTEM_ERROR", "결제 시스템에 일시적인 문제가 발생했습니다.");
+    PAYMENT_SYSTEM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_SYSTEM_ERROR", "결제 시스템에 일시적인 문제가 발생했습니다."),
+    CALLBACK_DATA_SYNC_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_SYSTEM_ERROR", "결제 시스템에 일시적인 문제가 발생했습니다."),
+    PAYMENT_CLIENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "PAYMENT_FAILED", "결제 처리 중 오류가 발생했습니다.")
+    ;
 
     private final HttpStatus status;
     private final String code;

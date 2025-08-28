@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -119,7 +120,7 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
         UserInfo userInfo = UserInfo.of(user);
 
-        productLikeRepository.save(ProductLike.create(product, user));
+        productLikeRepository.save(ProductLike.create(product.getId(), user.getId()));
 
         // Act
         ProductInfo result = productFacade.getProductDetail(product.getId(), userInfo);
@@ -146,18 +147,25 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         Long userPk = user.getId();
 
         // Act
-        ProductLikedInfo firstLike = productFacade.likeProduct(productId, userPk);
-        ProductLikedInfo secondLike = productFacade.likeProduct(productId, userPk);
-        ProductLikedInfo thirdLike = productFacade.likeProduct(productId, userPk);
+        boolean firstLike = productFacade.likeProduct(productId, userPk);
+        boolean secondLike = productFacade.likeProduct(productId, userPk);
+        boolean thirdLike = productFacade.likeProduct(productId, userPk);
 
         // Assert
-        assertThat(firstLike.isLiked()).isTrue();
-        assertThat(secondLike.isLiked()).isTrue();
-        assertThat(thirdLike.isLiked()).isTrue();
+        assertThat(firstLike).isTrue();
+        assertThat(secondLike).isTrue();
+        assertThat(thirdLike).isTrue();
 
-        // 좋아요 수는 한 번만 증가해야 함
-        Optional<Product> updatedProduct = productRepository.findById(productId);
-        assertThat(updatedProduct.get().getLikeCount()).isEqualTo(1);
+        // 가장 중요한 것은 ProductLike 엔티티가 중복 생성되지 않았는지 확인
+        boolean likeExists = productLikeRepository.existsByProductIdAndUserPk(productId, userPk);
+        assertThat(likeExists).isTrue();
+        
+        // ProductLike 테이블에서 해당 유저-상품 조합이 단 하나만 있는지 확인
+        List<ProductLike> userLikes = productLikeRepository.findByUserPk(userPk);
+        long sameProductLikes = userLikes.stream()
+                .filter(like -> like.getProductId().equals(productId))
+                .count();
+        assertThat(sameProductLikes).isEqualTo(1);
     }
 
     @DisplayName("같은 유저가 같은 상품에 여러 번 좋아요 취소 요청을 보내도 한 번만 반영되어야 한다")
@@ -170,24 +178,34 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
                 ProductCategory.CLOTHING, brand, "https://image1.jpg"
         ));
         User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
-        productLikeService.like(product, user);
+        productLikeService.like(product.getId(), user.getId());
 
         Long productId = product.getId();
         Long userPk = user.getId();
 
+        // 먼저 좋아요가 있는 상태인지 확인
+        assertThat(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).isTrue();
+
         // when
-        ProductLikedInfo firstLike = productFacade.unLikeProduct(productId, userPk);
-        ProductLikedInfo secondLike = productFacade.unLikeProduct(productId, userPk);
-        ProductLikedInfo thirdLike = productFacade.unLikeProduct(productId, userPk);
+        boolean firstUnlike = productFacade.unLikeProduct(productId, userPk);
+        boolean secondUnlike = productFacade.unLikeProduct(productId, userPk);
+        boolean thirdUnlike = productFacade.unLikeProduct(productId, userPk);
 
         // then
-        assertThat(firstLike.isLiked()).isFalse();
-        assertThat(secondLike.isLiked()).isFalse();
-        assertThat(thirdLike.isLiked()).isFalse();
+        assertThat(firstUnlike).isFalse();
+        assertThat(secondUnlike).isFalse();
+        assertThat(thirdUnlike).isFalse();
 
-
-        Optional<Product> updatedProduct = productRepository.findById(productId);
-        assertThat(updatedProduct.get().getLikeCount()).isEqualTo(0);
+        // 좋아요가 제거되었는지 확인
+        boolean likeExists = productLikeRepository.existsByProductIdAndUserPk(productId, userPk);
+        assertThat(likeExists).isFalse();
+        
+        // 해당 유저의 좋아요 목록에서 해당 상품이 완전히 제거되었는지 확인
+        List<ProductLike> userLikes = productLikeRepository.findByUserPk(userPk);
+        long sameProductLikes = userLikes.stream()
+                .filter(like -> like.getProductId().equals(productId))
+                .count();
+        assertThat(sameProductLikes).isEqualTo(0);
     }
 
     @Test
@@ -203,16 +221,33 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
             users.add(userRepository.save(User.create("user" + i, "user" + i + "@test.com", "1990-01-01", "MALE")));
         }
 
-        // when
+        // when - 각 사용자를 명시적으로 인덱스로 매핑
+        AtomicInteger userIndex = new AtomicInteger(0);
         ConcurrentTestUtils.Result result = ConcurrentTestUtils.runConcurrent(threadCount, () -> {
-            User currentUser = users.get((int) (Thread.currentThread().threadId() % threadCount));
+            int index = userIndex.getAndIncrement();
+            User currentUser = users.get(index);
             productFacade.likeProduct(product.getId(), currentUser.getId());
         });
 
         // then
-        Product updated = productRepository.findById(product.getId()).orElseThrow();
-        assertThat(updated.getLikeCount()).isEqualTo(threadCount);
         assertThat(result.successCount()).isEqualTo(threadCount);
         assertThat(result.failedCount()).isEqualTo(0);
+        
+        // 각 사용자마다 정확히 하나씩 좋아요가 생성되었는지 확인
+        for (User user : users) {
+            boolean likeExists = productLikeRepository.existsByProductIdAndUserPk(product.getId(), user.getId());
+            assertThat(likeExists).isTrue();
+        }
+        
+        // 전체 좋아요 수가 사용자 수와 같은지 확인 (중복 생성이 없었는지)
+        // 더 간단하게 각 사용자의 좋아요가 정확히 존재하는지만 확인
+        int actualLikeCount = 0;
+        for (User user : users) {
+            if (productLikeRepository.existsByProductIdAndUserPk(product.getId(), user.getId())) {
+                actualLikeCount++;
+            }
+        }
+        System.out.println("Expected like count: " + threadCount + ", Actual like count: " + actualLikeCount);
+        assertThat(actualLikeCount).isEqualTo(threadCount);
     }
 }

@@ -1,9 +1,5 @@
 package com.loopers.domain.payment;
 
-import com.loopers.application.payment.PaymentInfo;
-import com.loopers.application.payment.PaymentSyncScheduler;
-import com.loopers.domain.order.Order;
-import com.loopers.domain.order.OrderRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -14,41 +10,44 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
-    private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentProcessorManager paymentProcessorManager;
+    private final PaymentEventPublisher paymentEventPublisher;
 
-    public ExternalPaymentResponse payment(PaymentCommand.Request paymentCommand) {
-        Order order = orderRepository.findById(paymentCommand.orderId())
-                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
-
-        if (order.getPaidAmount().compareTo(BigDecimal.ZERO) <= 0) {
+    public ExternalPaymentResponse payment(Payment payment) {
+        ExternalPaymentResponse response;
+        if (payment.getPaidAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "결제금액은 0원 초과이어야 합니다");
         }
 
-        PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(paymentCommand.paymentType());
-        ExternalPaymentRequest request = paymentProcessor.createRequest(paymentCommand, order.getPaidAmount());
-        return paymentProcessor.payment(request);
+        PaymentProcessor paymentProcessor = paymentProcessorManager.getProcessor(payment.getPaymentType());
+        ExternalPaymentRequest request = paymentProcessor.createRequest(payment);
+
+        try {
+            response = paymentProcessor.payment(request);
+        } catch (Exception e) {
+            paymentEventPublisher.publish(new PaymentEvent.PaymentFailedRecovery(payment.getOrderId()));
+            throw e;
+        }
+
+        return response;
     }
 
     @Transactional
-    public Payment create(PaymentCommand.Request paymentCommand) {
-        Order order = orderRepository.findById(paymentCommand.orderId())
-                .orElseThrow(() -> new CoreException(ErrorType.ORDER_NOT_FOUND));
-
+    public Payment create(PaymentCommand.Request paymentCommand, BigDecimal paidAmount) {
         Payment payment = Payment.create(
                 paymentCommand.paymentType(),
                 paymentCommand.cardType(),
                 paymentCommand.cardNo(),
                 Payment.PaymentStatus.PENDING,
-                order.getPaidAmount(),
-                order);
+                paidAmount,
+                paymentCommand.orderId(),
+                paymentCommand.callbackUrl());
         paymentRepository.save(payment);
         return payment;
     }
@@ -66,10 +65,11 @@ public class PaymentService {
     }
 
     @Transactional
-    public void updateTransactionId(Long paymentId, String transactionId) {
+    public Payment updateTransactionId(Long paymentId, String transactionId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
         payment.updateTransactionId(transactionId);
+        return payment;
     }
 
     public Payment findByTransactionId(String transactionKey) {
@@ -135,6 +135,23 @@ public class PaymentService {
         }
     }
 
+    @Transactional
+    public Payment complete(final PaymentCommand.CallbackRequest command) {
+        Payment payment = paymentRepository.findByTransactionId(command.transactionKey())
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.success();
+        paymentEventPublisher.publish(new PaymentEvent.PaymentSuccess(PgOrderIdGenerator.extractOrderId(command.orderId())));
+        return payment;
+    }
+
+    public Payment failed(PaymentCommand.CallbackRequest command) {
+        Payment payment = paymentRepository.findByTransactionId(command.transactionKey())
+                .orElseThrow(() -> new CoreException(ErrorType.PAYMENT_NOT_FOUND));
+        payment.failed();
+        paymentEventPublisher.publish(PaymentEvent.PaymentFailedRecovery.of(PgOrderIdGenerator.extractOrderId(command.orderId())));
+        return payment;
+    }
+
     private Payment.PaymentStatus convertPgStatusToPaymentStatus(String pgStatus) {
         return switch (pgStatus.toUpperCase()) {
             case "SUCCESS", "COMPLETED", "PAID" -> Payment.PaymentStatus.SUCCESS;
@@ -146,5 +163,9 @@ public class PaymentService {
                 yield Payment.PaymentStatus.PENDING;
             }
         };
+    }
+
+    public List<Payment> findByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId);
     }
 }

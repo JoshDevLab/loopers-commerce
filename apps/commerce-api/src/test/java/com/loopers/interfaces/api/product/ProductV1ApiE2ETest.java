@@ -278,7 +278,7 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
                 product
         ));
 
-        productLikeRepository.save(ProductLike.create(product, user));
+        productLikeRepository.save(ProductLike.create(product.getId(), user.getId()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-USER-ID", user.getUserId());

@@ -1,5 +1,6 @@
 package com.loopers.domain.coupon;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CouponHistoryRepository {
@@ -10,4 +11,6 @@ public interface CouponHistoryRepository {
     void delete(CouponHistory couponHistory);
 
     boolean existsByOrderId(Long orderId);
+
+    List<CouponHistory> findAll();
 }
