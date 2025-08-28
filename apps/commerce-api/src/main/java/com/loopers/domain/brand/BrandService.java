@@ -21,4 +21,8 @@ public class BrandService {
         return brandRepository.findById(id)
                 .orElseThrow(() -> new CoreException(ErrorType.BRAND_NOT_FOUND, id + "는 존재하지 않는 브랜드입니다."));
     }
+
+    public List<Brand> findAllByIds(List<Long> brandIds) {
+        return brandRepository.findAllByIds(brandIds);
+    }
 }

@@ -92,7 +92,7 @@ class ProductServiceTest {
         // Act & Assert
         assertThatThrownBy(() -> sut.getProductWithBrandById(id))
                 .isInstanceOf(CoreException.class)
-                .hasMessageContaining("존재하지 않는 상품 orderId")
+                .hasMessageContaining("존재하지 않는 상품 productId")
                 .extracting("errorType")
                 .isEqualTo(ErrorType.PRODUCT_NOT_FOUND);
         verify(productRepository, times(1)).findWithBrandById(id);

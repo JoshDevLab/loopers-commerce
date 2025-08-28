@@ -1,16 +1,13 @@
 package com.loopers.domain.product.like;
 
-import com.loopers.domain.product.Product;
-import com.loopers.domain.user.User;
-
 import java.util.List;
 
 public interface ProductLikeRepository {
     ProductLike save(ProductLike productLike);
 
-    boolean existsByProductAndUser(Product product, User user);
+    boolean existsByProductIdAndUserPk(Long productId, Long userPk);
 
-    void deleteByProductAndUser(Product product, User user);
+    void deleteByProductIdAndUserPk(Long productId, Long userPk);
 
-    List<ProductLike> findByUser(User user);
+    List<ProductLike> findByUserPk(Long userPk);
 }

@@ -52,6 +52,11 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public List<Product> findAllByIdIn(List<Long> productIds) {
+        return productJpaRepository.findAllById(productIds);
+    }
+
+    @Override
     public Page<Product> findAllByCriteria(ProductCriteria criteria, Pageable pageable) {
         OrderSpecifier<?>[] orders = productOrderBy(criteria.sort());
 

@@ -1,8 +1,6 @@
 package com.loopers.domain.product.like;
 
-import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductChangedEvent;
-import com.loopers.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -17,31 +15,31 @@ public class ProductLikeService {
     private final ApplicationEventPublisher publisher;
     private final ProductLikeEventPublisher productLikeEventPublisher;
 
-    public boolean existsByProductAndUser(Product product, User user) {
-        return productLikeRepository.existsByProductAndUser(product, user);
+    public boolean existsByProductAndUser(Long productId, Long userPk) {
+        return productLikeRepository.existsByProductIdAndUserPk(productId, userPk);
     }
 
     @Transactional
-    public void like(Product product, User user) {
-        boolean alreadyLiked = productLikeRepository.existsByProductAndUser(product, user);
+    public void like(Long productId, Long userPk) {
+        boolean alreadyLiked = productLikeRepository.existsByProductIdAndUserPk(productId, userPk);
         if (!alreadyLiked) {
-            productLikeRepository.save(ProductLike.create(product, user));
-            productLikeEventPublisher.publish(new ProductLikeEvent(product.getId()));
-            publisher.publishEvent(new ProductChangedEvent(product.getId()));
+            productLikeRepository.save(ProductLike.create(productId, userPk));
+            productLikeEventPublisher.publish(new ProductLikeEvent(productId));
+            publisher.publishEvent(new ProductChangedEvent(productId));
         }
     }
 
     @Transactional
-    public void unLike(Product product, User user) {
-        boolean alreadyLiked = productLikeRepository.existsByProductAndUser(product, user);
+    public void unLike(Long productId, Long userPk) {
+        boolean alreadyLiked = productLikeRepository.existsByProductIdAndUserPk(productId, userPk);
         if (alreadyLiked) {
-            productLikeRepository.deleteByProductAndUser(product, user);
-            productLikeEventPublisher.publish(new ProductUnLikeEvent(product.getId()));
-            publisher.publishEvent(new ProductChangedEvent(product.getId()));
+            productLikeRepository.deleteByProductIdAndUserPk(productId, userPk);
+            productLikeEventPublisher.publish(new ProductUnLikeEvent(productId));
+            publisher.publishEvent(new ProductChangedEvent(productId));
         }
     }
 
-    public List<ProductLike> getProductLikeByUser(User user) {
-        return productLikeRepository.findByUser(user);
+    public List<ProductLike> getProductLikeByUser(Long userPk) {
+        return productLikeRepository.findByUserPk(userPk);
     }
 }

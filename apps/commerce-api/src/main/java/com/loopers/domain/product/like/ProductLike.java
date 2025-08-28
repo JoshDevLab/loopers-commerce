@@ -1,11 +1,7 @@
 package com.loopers.domain.product.like;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.product.Product;
-import com.loopers.domain.user.User;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,19 +14,13 @@ import lombok.NoArgsConstructor;
         uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = {"product_id", "user_id"})
 )
 public class ProductLike extends BaseEntity {
+    private Long productId;
+    private Long userPk;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
-
-    private ProductLike(Product product, User user) {
-        this.product = product;
-        this.user = user;
-    }
-
-    public static ProductLike create(Product product, User user) {
-        return new ProductLike(product, user);
+    public static ProductLike create(Long productId, Long userPk) {
+        ProductLike productLike = new ProductLike();
+        productLike.productId = productId;
+        productLike.userPk = userPk;
+        return productLike;
     }
 }

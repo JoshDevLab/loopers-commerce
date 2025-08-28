@@ -1,8 +1,6 @@
 package com.loopers.domain.product.like;
 
-import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductChangedEvent;
-import com.loopers.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +21,6 @@ class ProductLikeServiceTest {
     @Mock ProductLikeRepository productLikeRepository;
     @Mock ApplicationEventPublisher publisher;
     @Mock ProductLikeEventPublisher productLikeEventPublisher;
-    @Mock Product product;
-    @Mock User user;
     @Mock ProductLike productLike;
 
     @InjectMocks ProductLikeService sut;
@@ -33,29 +29,32 @@ class ProductLikeServiceTest {
     @DisplayName("existsByProductAndUser - 상품과 사용자로 좋아요 존재 여부를 확인한다")
     void existsByProductAndUser_returnsTrue() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        boolean result = sut.existsByProductAndUser(product, user);
+        boolean result = sut.existsByProductAndUser(productId, userPk);
 
         // Assert
         assertThat(result).isTrue();
-        verify(productLikeRepository).existsByProductAndUser(product, user);
+        verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
     }
 
     @Test
     @DisplayName("like - 이미 좋아요가 되어있지 않으면 좋아요를 생성하고 이벤트를 발행한다")
     void like_whenNotAlreadyLiked_createsLikeAndPublishesEvents() {
         // Arrange
-        when(product.getId()).thenReturn(1L);
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
         when(productLikeRepository.save(any(ProductLike.class))).thenReturn(productLike);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
-        verify(productLikeRepository).existsByProductAndUser(product, user);
+        verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
         verify(productLikeRepository).save(any(ProductLike.class));
         verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
         verify(publisher).publishEvent(any(ProductChangedEvent.class));
@@ -65,13 +64,15 @@ class ProductLikeServiceTest {
     @DisplayName("like - 이미 좋아요가 되어있으면 아무것도 하지 않는다")
     void like_whenAlreadyLiked_doesNothing() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
-        verify(productLikeRepository).existsByProductAndUser(product, user);
+        verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
         verify(productLikeRepository, never()).save(any(ProductLike.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductLikeEvent.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
@@ -82,15 +83,16 @@ class ProductLikeServiceTest {
     @DisplayName("unLike - 좋아요가 되어있으면 좋아요를 삭제하고 이벤트를 발행한다")
     void unLike_whenAlreadyLiked_deletesLikeAndPublishesEvents() {
         // Arrange
-        when(product.getId()).thenReturn(1L);
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
-        verify(productLikeRepository).existsByProductAndUser(product, user);
-        verify(productLikeRepository).deleteByProductAndUser(product, user);
+        verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
+        verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
         verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
         verify(publisher).publishEvent(any(ProductChangedEvent.class));
     }
@@ -99,14 +101,16 @@ class ProductLikeServiceTest {
     @DisplayName("unLike - 좋아요가 되어있지 않으면 아무것도 하지 않는다")
     void unLike_whenNotAlreadyLiked_doesNothing() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
-        verify(productLikeRepository).existsByProductAndUser(product, user);
-        verify(productLikeRepository, never()).deleteByProductAndUser(any(), any());
+        verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
+        verify(productLikeRepository, never()).deleteByProductIdAndUserPk(any(), any());
         verify(productLikeEventPublisher, never()).publish(any(ProductLikeEvent.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
         verify(publisher, never()).publishEvent(any(ProductChangedEvent.class));
@@ -116,56 +120,60 @@ class ProductLikeServiceTest {
     @DisplayName("getProductLikeByUser - 사용자의 좋아요 목록을 조회한다")
     void getProductLikeByUser_returnsUserLikes() {
         // Arrange
+        Long userPk = 2L;
         List<ProductLike> expectedLikes = List.of(productLike);
-        when(productLikeRepository.findByUser(user)).thenReturn(expectedLikes);
+        when(productLikeRepository.findByUserPk(userPk)).thenReturn(expectedLikes);
 
         // Act
-        List<ProductLike> result = sut.getProductLikeByUser(user);
+        List<ProductLike> result = sut.getProductLikeByUser(userPk);
 
         // Assert
         assertThat(result).isSameAs(expectedLikes);
-        verify(productLikeRepository).findByUser(user);
+        verify(productLikeRepository).findByUserPk(userPk);
     }
 
     @Test
     @DisplayName("like - 좋아요 생성 시 ProductLike.create가 올바른 파라미터로 호출된다")
     void like_callsProductLikeCreateWithCorrectParameters() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
-        when(product.getId()).thenReturn(1L);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
         verify(productLikeRepository).save(argThat(savedProductLike -> 
-            savedProductLike != null
+            savedProductLike.getProductId().equals(productId) && savedProductLike.getUserPk().equals(userPk)
         ));
     }
 
     @Test
-    @DisplayName("unLike - 좋아요 삭제 시 올바른 파라미터로 deleteByProductAndUser가 호출된다")
-    void unLike_callsDeleteByProductAndUserWithCorrectParameters() {
+    @DisplayName("unLike - 좋아요 삭제 시 올바른 파라미터로 deleteByProductIdAndUserPk가 호출된다")
+    void unLike_callsDeleteByProductIdAndUserPkWithCorrectParameters() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
-        when(product.getId()).thenReturn(1L);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
-        verify(productLikeRepository).deleteByProductAndUser(product, user);
+        verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
     }
 
     @Test
     @DisplayName("like - 이벤트 발행 순서 확인: ProductLikeEvent -> ProductChangedEvent")
     void like_publishesEventsInCorrectOrder() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
-        when(product.getId()).thenReturn(1L);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
         var inOrder = inOrder(productLikeEventPublisher, publisher);
@@ -177,11 +185,12 @@ class ProductLikeServiceTest {
     @DisplayName("unLike - 이벤트 발행 순서 확인: ProductUnLikeEvent -> ProductChangedEvent")
     void unLike_publishesEventsInCorrectOrder() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
-        when(product.getId()).thenReturn(1L);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
         var inOrder = inOrder(productLikeEventPublisher, publisher);
@@ -193,11 +202,12 @@ class ProductLikeServiceTest {
     @DisplayName("like - ProductLikeEvent가 올바른 productId로 발행된다")
     void like_publishesProductLikeEventWithCorrectProductId() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
-        when(product.getId()).thenReturn(123L);
+        Long productId = 123L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
         verify(productLikeEventPublisher).publish(argThat((ProductLikeEvent event) -> 
@@ -209,11 +219,12 @@ class ProductLikeServiceTest {
     @DisplayName("unLike - ProductUnLikeEvent가 올바른 productId로 발행된다")
     void unLike_publishesProductUnLikeEventWithCorrectProductId() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
-        when(product.getId()).thenReturn(456L);
+        Long productId = 456L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
         verify(productLikeEventPublisher).publish(argThat((ProductUnLikeEvent event) -> 
@@ -225,11 +236,12 @@ class ProductLikeServiceTest {
     @DisplayName("like - ProductChangedEvent가 올바른 productId로 발행된다")
     void like_publishesProductChangedEventWithCorrectProductId() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
-        when(product.getId()).thenReturn(789L);
+        Long productId = 789L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
         verify(publisher).publishEvent(argThat((ProductChangedEvent event) -> 
@@ -241,11 +253,12 @@ class ProductLikeServiceTest {
     @DisplayName("unLike - ProductChangedEvent가 올바른 productId로 발행된다")
     void unLike_publishesProductChangedEventWithCorrectProductId() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
-        when(product.getId()).thenReturn(101L);
+        Long productId = 101L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
         verify(publisher).publishEvent(argThat((ProductChangedEvent event) -> 
@@ -257,11 +270,12 @@ class ProductLikeServiceTest {
     @DisplayName("like - 저장소에 저장 후 이벤트를 발행한다")
     void like_publishesEventsAfterSaving() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(false);
-        when(product.getId()).thenReturn(1L);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(false);
 
         // Act
-        sut.like(product, user);
+        sut.like(productId, userPk);
 
         // Assert
         var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, publisher);
@@ -274,15 +288,16 @@ class ProductLikeServiceTest {
     @DisplayName("unLike - 저장소에서 삭제 후 이벤트를 발행한다")
     void unLike_publishesEventsAfterDeleting() {
         // Arrange
-        when(productLikeRepository.existsByProductAndUser(product, user)).thenReturn(true);
-        when(product.getId()).thenReturn(1L);
+        Long productId = 1L;
+        Long userPk = 2L;
+        when(productLikeRepository.existsByProductIdAndUserPk(productId, userPk)).thenReturn(true);
 
         // Act
-        sut.unLike(product, user);
+        sut.unLike(productId, userPk);
 
         // Assert
         var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, publisher);
-        inOrder.verify(productLikeRepository).deleteByProductAndUser(product, user);
+        inOrder.verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
         inOrder.verify(publisher).publishEvent(any(ProductChangedEvent.class));
     }

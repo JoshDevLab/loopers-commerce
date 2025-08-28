@@ -1,7 +1,7 @@
 package com.loopers.interfaces.event.like;
 
+import com.loopers.domain.product.ProductService;
 import com.loopers.domain.product.like.ProductLikeEvent;
-import com.loopers.domain.product.like.ProductLikeStatService;
 import com.loopers.domain.product.like.ProductUnLikeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,17 +14,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 @Component
 public class ProductLikeEventHandler {
-    private final ProductLikeStatService productLikeStatService;
+    private final ProductService productService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onProductLike(ProductLikeEvent event) {
-        productLikeStatService.like(event.productId());
+        productService.increaseLikeCount(event.productId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onProductUnLike(ProductUnLikeEvent event) {
-        productLikeStatService.unLike(event.productId());
+        productService.decreaseLikeCount(event.productId());
     }
 }
