@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 class ProductLikeServiceTest {
 
     @Mock ProductLikeRepository productLikeRepository;
-    @Mock ApplicationEventPublisher publisher;
+    @Mock ProductChangedEventPublisher publisher;
     @Mock ProductLikeEventPublisher productLikeEventPublisher;
     @Mock ProductLike productLike;
 
@@ -57,7 +57,7 @@ class ProductLikeServiceTest {
         verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
         verify(productLikeRepository).save(any(ProductLike.class));
         verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
-        verify(publisher).publishEvent(any(ProductChangedEvent.class));
+        verify(publisher).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -76,7 +76,7 @@ class ProductLikeServiceTest {
         verify(productLikeRepository, never()).save(any(ProductLike.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductLikeEvent.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
-        verify(publisher, never()).publishEvent(any(ProductChangedEvent.class));
+        verify(publisher, never()).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -94,7 +94,7 @@ class ProductLikeServiceTest {
         verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
         verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
         verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
-        verify(publisher).publishEvent(any(ProductChangedEvent.class));
+        verify(publisher).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -113,7 +113,7 @@ class ProductLikeServiceTest {
         verify(productLikeRepository, never()).deleteByProductIdAndUserPk(any(), any());
         verify(productLikeEventPublisher, never()).publish(any(ProductLikeEvent.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
-        verify(publisher, never()).publishEvent(any(ProductChangedEvent.class));
+        verify(publisher, never()).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -178,7 +178,7 @@ class ProductLikeServiceTest {
         // Assert
         var inOrder = inOrder(productLikeEventPublisher, publisher);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
-        inOrder.verify(publisher).publishEvent(any(ProductChangedEvent.class));
+        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -195,7 +195,7 @@ class ProductLikeServiceTest {
         // Assert
         var inOrder = inOrder(productLikeEventPublisher, publisher);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
-        inOrder.verify(publisher).publishEvent(any(ProductChangedEvent.class));
+        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -244,7 +244,7 @@ class ProductLikeServiceTest {
         sut.like(productId, userPk);
 
         // Assert
-        verify(publisher).publishEvent(argThat((ProductChangedEvent event) -> 
+        verify(publisher).publish(argThat((ProductChangedEvent event) ->
             event.productId().equals(789L)
         ));
     }
@@ -261,7 +261,7 @@ class ProductLikeServiceTest {
         sut.unLike(productId, userPk);
 
         // Assert
-        verify(publisher).publishEvent(argThat((ProductChangedEvent event) -> 
+        verify(publisher).publish(argThat((ProductChangedEvent event) ->
             event.productId().equals(101L)
         ));
     }
@@ -281,7 +281,7 @@ class ProductLikeServiceTest {
         var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, publisher);
         inOrder.verify(productLikeRepository).save(any(ProductLike.class));
         inOrder.verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
-        inOrder.verify(publisher).publishEvent(any(ProductChangedEvent.class));
+        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
     }
 
     @Test
@@ -299,6 +299,6 @@ class ProductLikeServiceTest {
         var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, publisher);
         inOrder.verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
-        inOrder.verify(publisher).publishEvent(any(ProductChangedEvent.class));
+        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
     }
 }

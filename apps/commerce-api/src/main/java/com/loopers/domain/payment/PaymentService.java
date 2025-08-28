@@ -20,7 +20,7 @@ public class PaymentService {
     private final PaymentEventPublisher paymentEventPublisher;
 
     public ExternalPaymentResponse payment(Payment payment) {
-        ExternalPaymentResponse response = null;
+        ExternalPaymentResponse response;
         if (payment.getPaidAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new CoreException(ErrorType.INVALID_PAID_AMOUNT, "결제금액은 0원 초과이어야 합니다");
         }

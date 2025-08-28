@@ -114,7 +114,7 @@ class PaymentFacadeTest {
 
         // Act & Assert
         assertThatThrownBy(() -> sut.processCallback(command))
-                .isInstanceOf(CoreException.class)
+                .isInstanceOf(DataSyncException.class)
                 .hasMessage("콜백 데이터 동기화 실패");
     }
 
@@ -182,14 +182,13 @@ class PaymentFacadeTest {
     void processCallback_retryFails_eventuallyThrows() {
         // Arrange
         PaymentCommand.CallbackRequest command = createCallbackCommand(true);
-        DataSyncException syncException = new DataSyncException("콜백 데이터 동기화 실패");
-        
+
         when(exceptionTranslator.executeForCallback(any())).thenReturn(externalPaymentResponse);
         when(externalPaymentResponse.checkSync(command)).thenReturn(false);
 
         // Act & Assert
         assertThatThrownBy(() -> sut.processCallback(command))
-                .isInstanceOf(CoreException.class)
+                .isInstanceOf(DataSyncException.class)
                 .hasMessage("콜백 데이터 동기화 실패");
     }
 

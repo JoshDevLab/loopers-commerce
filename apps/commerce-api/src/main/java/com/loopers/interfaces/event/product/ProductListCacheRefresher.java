@@ -1,4 +1,4 @@
-package com.loopers.application.product;
+package com.loopers.interfaces.event.product;
 
 import com.loopers.domain.product.ProductListAddedEvent;
 import com.loopers.domain.product.ProductListCache;

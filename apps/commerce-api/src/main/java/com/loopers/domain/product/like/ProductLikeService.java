@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class ProductLikeService {
     private final ProductLikeRepository productLikeRepository;
-    private final ApplicationEventPublisher publisher;
+    private final ProductChangedEventPublisher productChangedEventPublisher;
     private final ProductLikeEventPublisher productLikeEventPublisher;
 
     public boolean existsByProductAndUser(Long productId, Long userPk) {
@@ -25,7 +25,7 @@ public class ProductLikeService {
         if (!alreadyLiked) {
             productLikeRepository.save(ProductLike.create(productId, userPk));
             productLikeEventPublisher.publish(new ProductLikeEvent(productId));
-            publisher.publishEvent(new ProductChangedEvent(productId));
+            productChangedEventPublisher.publish(new ProductChangedEvent(productId));
         }
     }
 
@@ -35,7 +35,7 @@ public class ProductLikeService {
         if (alreadyLiked) {
             productLikeRepository.deleteByProductIdAndUserPk(productId, userPk);
             productLikeEventPublisher.publish(new ProductUnLikeEvent(productId));
-            publisher.publishEvent(new ProductChangedEvent(productId));
+            productChangedEventPublisher.publish(new ProductChangedEvent(productId));
         }
     }
 

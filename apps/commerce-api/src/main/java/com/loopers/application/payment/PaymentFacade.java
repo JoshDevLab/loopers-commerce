@@ -46,7 +46,7 @@ public class PaymentFacade {
         boolean isSync = response.checkSync(command);
         
         if (!isSync) {
-            throw new CoreException(ErrorType.CALLBACK_DATA_SYNC_FAILED, "콜백 데이터 동기화 실패");
+            throw new DataSyncException("콜백 데이터 동기화 실패");
         }
 
         if (response.isSuccess()) {

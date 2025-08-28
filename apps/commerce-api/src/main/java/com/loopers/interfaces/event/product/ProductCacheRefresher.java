@@ -1,4 +1,4 @@
-package com.loopers.application.product;
+package com.loopers.interfaces.event.product;
 
 import com.loopers.domain.product.ProductCache;
 import com.loopers.domain.product.ProductChangedEvent;
@@ -16,10 +16,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class ProductCacheRefresher {
     private final ProductCache productCache;
-    private final ProductRepository productRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public void onProductChanged(ProductChangedEvent event) {
         Long productId = event.productId();
         try {
