@@ -9,4 +9,6 @@ public interface BrandRepository {
     List<Brand> findAll();
 
     Optional<Brand> findById(Long id);
+
+    List<Brand> findAllByIds(List<Long> brandIds);
 }

@@ -1,6 +1,5 @@
 package com.loopers.domain.point;
 
-import com.loopers.domain.order.Order;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -39,16 +38,12 @@ public class PointService {
     }
 
     @Transactional
-    public Point use(Long userPk, BigDecimal paidAmount) {
+    public Point use(Long userPk, BigDecimal paidAmount, Long orderId) {
         Point point = pointRepository.findByUserPkWithLock(userPk)
                 .orElseThrow(() -> new CoreException(ErrorType.POINT_NOT_FOUND, "보유하고 있는 포인트가 없습니다."));
         point.use(paidAmount);
+        pointHistoryRepository.save(PointHistory.createUsingHistory(point.getUserPk(), paidAmount, PointHistoryType.USE, orderId));
         return point;
-    }
-
-    @Transactional
-    public void createUsingPointHistory(Point point, BigDecimal paidAmount, Order order) {
-        pointHistoryRepository.save(PointHistory.createUsingHistory(point.getUserPk(), paidAmount, PointHistoryType.USE, order));
     }
 
     public void recovery(Long orderId) {

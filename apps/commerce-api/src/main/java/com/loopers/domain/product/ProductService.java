@@ -34,20 +34,28 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProductWithBrandById(Long productId) {
         return productCache.getOrLoad(productId, () -> productRepository.findWithBrandById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId)));
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 productId: " + productId)));
     }
 
     public List<Product> getProductByBrand(Brand brand) {
         return productRepository.findByBrandId(brand);
     }
 
-    public Product getProductById(Long productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
+    public List<Product> findAllByIds(List<Long> productIds) {
+        return productRepository.findAllByIdIn(productIds);
     }
 
-    public Product getProductByIdWithLock(Long productId) {
-        return productRepository.findByIdWithLock(productId)
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 id: " + productId));
+    @Transactional
+    public void increaseLikeCount(Long productId) {
+        Product product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 productId: " + productId));
+        product.increaseLikeCount();
+    }
+
+    @Transactional
+    public void decreaseLikeCount(Long productId) {
+        Product product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_NOT_FOUND, "존재하지 않는 상품 productId: " + productId));
+        product.decreaseLikeCount();
     }
 }

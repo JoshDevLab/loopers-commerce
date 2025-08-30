@@ -9,4 +9,9 @@ public class PaymentEvent {
             return new PaymentFailedRecovery(orderId);
         }
     }
+
+    public record PaymentSuccess(
+            Long orderId
+    ) {
+    }
 }

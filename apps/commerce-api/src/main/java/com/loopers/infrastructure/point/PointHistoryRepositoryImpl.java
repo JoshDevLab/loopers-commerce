@@ -5,6 +5,7 @@ import com.loopers.domain.point.PointHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -30,6 +31,11 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
     @Override
     public void delete(PointHistory pointHistory) {
         pointHistoryJpaRepository.delete(pointHistory);
+    }
+
+    @Override
+    public List<PointHistory> findAll() {
+        return pointHistoryJpaRepository.findAll();
     }
 
 }

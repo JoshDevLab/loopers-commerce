@@ -19,4 +19,6 @@ public interface ProductRepository {
     List<Product> findByBrandId(Brand brand);
 
     Optional<Product> findByIdWithLock(Long productId);
+
+    List<Product> findAllByIdIn(List<Long> productIds);
 }

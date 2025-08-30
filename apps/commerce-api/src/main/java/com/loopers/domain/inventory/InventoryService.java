@@ -14,16 +14,19 @@ public class InventoryService {
     private final InventoryHistoryRepository inventoryHistoryRepository;
 
     @Transactional
-    public Inventory getEnoughQuantityInventory(ProductOption productOption, int quantity) {
-        Inventory inventory = inventoryRepository.findByProductOptionWithLock(productOption)
+    public void hasEnoughQuantityInventory(ProductOption productOption, int quantity) {
+        Inventory inventory = inventoryRepository.findByProductOption(productOption)
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "상품 재고를 찾을 수 없습니다."));
         inventory.hasEnoughQuantity(quantity);
-        return inventory;
     }
 
     @Transactional
-    public void decreaseQuantity(Inventory inventory, int quantity) {
+    public void decreaseQuantity(Long productOptionId,  Long orderId, int quantity, String reason) {
+        Inventory inventory = inventoryRepository.findByProductOptionIdWithLock(productOptionId)
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "상품 재고를 찾을 수 없습니다."));
+        inventory.hasEnoughQuantity(quantity);
         inventory.decreaseQuantity(quantity);
+        inventoryHistoryRepository.save(InventoryHistory.createDecrease(inventory, quantity, orderId, reason));
     }
 
     @Transactional
@@ -37,12 +40,12 @@ public class InventoryService {
                 .orElseThrow(() -> new CoreException(ErrorType.INVENTORY_HISTORY_NOT_FOUND, "재고 이력을 찾을 수 없습니다."));
 
         Inventory inventory = inventoryRepository.findById(inventoryHistory.getInventory().getId())
-                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "재고 이력을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "상품 재고를 찾을 수 없습니다."));
 
         inventory.recovery(inventoryHistory.getQuantityChanged());
 
         InventoryHistory history = InventoryHistory.createCancel(inventoryHistory.getInventory(),
-                inventoryHistory.getOrder(),
+                orderId,
                 inventoryHistory.getQuantityChanged());
         inventoryHistoryRepository.save(history);
     }

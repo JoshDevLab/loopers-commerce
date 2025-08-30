@@ -32,14 +32,12 @@ public class LikeV1Controller {
 
     @PostMapping("/{productId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<LikedResponse> likeProduct(@PathVariable Long productId, @CurrentUser UserInfo userInfo) {
-        ProductLikedInfo productLikedInfo = productFacade.likeProduct(productId, userInfo.id());
-        return ApiResponse.success(LikedResponse.from(productLikedInfo));
+    public ApiResponse<Boolean> likeProduct(@PathVariable Long productId, @CurrentUser UserInfo userInfo) {
+        return ApiResponse.success(productFacade.likeProduct(productId, userInfo.id()));
     }
 
     @DeleteMapping("/{productId}")
-    public ApiResponse<LikedResponse> unLikeProduct(@PathVariable Long productId, @CurrentUser UserInfo userInfo) {
-        ProductLikedInfo productLikedInfo = productFacade.unLikeProduct(productId, userInfo.id());
-        return ApiResponse.success(LikedResponse.from(productLikedInfo));
+    public ApiResponse<Boolean> unLikeProduct(@PathVariable Long productId, @CurrentUser UserInfo userInfo) {
+        return ApiResponse.success(productFacade.unLikeProduct(productId, userInfo.id()));
     }
 }

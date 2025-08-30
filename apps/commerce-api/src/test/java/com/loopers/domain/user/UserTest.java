@@ -17,7 +17,7 @@ public class UserTest {
                     "toolonguserid1",    // 10자 초과
                     "invalid!@#",        // 특수문자 포함
                     "한글아이디",         // 한글 포함
-                    "space id",          // 공백 포함
+                    "space orderId",          // 공백 포함
                     "",                  // 빈 문자열
             }
     )

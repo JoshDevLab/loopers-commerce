@@ -52,6 +52,11 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public List<Product> findAllByIdIn(List<Long> productIds) {
+        return productJpaRepository.findAllById(productIds);
+    }
+
+    @Override
     public Page<Product> findAllByCriteria(ProductCriteria criteria, Pageable pageable) {
         OrderSpecifier<?>[] orders = productOrderBy(criteria.sort());
 
@@ -95,7 +100,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     private OrderSpecifier<?>[] productOrderBy(String sort) {
         if (sort == null || sort.isBlank()) {
-            // 기본 정렬: id DESC
+            // 기본 정렬: orderId DESC
             return new OrderSpecifier<?>[]{ product.id.desc() };
         }
 

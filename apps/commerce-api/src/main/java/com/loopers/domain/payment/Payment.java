@@ -1,7 +1,6 @@
 package com.loopers.domain.payment;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.order.Order;
 import com.loopers.interfaces.api.payment.dto.CardNo;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -35,15 +34,15 @@ public class Payment extends BaseEntity {
 
     private BigDecimal paidAmount;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private Order order;
+    private Long orderId;
 
     public static Payment create(PaymentType paymentType,
                                  CardType cardType,
                                  CardNo cardNo,
                                  PaymentStatus paymentStatus,
                                  BigDecimal paidAmount,
-                                 Order order)
+                                 Long orderId,
+                                 String callbackUrl)
     {
         Payment payment = new Payment();
         payment.paymentType = paymentType;
@@ -51,7 +50,8 @@ public class Payment extends BaseEntity {
         payment.cardNo = cardNo;
         payment.status = paymentStatus;
         payment.paidAmount = paidAmount;
-        payment.order = order;
+        payment.orderId = orderId;
+        payment.callbackUrl = callbackUrl;
         return payment;
     }
 

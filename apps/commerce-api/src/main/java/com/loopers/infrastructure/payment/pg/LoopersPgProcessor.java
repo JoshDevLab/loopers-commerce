@@ -1,6 +1,9 @@
 package com.loopers.infrastructure.payment.pg;
 
-import com.loopers.domain.payment.*;
+import com.loopers.domain.payment.ExternalPaymentRequest;
+import com.loopers.domain.payment.ExternalPaymentResponse;
+import com.loopers.domain.payment.Payment;
+import com.loopers.domain.payment.PaymentProcessor;
 import com.loopers.infrastructure.payment.pg.exception.PgBusinessException;
 import com.loopers.infrastructure.payment.pg.exception.PgException;
 import com.loopers.infrastructure.payment.pg.exception.PgGeneralException;
@@ -13,15 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class LoopersPgProcessor implements PaymentProcessor {
     private final LoopersPgFeginClient client;
 
-    @Value("${app.pg-simulator.user-id:135135}")
+    @Value("${app.pg-simulator.user-orderId:135135}")
     private String userId;
 
     @Override
@@ -30,13 +31,13 @@ public class LoopersPgProcessor implements PaymentProcessor {
     }
 
     @Override
-    public ExternalPaymentRequest createRequest(PaymentCommand.Request paymentCommand, BigDecimal paidAmount) {
+    public ExternalPaymentRequest createRequest(Payment payment) {
         return new LoopersPgFeginClient.LoopersPaymentRequest(
-                paymentCommand.orderId(),
-                paymentCommand.cardType(),
-                paymentCommand.cardNo(),
-                paymentCommand.callbackUrl(),
-                paidAmount,
+                payment.getOrderId(),
+                payment.getCardType(),
+                payment.getCardNo(),
+                payment.getCallbackUrl(),
+                payment.getPaidAmount(),
                 userId
         );
     }
