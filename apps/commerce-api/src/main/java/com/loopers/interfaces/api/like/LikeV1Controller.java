@@ -2,10 +2,8 @@ package com.loopers.interfaces.api.like;
 
 import com.loopers.application.product.ProductFacade;
 import com.loopers.application.product.ProductInfo;
-import com.loopers.application.product.ProductLikedInfo;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.interfaces.api.ApiResponse;
-import com.loopers.interfaces.api.product.dto.LikedResponse;
 import com.loopers.interfaces.api.product.dto.ProductResponse;
 import com.loopers.interfaces.interceptor.CurrentUser;
 import lombok.RequiredArgsConstructor;

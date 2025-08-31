@@ -2,7 +2,6 @@ package com.loopers.domain.product.like;
 
 import com.loopers.domain.product.ProductChangedEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
