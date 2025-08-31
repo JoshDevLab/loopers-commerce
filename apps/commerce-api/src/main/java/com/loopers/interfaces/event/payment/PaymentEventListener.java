@@ -7,7 +7,10 @@ import com.loopers.domain.payment.PaymentEvent;
 import com.loopers.domain.point.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -20,7 +23,8 @@ public class PaymentEventListener {
     private final PointService pointService;
     private final CouponService couponService;
 
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(PaymentEvent.PaymentFailedRecovery event) {
         log.info("결제 실패 복구 이벤트 처리 시작: orderId={}", event.orderId());
         orderService.cancel(event.orderId());
@@ -31,6 +35,7 @@ public class PaymentEventListener {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(PaymentEvent.PaymentSuccess event) {
         log.info("결제 성공 주문성공 이벤트 처리 시작: orderId={}", event.orderId());
         orderService.complete(event.orderId());
