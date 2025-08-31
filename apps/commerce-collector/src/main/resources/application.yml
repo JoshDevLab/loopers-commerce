@@ -14,35 +14,26 @@ spring:
   main:
     web-application-type: servlet
   application:
-    name: commerce-api
+    name: commerce-collector
   profiles:
     active: local
   config:
     import:
       - jpa.yml
       - redis.yml
+      - kafka.yml
       - logging.yml
       - monitoring.yml
-      - feign.yml
-      - pg.yml
-      - scheduling.yml
-      - kafka.yml
 
-springdoc:
-  use-fqn: true
-  swagger-ui:
-    path: /swagger-ui.html
+demo-kafka:
+  test:
+    topic-name: demo.internal.topic-v1
 
 ---
 spring:
   config:
     activate:
       on-profile: local, test
-
-# 테스트 스케줄러 활성화 (로컬 환경)
-scheduling:
-  test:
-    enabled: true
 
 ---
 spring:
