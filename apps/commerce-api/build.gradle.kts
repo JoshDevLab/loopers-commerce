@@ -4,6 +4,7 @@ dependencies {
     implementation(project(":modules:redis"))
     implementation(project(":modules:feign"))
     implementation(project(":modules:scheduling"))
+    implementation(project(":modules:kafka"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))

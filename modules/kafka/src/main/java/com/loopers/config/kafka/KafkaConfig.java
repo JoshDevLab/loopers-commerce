@@ -1,6 +1,7 @@
 package com.loopers.config.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -25,16 +26,22 @@ public class KafkaConfig {
 
     public static final String BATCH_LISTENER = "BATCH_LISTENER_DEFAULT";
 
-    private static final int MAX_POLLING_SIZE = 3000;          // read 3000 msg
-    private static final int FETCH_MIN_BYTES = (1024 * 1024);   // 1mb
-    private static final int FETCH_MAX_WAIT_MS = 5 * 1000;      // broker waiting time = 5s
-    private static final int SESSION_TIMEOUT_MS = 60 * 1000;    // session timeout = 1m
-    private static final int HEARTBEAT_INTERVAL_MS = 20 * 1000; // heartbeat interval = 20s (1/3 of session_timeout)
-    private static final int MAX_POLL_INTERVAL_MS = 2 * 60 * 1000; // max poll interval = 2m
+    private static final int MAX_POLLING_SIZE = 3000;
+    private static final int FETCH_MIN_BYTES = (1024 * 1024);
+    private static final int FETCH_MAX_WAIT_MS = 5 * 1000;
+    private static final int SESSION_TIMEOUT_MS = 60 * 1000;
+    private static final int HEARTBEAT_INTERVAL_MS = 20 * 1000;
+    private static final int MAX_POLL_INTERVAL_MS = 2 * 60 * 1000;
 
     @Bean
     public ProducerFactory<Object, Object> producerFactory(KafkaProperties kafkaProperties) {
         Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties());
+
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
+        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 300000); // 5분
+
         return new DefaultKafkaProducerFactory<>(props);
     }
 
@@ -59,7 +66,7 @@ public class KafkaConfig {
             KafkaProperties kafkaProperties,
             ByteArrayJsonMessageConverter converter
     ) {
-        Map<String, Object> consumerConfig = new HashMap<>(kafkaProperties.buildConsumerProperties());
+        Map<String, Object> consumerConfig = new HashMap<>(kafkaProperties.buildProducerProperties());
         consumerConfig.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, MAX_POLLING_SIZE);
         consumerConfig.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, FETCH_MIN_BYTES);
         consumerConfig.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, FETCH_MAX_WAIT_MS);

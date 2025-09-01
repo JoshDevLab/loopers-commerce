@@ -62,6 +62,15 @@ public class OutboxEvent extends BaseEntity {
         return outboxEvent;
     }
 
+    public void markAsPublished() {
+        this.published = true;
+        this.publishedAt = ZonedDateTime.now();
+    }
+
+    public boolean isPublished() {
+        return Boolean.TRUE.equals(this.published);
+    }
+
     public enum EventType {
         ORDER_CREATED,
         PRODUCT_LIKED,
