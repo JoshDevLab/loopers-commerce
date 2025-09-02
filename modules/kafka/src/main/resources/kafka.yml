@@ -3,7 +3,7 @@ spring:
     bootstrap-servers: ${BOOTSTRAP_SERVERS}
     client-id: ${spring.application.name}
     properties:
-      spring.json.add.type.headers: false
+      spring.json.add.type.headers: false # json serialize off
       request.timeout.ms: 20000
       retry.backoff.ms: 500
       auto:
@@ -15,13 +15,10 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       retries: 3
-      # At Least Once 보장 설정 추가
-      acks: all
-      delivery-timeout-ms: 300000  # 5분
     consumer:
       group-id: loopers-default-consumer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-serializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
       properties:
         enable-auto-commit: false
     listener:

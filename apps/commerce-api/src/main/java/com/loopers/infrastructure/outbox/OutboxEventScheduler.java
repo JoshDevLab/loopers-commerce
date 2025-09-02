@@ -1,5 +1,8 @@
 package com.loopers.infrastructure.outbox;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.loopers.domain.outbox.OutboxEvent;
 import com.loopers.domain.outbox.OutboxEventRepository;
 import com.loopers.infrastructure.support.RedisDistributedLock;
@@ -23,6 +26,7 @@ import java.util.List;
 public class OutboxEventScheduler {
     private final OutboxEventRepository outboxEventRepository;
     private final KafkaTemplate<Object, Object> kafkaTemplate;
+    private final ObjectMapper objectMapper;
     private final RedisDistributedLock distributedLock;
 
     @Value("${scheduling.tasks.outbox-publishing.batch-size:100}")
@@ -61,11 +65,13 @@ public class OutboxEventScheduler {
 
     private void publishEvent(OutboxEvent event) {
         try {
+            String enrichedPayload = addEventIdToPayload(event.getPayload(), event.getEventId());
+
             // Kafka 발행
             kafkaTemplate.send(
                     event.getTopicName(),
                     event.getAggregateId(),  // 파티션 키
-                    event
+                    enrichedPayload
             );
 
             // 발행 완료 처리
@@ -87,5 +93,22 @@ public class OutboxEventScheduler {
         ZonedDateTime threshold = ZonedDateTime.now().minusDays(7);
         outboxEventRepository.deleteOldPublishedEvents(threshold);
         log.info("오래된 아웃박스 이벤트 정리 완료");
+    }
+
+    private String addEventIdToPayload(String originalPayload, String eventId) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(originalPayload);
+
+            // JSON에 eventId 필드 추가
+            if (jsonNode instanceof ObjectNode) {
+                ((ObjectNode) jsonNode).put("eventId", eventId);
+                return objectMapper.writeValueAsString(jsonNode);
+            }
+
+            return originalPayload;
+        } catch (Exception e) {
+            log.error("Payload에 eventId 추가 실패: {}", originalPayload, e);
+            return originalPayload; // 실패시 원본 반환
+        }
     }
 }
