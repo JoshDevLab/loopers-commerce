@@ -28,13 +28,9 @@ spring:
 app:
   kafka:
     topics:
-      product-stock-events: product-stock-events
       product-like-events: product-like-events
-      product-lifecycle-events: product-lifecycle-events
     consumer-groups:
-      product-stock-collector: product-stock-collector
       product-like-collector: product-like-collector
-      product-lifecycle-collector: product-lifecycle-collector
 
 demo-kafka:
   test:
