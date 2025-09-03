@@ -2,12 +2,12 @@ server:
   shutdown: graceful
   tomcat:
     threads:
-      max: 200 # 최대 워커 스레드 수 (default : 200)
-      min-spare: 10 # 최소 유지 스레드 수 (default : 10)
-    connection-timeout: 1m # 연결 타임아웃 (ms) (default : 60000ms = 1m)
-    max-connections: 8192 # 최대 동시 연결 수 (default : 8192)
-    accept-count: 100 # 대기 큐 크기 (default : 100)
-    keep-alive-timeout: 60s # 60s
+      max: 200
+      min-spare: 10
+    connection-timeout: 1m
+    max-connections: 8192
+    accept-count: 100
+    keep-alive-timeout: 60s
   max-http-request-header-size: 8KB
 
 spring:
@@ -25,6 +25,17 @@ spring:
       - logging.yml
       - monitoring.yml
 
+app:
+  kafka:
+    topics:
+      product-stock-events: product-stock-events
+      product-like-events: product-like-events
+      product-lifecycle-events: product-lifecycle-events
+    consumer-groups:
+      product-stock-collector: product-stock-collector
+      product-like-collector: product-like-collector
+      product-lifecycle-collector: product-lifecycle-collector
+
 demo-kafka:
   test:
     topic-name: demo.internal.topic-v1
@@ -34,6 +45,11 @@ spring:
   config:
     activate:
       on-profile: local, test
+  kafka:
+    bootstrap-servers: localhost:19092
+    admin:
+      properties:
+        bootstrap.servers: kafka:9092
 
 ---
 spring:

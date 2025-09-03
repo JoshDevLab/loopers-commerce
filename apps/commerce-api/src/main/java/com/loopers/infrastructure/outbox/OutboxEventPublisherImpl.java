@@ -31,7 +31,7 @@ public class OutboxEventPublisherImpl implements OutboxEventPublisher {
             applicationEventPublisher.publishEvent(
                     Objects.requireNonNull(
                             OutboxEvent.createProductLike(
-                            "catalog-events",
+                            "product-like-events",
                             event.productId().toString(),
                             payload)
                     )
@@ -50,7 +50,7 @@ public class OutboxEventPublisherImpl implements OutboxEventPublisher {
             applicationEventPublisher.publishEvent(
                     Objects.requireNonNull(
                             OutboxEvent.createProductUnLike(
-                                    "catalog-events",
+                                    "product-like-events",
                                     event.productId().toString(),
                                     payload)
                     )

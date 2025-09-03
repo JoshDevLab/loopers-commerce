@@ -65,7 +65,10 @@ public class OutboxEventScheduler {
 
     private void publishEvent(OutboxEvent event) {
         try {
-            String enrichedPayload = addEventIdToPayload(event.getPayload(), event.getEventId());
+            String enrichedPayload = addEventMetadataToPayload(event.getPayload(),
+                    event.getEventId(),
+                    event.getEventType().toString(),
+                    event.getAggregateId());
 
             // Kafka 발행
             kafkaTemplate.send(
@@ -95,19 +98,26 @@ public class OutboxEventScheduler {
         log.info("오래된 아웃박스 이벤트 정리 완료");
     }
 
-    private String addEventIdToPayload(String originalPayload, String eventId) {
+    private String addEventMetadataToPayload(String originalPayload, String eventId,
+                                             String eventType, String aggregateId) {
         try {
             JsonNode jsonNode = objectMapper.readTree(originalPayload);
 
-            // JSON에 eventId 필드 추가
-            if (jsonNode instanceof ObjectNode) {
-                ((ObjectNode) jsonNode).put("eventId", eventId);
-                return objectMapper.writeValueAsString(jsonNode);
+            if (jsonNode instanceof ObjectNode objectNode) {
+                // 필수 메타데이터 추가
+                objectNode.put("eventId", eventId);
+                objectNode.put("eventType", eventType);
+                objectNode.put("aggregateId", aggregateId);
+
+                // 타임스탬프 추가 (Consumer에서 발생 시점 확인용)
+                objectNode.put("timestamp", ZonedDateTime.now().toString());
+
+                return objectMapper.writeValueAsString(objectNode);
             }
 
             return originalPayload;
         } catch (Exception e) {
-            log.error("Payload에 eventId 추가 실패: {}", originalPayload, e);
+            log.error("Payload에 메타데이터 추가 실패: {}", originalPayload, e);
             return originalPayload; // 실패시 원본 반환
         }
     }
