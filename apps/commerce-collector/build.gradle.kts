@@ -27,5 +27,10 @@ dependencies {
 
     // test dependencies for wiremock
     testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
+    testImplementation ("org.testcontainers:junit-jupiter:1.20.2")
+    testImplementation ("org.testcontainers:kafka:1.20.2")
+    testImplementation ("org.springframework.kafka:spring-kafka-test:3.3.4")
+    testImplementation ("org.awaitility:awaitility:4.2.1")
+    testImplementation ("org.assertj:assertj-core:3.26.0")
 
 }
