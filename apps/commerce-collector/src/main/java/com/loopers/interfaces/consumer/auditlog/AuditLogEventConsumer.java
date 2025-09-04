@@ -27,7 +27,9 @@ public class AuditLogEventConsumer {
     private final DltPublisher dltPublisher;
 
     @KafkaListener(
-            topics = "${app.kafka.topics.audit-events:audit-events}",
+            topics = {"${app.kafka.topics.product-like-events:product-like-events}",
+                    "${app.kafka.topics.product-order-events:product-order-events}",
+                    "${app.kafka.topics.product-view-events:product-view-events}"},
             containerFactory = KafkaConfig.BATCH_LISTENER,
             groupId = "${app.kafka.consumer-groups.audit-collector:audit-collector}"
     )

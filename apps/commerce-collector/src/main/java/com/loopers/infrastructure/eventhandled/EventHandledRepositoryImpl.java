@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -22,5 +23,10 @@ public class EventHandledRepositoryImpl implements EventHandledRepository {
     @Override
     public Optional<EventHandled> findByEventId(String eventId) {
         return eventHandledJpaRepository.findByEventId(eventId);
+    }
+
+    @Override
+    public List<EventHandled> findAll() {
+        return eventHandledJpaRepository.findAll();
     }
 }

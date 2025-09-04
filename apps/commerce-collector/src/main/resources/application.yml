@@ -36,6 +36,7 @@ app:
       product-like-collector: product-like-collector
       product-order-collector: product-order-collector
       product-view-collector: product-view-collector
+      audit-collector: audit-collector
 demo-kafka:
   test:
     topic-name: demo.internal.topic-v1
