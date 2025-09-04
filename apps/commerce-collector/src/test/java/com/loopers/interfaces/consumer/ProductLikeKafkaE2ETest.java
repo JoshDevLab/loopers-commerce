@@ -1,21 +1,18 @@
 package com.loopers.interfaces.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loopers.domain.eventhandled.EventHandled;
-import com.loopers.domain.productmetrics.ProductMetrics;
 import com.loopers.infrastructure.eventhandled.EventHandledJpaRepository;
 import com.loopers.infrastructure.productmetrics.ProductMetricsJpaRepository;
 import com.loopers.support.KafkaTestInitializer;
 import com.loopers.support.TxReadHelper;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
