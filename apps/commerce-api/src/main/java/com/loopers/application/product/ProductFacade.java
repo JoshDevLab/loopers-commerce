@@ -2,6 +2,7 @@ package com.loopers.application.product;
 
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandService;
+import com.loopers.domain.outbox.OutboxEventPublisher;
 import com.loopers.domain.product.*;
 import com.loopers.domain.product.like.ProductLike;
 import com.loopers.domain.product.like.ProductLikeService;
@@ -23,6 +24,7 @@ public class ProductFacade {
     private final BrandService brandService;
     private final ProductOptionService productOptionService;
     private final ProductLikeService productLikeService;
+    private final OutboxEventPublisher outboxEventPublisher;
 
     public Page<ProductInfo> getProductsWithCondition(ProductCriteria criteria, Pageable pageable) {
         return productService.searchByConditionWithPaging(criteria, pageable)
@@ -41,6 +43,7 @@ public class ProductFacade {
         if (productLikeService.existsByProductAndUser(productId, userInfo.id())) {
             result.liked();
         }
+        outboxEventPublisher.publish(new ProductViewEvent(productId));
         return result;
     }
 

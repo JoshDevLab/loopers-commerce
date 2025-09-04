@@ -1,7 +1,7 @@
 package com.loopers.application.productlike;
 
-import com.loopers.domain.command.ProductLikeCommand;
 import com.loopers.domain.productmetrics.ProductMetricsService;
+import com.loopers.domain.productmetrics.command.ProductLikeMetricCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class ProductLikeEventProcessor {
     private final ProductMetricsService productMetricsService;
 
-    public void processEvent(ProductLikeCommand command) {
+    public void processEvent(ProductLikeMetricCommand command) {
         productMetricsService.metricProductLike(command);
     }
 

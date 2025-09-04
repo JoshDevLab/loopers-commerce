@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.context.ApplicationEvent;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -62,20 +63,30 @@ public class OutboxEvent extends BaseEntity {
         return outboxEvent;
     }
 
-    public void markAsPublished() {
-        this.published = true;
-        this.publishedAt = ZonedDateTime.now();
+    public static OutboxEvent createSales(String topicName, String aggregateId, String payload) {
+        OutboxEvent outboxEvent = new OutboxEvent();
+        outboxEvent.eventId = UUID.randomUUID().toString();
+        outboxEvent.aggregateId = aggregateId;
+        outboxEvent.eventType = EventType.ORDER_CREATED;
+        outboxEvent.topicName = topicName;
+        outboxEvent.payload = payload;
+        return outboxEvent;
     }
 
-    public boolean isPublished() {
-        return Boolean.TRUE.equals(this.published);
+    public static OutboxEvent createProductView(String topicName, String aggregateId, String payload) {
+        OutboxEvent outboxEvent = new OutboxEvent();
+        outboxEvent.eventId = UUID.randomUUID().toString();
+        outboxEvent.aggregateId = aggregateId;
+        outboxEvent.eventType = EventType.PRODUCT_VIEW;
+        outboxEvent.topicName = topicName;
+        outboxEvent.payload = payload;
+        return outboxEvent;
     }
 
     public enum EventType {
         ORDER_CREATED,
         PRODUCT_LIKED,
         PRODUCT_UNLIKED,
-        PAYMENT_CREATED,
-        PRODUCT_CHANGED,
+        PRODUCT_CHANGED, PRODUCT_VIEW,
     }
 }

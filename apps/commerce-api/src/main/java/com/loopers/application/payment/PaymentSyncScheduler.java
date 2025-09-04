@@ -6,10 +6,10 @@ import com.loopers.domain.payment.Payment;
 import com.loopers.domain.payment.PaymentEvent;
 import com.loopers.domain.payment.PaymentEventPublisher;
 import com.loopers.domain.payment.PaymentService;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Scheduled;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;

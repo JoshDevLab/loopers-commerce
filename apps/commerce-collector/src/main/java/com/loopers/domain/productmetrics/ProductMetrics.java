@@ -1,12 +1,16 @@
 package com.loopers.domain.productmetrics;
 
 import com.loopers.domain.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Getter
@@ -33,7 +37,7 @@ public class ProductMetrics extends BaseEntity {
     @Builder
     private ProductMetrics(Long productId, ZonedDateTime metricDate, Integer likeCount, Integer viewCount, Integer salesCount) {
         this.productId = productId;
-        this.metricDate = metricDate != null ? metricDate : ZonedDateTime.now();
+        this.metricDate = metricDate != null ? metricDate : ZonedDateTime.now().toLocalDate().atStartOfDay(ZoneId.systemDefault());
         this.likeCount = likeCount != null ? likeCount : 0;
         this.viewCount = viewCount != null ? viewCount : 0;
         this.salesCount = salesCount != null ? salesCount : 0;
@@ -42,12 +46,12 @@ public class ProductMetrics extends BaseEntity {
     public static ProductMetrics createNew(Long productId, ZonedDateTime date) {
         return ProductMetrics.builder()
                 .productId(productId)
-                .metricDate(date != null ? date : ZonedDateTime.now())
+                .metricDate(date != null ? date : ZonedDateTime.now().toLocalDate().atStartOfDay(ZoneId.systemDefault()))
                 .build();
     }
 
     public static ProductMetrics createToday(Long productId) {
-        return createNew(productId, ZonedDateTime.now());
+        return createNew(productId, ZonedDateTime.now().toLocalDate().atStartOfDay(ZoneId.systemDefault()));
     }
 
     public void incrementLikeCount() {
@@ -64,8 +68,8 @@ public class ProductMetrics extends BaseEntity {
         this.viewCount++;
     }
 
-    public void incrementSalesCount(int quantity) {
-        this.salesCount += Math.max(0, quantity);
+    public void incrementSalesCount() {
+        this.salesCount++;
     }
 
     public boolean isToday() {

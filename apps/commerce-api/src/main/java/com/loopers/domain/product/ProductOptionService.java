@@ -33,4 +33,7 @@ public class ProductOptionService {
         return productOption;
     }
 
+    public List<Long> getProductsByOptionIdNotDuplicate(List<Long> optionIds) {
+        return productOptionRepository.findByIdInNotDuplicate(optionIds);
+    }
 }

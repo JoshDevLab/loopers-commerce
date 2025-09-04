@@ -2,12 +2,13 @@ package com.loopers.interfaces.consumer.productlike.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.loopers.domain.command.ProductLikeCommand;
+import com.loopers.domain.productmetrics.command.ProductLikeMetricCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Slf4j
@@ -27,9 +28,6 @@ public class ProductLikeEventDto {
 
     @JsonProperty("aggregateId")
     private String aggregateId;
-
-    @JsonProperty("aggregateVersion")
-    private Long aggregateVersion;
 
     @JsonProperty("timestamp")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
@@ -65,14 +63,14 @@ public class ProductLikeEventDto {
     /**
      * DTO를 Command 객체로 변환
      */
-    public ProductLikeCommand toCommand() {
+    public ProductLikeMetricCommand toCommand() {
         if (!isValid()) {
             log.warn("유효하지 않은 DTO로 Command 생성 불가: {}", this);
             return null;
         }
 
         try {
-            return ProductLikeCommand.builder()
+            return ProductLikeMetricCommand.builder()
                     .eventId(this.eventId)
                     .eventType(this.eventType)
                     .productId(this.productId)
@@ -91,7 +89,9 @@ public class ProductLikeEventDto {
      * 메트릭 날짜 추출 (타임스탬프에서 날짜 부분만)
      */
     private ZonedDateTime extractMetricDate() {
-        return this.timestamp != null ? this.timestamp : ZonedDateTime.now();
+        return this.timestamp != null ?
+                timestamp.toLocalDate().atStartOfDay(ZoneId.systemDefault()) :
+                ZonedDateTime.now().toLocalDate().atStartOfDay(ZoneId.systemDefault());
     }
 
     /**

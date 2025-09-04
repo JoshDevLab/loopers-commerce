@@ -5,6 +5,7 @@ import com.loopers.domain.productmetrics.ProductMetricsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -20,6 +21,7 @@ public class ProductMetricsRepositoryImpl implements ProductMetricsRepository {
 
     @Override
     public Optional<ProductMetrics> findTodayProductMetric(Long productId) {
-        return productMetricsJpaRepository.findByProductIdAndMetricDate(productId, ZonedDateTime.now());
+        ZonedDateTime today = ZonedDateTime.now().toLocalDate().atStartOfDay().atZone(ZoneId.systemDefault());
+        return productMetricsJpaRepository.findByProductIdAndMetricDate(productId, today);
     }
 }

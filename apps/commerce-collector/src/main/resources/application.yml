@@ -1,4 +1,5 @@
 server:
+  port: 8081
   shutdown: graceful
   tomcat:
     threads:
@@ -29,9 +30,12 @@ app:
   kafka:
     topics:
       product-like-events: product-like-events
+      product-order-events: product-order-events
+      product-view-events: product-view-events
     consumer-groups:
       product-like-collector: product-like-collector
-
+      product-order-collector: product-order-collector
+      product-view-collector: product-view-collector
 demo-kafka:
   test:
     topic-name: demo.internal.topic-v1

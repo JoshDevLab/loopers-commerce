@@ -15,4 +15,7 @@ public interface ProductOptionJpaRepository extends JpaRepository<ProductOption,
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from ProductOption p where p.id = :productOptionId")
     Optional<ProductOption> findByIdWithLock(Long productOptionId);
+
+    @Query("select po from ProductOption po join fetch po.product where po.id in(:optionIds)")
+    List<ProductOption> findByIdInWithFetch(List<Long> optionIds);
 }
