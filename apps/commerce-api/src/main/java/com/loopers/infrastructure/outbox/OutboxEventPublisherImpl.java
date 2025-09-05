@@ -117,7 +117,7 @@ public class OutboxEventPublisherImpl implements OutboxEventPublisher {
             applicationEventPublisher.publishEvent(
                     Objects.requireNonNull(
                             OutboxEvent.createStockAdjusted(
-                                    "product-stock-adjusted-events",
+                                    "stock-adjusted-events",
                                     event.productOptionId().toString(),
                                     payload)
                     )
