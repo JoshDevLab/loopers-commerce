@@ -52,9 +52,9 @@ public class ProductStockAdjustedEventConsumer extends BatchConsumerTemplate<Sto
     }
 
     @KafkaListener(
-            topics = "${app.kafka.topics.product-view-events:product-view-events}",
+            topics = "${app.kafka.topics.stock-adjusted-events:stock-adjusted-events}",
             containerFactory = KafkaConfig.BATCH_LISTENER,
-            groupId = "${app.kafka.consumer-groups.product-view-collector:product-view-collector}"
+            groupId = "${app.kafka.consumer-groups.stock-adjusted-collector:stock-adjusted-collector}"
     )
     public void onMessage(
             @Payload List<StockAdjustedEventDto> events,

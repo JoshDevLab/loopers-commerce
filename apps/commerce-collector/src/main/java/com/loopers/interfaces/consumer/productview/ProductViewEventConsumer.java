@@ -52,9 +52,9 @@ public class ProductViewEventConsumer extends BatchConsumerTemplate<ProductViewE
     }
 
     @KafkaListener(
-            topics = "${app.kafka.topics.stock-adjusted-events:stock-adjusted-events}",
+            topics = "${app.kafka.topics.product-view-events:product-view-events}",
             containerFactory = KafkaConfig.BATCH_LISTENER,
-            groupId = "${app.kafka.consumer-groups.stock-adjusted-collector:stock-adjusted-collector}"
+            groupId = "${app.kafka.consumer-groups.product-view-collector:product-view-collector}"
     )
     public void onMessage(
             @Payload List<ProductViewEventDto> events,
