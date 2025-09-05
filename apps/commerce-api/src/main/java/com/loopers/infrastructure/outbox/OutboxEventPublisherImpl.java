@@ -2,6 +2,7 @@ package com.loopers.infrastructure.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopers.application.product.ProductViewEvent;
+import com.loopers.domain.inventory.StockAdjustedEvent;
 import com.loopers.domain.order.OrderCreatedEvent;
 import com.loopers.domain.outbox.OutboxEvent;
 import com.loopers.domain.outbox.OutboxEventPublisher;
@@ -100,6 +101,24 @@ public class OutboxEventPublisherImpl implements OutboxEventPublisher {
                             OutboxEvent.createProductView(
                                     "product-view-events",
                                     event.productId().toString(),
+                                    payload)
+                    )
+            );
+        }  catch (Exception e) {
+            log.error("Failed to save event to outbox: {}", event, e);
+            throw new RuntimeException("Outbox save failed", e);
+        }
+    }
+
+    @Override
+    public void publish(StockAdjustedEvent event) {
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            applicationEventPublisher.publishEvent(
+                    Objects.requireNonNull(
+                            OutboxEvent.createStockAdjusted(
+                                    "product-stock-adjusted-events",
+                                    event.productOptionId().toString(),
                                     payload)
                     )
             );

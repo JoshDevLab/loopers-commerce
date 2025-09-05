@@ -2,12 +2,10 @@ package com.loopers.domain.productmetrics.command;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.time.ZonedDateTime;
 
 @Getter
-@ToString
 @Builder
 public class ProductLikeMetricCommand {
 
