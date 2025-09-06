@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class auditLogRepositoryImpl implements AuditLogRepository {
+public class AuditLogRepositoryImpl implements AuditLogRepository {
     private final AuditLogJpaRepository auditLogJpaRepository;
 
     @Override
