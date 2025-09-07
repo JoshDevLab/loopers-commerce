@@ -5,12 +5,10 @@ import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductCategory;
 import com.loopers.domain.product.ProductRepository;
-import com.loopers.domain.product.ProductStatus;
 import com.loopers.domain.product.like.ProductLikeRepository;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.interfaces.api.ApiResponse;
-import com.loopers.interfaces.api.product.dto.LikedResponse;
 import com.loopers.interfaces.api.product.dto.ProductResponse;
 import com.loopers.support.E2ETestSupport;
 import com.loopers.support.fixture.brand.BrandFixture;
@@ -31,7 +29,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 public class LikeV1ApiE2ETest extends E2ETestSupport {
 

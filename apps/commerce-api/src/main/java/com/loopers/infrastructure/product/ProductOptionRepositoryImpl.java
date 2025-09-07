@@ -33,4 +33,13 @@ public class ProductOptionRepositoryImpl implements ProductOptionRepository {
     public Optional<ProductOption> findByIdWithLock(Long productOptionId) {
         return productOptionJpaRepository.findByIdWithLock(productOptionId);
     }
+
+    @Override
+    public List<Long> findByIdInNotDuplicate(List<Long> optionIds) {
+        List<ProductOption> productOptions = productOptionJpaRepository.findByIdInWithFetch(optionIds);
+        return productOptions.stream()
+                .map(po -> po.getProduct().getId())
+                .distinct()
+                .toList();
+    }
 }

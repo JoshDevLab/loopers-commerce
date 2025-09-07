@@ -1,0 +1,77 @@
+server:
+  port: 8081
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 1m
+    max-connections: 8192
+    accept-count: 100
+    keep-alive-timeout: 60s
+  max-http-request-header-size: 8KB
+
+spring:
+  main:
+    web-application-type: servlet
+  application:
+    name: commerce-collector
+  profiles:
+    active: local
+  config:
+    import:
+      - jpa.yml
+      - redis.yml
+      - kafka.yml
+      - logging.yml
+      - monitoring.yml
+
+app:
+  kafka:
+    topics:
+      product-like-events: product-like-events
+      product-order-events: product-order-events
+      product-view-events: product-view-events
+      stock-adjusted-events: stock-adjusted-events
+    consumer-groups:
+      product-like-collector: product-like-collector
+      product-order-collector: product-order-collector
+      product-view-collector: product-view-collector
+      audit-collector: audit-collector
+      stock-adjusted-collector: stock-adjusted-collector
+demo-kafka:
+  test:
+    topic-name: demo.internal.topic-v1
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local, test
+  kafka:
+    bootstrap-servers: localhost:19092
+    admin:
+      properties:
+        bootstrap.servers: kafka:9092
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+springdoc:
+  api-docs:
+    enabled: false

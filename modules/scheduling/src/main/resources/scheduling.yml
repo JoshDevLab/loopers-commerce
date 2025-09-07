@@ -1,15 +1,3 @@
-# Loopers 스케줄링 설정
-loopers:
-  scheduling:
-    # 스레드 풀 크기
-    pool-size: 10
-    # 스레드 이름 접두사
-    thread-name-prefix: "loopers-scheduler-"
-    # 종료 시 대기 시간 (초)
-    await-termination-seconds: 30
-    # 종료 시 작업 완료까지 대기 여부
-    wait-for-tasks-to-complete-on-shutdown: true
-
 # Spring 기본 스케줄링 설정
 spring:
   task:
@@ -29,6 +17,16 @@ scheduling:
       enabled: true
       pending-check-minutes: 10  # 10분 이상 PENDING 상태일 때 알림
 
+    # === 새로 추가할 아웃박스 설정 ===
+    outbox-publishing:
+      enabled: true
+      batch-size: 100           # 한 번에 처리할 이벤트 수
+      interval-seconds: 5       # 발행 간격 (초)
+
+    outbox-cleanup:
+      enabled: true
+      cleanup-days: 7           # 며칠 전 이벤트까지 정리할지
+
 # 환경별 설정
 ---
 # 로컬/개발 환경
@@ -45,6 +43,11 @@ scheduling:
   tasks:
     payment-sync:
       enabled: true   # 로컬에서는 결제 동기화 활성화 (테스트용)
+    outbox-publishing:
+      enabled: true
+      interval-seconds: 3  # 로컬에서는 더 빠르게
+    outbox-cleanup:
+      enabled: false   # 로컬에서는 정리 비활성화
 
 ---
 # 테스트 환경
@@ -62,6 +65,10 @@ scheduling:
   tasks:
     payment-sync:
       enabled: false  # 테스트에서는 비활성화
+    outbox-publishing:
+      enabled: false  # 테스트에서는 비활성화
+    outbox-cleanup:
+      enabled: false
 
 ---
 # QA 환경
@@ -79,6 +86,11 @@ scheduling:
   tasks:
     payment-sync:
       enabled: true
+    outbox-publishing:
+      enabled: true
+    outbox-cleanup:
+      enabled: true
+      cleanup-days: 3  # QA는 더 자주 정리
 
 ---
 # 운영 환경
@@ -96,3 +108,9 @@ scheduling:
   tasks:
     payment-sync:
       enabled: true
+    outbox-publishing:
+      enabled: true
+      batch-size: 200     # 운영에서는 더 큰 배치
+    outbox-cleanup:
+      enabled: true
+      cleanup-days: 30    # 운영에서는 30일 보관

@@ -10,5 +10,5 @@ public record OrderCreatedEvent(
         Long userCouponId,
         BigDecimal paidAmount,
         Long userPk,
-        BigDecimal discountAmount) {
+        BigDecimal discountAmount, List<Long> productIds) {
 }

@@ -4,12 +4,15 @@ import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderCommand;
 import com.loopers.domain.order.OrderCriteria;
 import com.loopers.domain.order.OrderService;
+import com.loopers.domain.product.ProductOptionService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -18,6 +21,7 @@ public class OrderFacade {
     private final UserService userService;
     private final OrderItemProcessor orderItemProcessor;
     private final CouponProcessor couponProcessor;
+    private final ProductOptionService productOptionService;
 
     public OrderInfo order(OrderCommand.Register command, Long userPk) {
         // order item 생성 및 토탈 금액 반환
@@ -29,6 +33,9 @@ public class OrderFacade {
         // 유저 정보 조회
         User user = userService.getMyInfoByUserPk(userPk);
 
+        List<Long> optionIds = command.getOrderItemCommands().stream().map(OrderCommand.OrderItemCommand::getProductOptionId).toList();
+        List<Long> productIds = productOptionService.getProductsByOptionIdNotDuplicate(optionIds);
+
         Order order = orderService.order(user,
                 orderItemResult.orderItems(),
                 command.getOrderItemCommands(),
@@ -36,7 +43,8 @@ public class OrderFacade {
                 orderItemResult.totalAmount(),
                 couponResult.discountAmount(),
                 command.getUsedPoint(),
-                command.getUserCouponId());
+                command.getUserCouponId(),
+                productIds);
 
         return OrderInfo.from(order);
     }

@@ -1,5 +1,6 @@
 package com.loopers.domain.order;
 
+import com.loopers.domain.outbox.OutboxEventPublisher;
 import com.loopers.domain.user.User;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -18,8 +19,8 @@ import java.util.List;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final OrderEventPublisher orderEventPublisher;
+    private final OutboxEventPublisher outboxEventPublisher;
 
     public Page<Order> getOrdersWithCondition(OrderCriteria criteria, Long userPk, Pageable pageable) {
         return orderRepository.findAllByCriteriaAndUserPk(criteria, userPk, pageable);
@@ -50,19 +51,20 @@ public class OrderService {
                        BigDecimal totalAmount,
                        BigDecimal discountAmount,
                        BigDecimal usedPoint,
-                       Long userCouponId) {
+                       Long userCouponId, List<Long> productIds) {
         Order order = Order.create(user, address, totalAmount, discountAmount, usedPoint);
         orderItems.forEach(order::addOrderItem);
         Order savedOrder = orderRepository.save(order);
-        orderEventPublisher.publish(
-                new OrderCreatedEvent(savedOrder.getId(),
-                        orderItemCommands,
-                        usedPoint,
-                        userCouponId,
-                        order.getPaidAmount(),
-                        user.getId(),
-                        discountAmount)
-        );
+        OrderCreatedEvent event = new OrderCreatedEvent(savedOrder.getId(),
+                orderItemCommands,
+                usedPoint,
+                userCouponId,
+                order.getPaidAmount(),
+                user.getId(),
+                discountAmount,
+                productIds);
+        orderEventPublisher.publish(event);
+        outboxEventPublisher.publish(event);
         return savedOrder;
     }
 

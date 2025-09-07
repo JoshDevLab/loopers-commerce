@@ -48,4 +48,8 @@ public class Inventory extends BaseEntity {
     public void recovery(int quantityChanged) {
         this.quantity = quantityChanged;
     }
+
+    public boolean isStockAdjusted() {
+        return this.quantity == 0;
+    }
 }

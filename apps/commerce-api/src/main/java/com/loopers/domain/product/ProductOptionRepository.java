@@ -11,4 +11,6 @@ public interface ProductOptionRepository {
     Optional<ProductOption> findById(Long productOptionId);
 
     Optional<ProductOption> findByIdWithLock(Long productOptionId);
+
+    List<Long> findByIdInNotDuplicate(List<Long> optionIds);
 }

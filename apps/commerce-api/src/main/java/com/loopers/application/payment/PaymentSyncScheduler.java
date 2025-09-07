@@ -6,9 +6,10 @@ import com.loopers.domain.payment.Payment;
 import com.loopers.domain.payment.PaymentEvent;
 import com.loopers.domain.payment.PaymentEventPublisher;
 import com.loopers.domain.payment.PaymentService;
-import com.loopers.scheduling.annotation.LoopersScheduled;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
@@ -28,12 +29,8 @@ public class PaymentSyncScheduler {
      * 결제 상태 동기화 작업
      * 매분 실행하여 PENDING 상태의 결제 건들을 PG사와 동기화
      */
-    @LoopersScheduled(
-        name = "sync-pending-payments",
-        description = "PENDING 상태 결제 건들의 PG 상태 동기화",
-        cron = "0 * * * * *",  // 매분 실행
-        profiles = {"local", "dev", "qa", "prd"}
-    )
+    @Scheduled(cron = "0 * * * * *")
+    @ConditionalOnProperty(name = "scheduling.tasks.payment-sync.enabled", havingValue = "true", matchIfMissing = true)
     public void syncPendingPayments() {
         try {
             List<Payment> pendingPayments = paymentService.findPendingPayments();

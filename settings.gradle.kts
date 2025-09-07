@@ -2,10 +2,12 @@ rootProject.name = "loopers-commerce"
 
 include(
     ":apps:commerce-api",
+    ":apps:commerce-collector",
     ":modules:jpa",
     ":modules:redis",
     ":modules:feign",
     ":modules:scheduling",
+    ":modules:kafka",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",

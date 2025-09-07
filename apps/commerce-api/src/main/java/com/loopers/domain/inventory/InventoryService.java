@@ -1,5 +1,6 @@
 package com.loopers.domain.inventory;
 
+import com.loopers.domain.outbox.OutboxEventPublisher;
 import com.loopers.domain.product.ProductOption;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
+    private final OutboxEventPublisher outboxEventPublisher;
 
     @Transactional
     public void hasEnoughQuantityInventory(ProductOption productOption, int quantity) {
@@ -26,12 +28,10 @@ public class InventoryService {
                 .orElseThrow(() -> new CoreException(ErrorType.PRODUCT_INVENTORY_NOT_FOUND, "상품 재고를 찾을 수 없습니다."));
         inventory.hasEnoughQuantity(quantity);
         inventory.decreaseQuantity(quantity);
+        if (inventory.isStockAdjusted()) {
+            outboxEventPublisher.publish(new StockAdjustedEvent(productOptionId));
+        }
         inventoryHistoryRepository.save(InventoryHistory.createDecrease(inventory, quantity, orderId, reason));
-    }
-
-    @Transactional
-    public void createInventoryHistory(InventoryHistory inventoryHistory) {
-        inventoryHistoryRepository.save(inventoryHistory);
     }
 
     @Transactional
