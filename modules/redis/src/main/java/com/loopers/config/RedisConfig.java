@@ -1,4 +1,4 @@
-package com.loopers.config.redis;
+package com.loopers.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
