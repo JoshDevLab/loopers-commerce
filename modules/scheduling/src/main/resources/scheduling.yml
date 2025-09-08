@@ -53,9 +53,7 @@ scheduling:
       enabled: true
       interval-seconds: 3  # 로컬에서는 더 빠르게
     outbox-cleanup:
-      enabled: false
-    ranking-carry-over:
-      enabled: false        # 테스트에서는 비활성화   # 로컬에서는 정리 비활성화
+      enabled: false        # 로컬에서는 정리 비활성화
     ranking-carry-over:
       enabled: true
       decay-factor: 0.5     # 개발환경에서는 50% 감쇠

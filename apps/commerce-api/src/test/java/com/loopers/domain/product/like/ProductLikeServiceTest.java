@@ -1,6 +1,6 @@
 package com.loopers.domain.product.like;
 
-import com.loopers.domain.product.ProductChangedEvent;
+import com.loopers.domain.outbox.OutboxEventPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class ProductLikeServiceTest {
 
     @Mock ProductLikeRepository productLikeRepository;
-    @Mock ProductChangedEventPublisher publisher;
+    @Mock OutboxEventPublisher outboxEventPublisher;
     @Mock ProductLikeEventPublisher productLikeEventPublisher;
     @Mock ProductLike productLike;
 
@@ -56,7 +56,7 @@ class ProductLikeServiceTest {
         verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
         verify(productLikeRepository).save(any(ProductLike.class));
         verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
-        verify(publisher).publish(any(ProductChangedEvent.class));
+        verify(outboxEventPublisher).publish(any(ProductLikeEvent.class));
     }
 
     @Test
@@ -75,7 +75,8 @@ class ProductLikeServiceTest {
         verify(productLikeRepository, never()).save(any(ProductLike.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductLikeEvent.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
-        verify(publisher, never()).publish(any(ProductChangedEvent.class));
+        verify(outboxEventPublisher, never()).publish(any(ProductLikeEvent.class));
+        verify(outboxEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
     }
 
     @Test
@@ -93,7 +94,7 @@ class ProductLikeServiceTest {
         verify(productLikeRepository).existsByProductIdAndUserPk(productId, userPk);
         verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
         verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
-        verify(publisher).publish(any(ProductChangedEvent.class));
+        verify(outboxEventPublisher).publish(any(ProductUnLikeEvent.class));
     }
 
     @Test
@@ -112,7 +113,8 @@ class ProductLikeServiceTest {
         verify(productLikeRepository, never()).deleteByProductIdAndUserPk(any(), any());
         verify(productLikeEventPublisher, never()).publish(any(ProductLikeEvent.class));
         verify(productLikeEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
-        verify(publisher, never()).publish(any(ProductChangedEvent.class));
+        verify(outboxEventPublisher, never()).publish(any(ProductLikeEvent.class));
+        verify(outboxEventPublisher, never()).publish(any(ProductUnLikeEvent.class));
     }
 
     @Test
@@ -164,7 +166,7 @@ class ProductLikeServiceTest {
     }
 
     @Test
-    @DisplayName("like - 이벤트 발행 순서 확인: ProductLikeEvent -> ProductChangedEvent")
+    @DisplayName("like - 이벤트 발행 순서 확인: ProductLikeEvent -> OutboxEvent")
     void like_publishesEventsInCorrectOrder() {
         // Arrange
         Long productId = 1L;
@@ -175,13 +177,13 @@ class ProductLikeServiceTest {
         sut.like(productId, userPk);
 
         // Assert
-        var inOrder = inOrder(productLikeEventPublisher, publisher);
+        var inOrder = inOrder(productLikeEventPublisher, outboxEventPublisher);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
-        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
+        inOrder.verify(outboxEventPublisher).publish(any(ProductLikeEvent.class));
     }
 
     @Test
-    @DisplayName("unLike - 이벤트 발행 순서 확인: ProductUnLikeEvent -> ProductChangedEvent")
+    @DisplayName("unLike - 이벤트 발행 순서 확인: ProductUnLikeEvent -> OutboxEvent")
     void unLike_publishesEventsInCorrectOrder() {
         // Arrange
         Long productId = 1L;
@@ -192,9 +194,9 @@ class ProductLikeServiceTest {
         sut.unLike(productId, userPk);
 
         // Assert
-        var inOrder = inOrder(productLikeEventPublisher, publisher);
+        var inOrder = inOrder(productLikeEventPublisher, outboxEventPublisher);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
-        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
+        inOrder.verify(outboxEventPublisher).publish(any(ProductUnLikeEvent.class));
     }
 
     @Test
@@ -232,7 +234,7 @@ class ProductLikeServiceTest {
     }
 
     @Test
-    @DisplayName("like - ProductChangedEvent가 올바른 productId로 발행된다")
+    @DisplayName("like - OutboxEvent로 ProductLikeEvent가 올바른 productId로 발행된다")
     void like_publishesProductChangedEventWithCorrectProductId() {
         // Arrange
         Long productId = 789L;
@@ -243,13 +245,13 @@ class ProductLikeServiceTest {
         sut.like(productId, userPk);
 
         // Assert
-        verify(publisher).publish(argThat((ProductChangedEvent event) ->
+        verify(outboxEventPublisher).publish(argThat((ProductLikeEvent event) ->
             event.productId().equals(789L)
         ));
     }
 
     @Test
-    @DisplayName("unLike - ProductChangedEvent가 올바른 productId로 발행된다")
+    @DisplayName("unLike - OutboxEvent로 ProductUnLikeEvent가 올바른 productId로 발행된다")
     void unLike_publishesProductChangedEventWithCorrectProductId() {
         // Arrange
         Long productId = 101L;
@@ -260,7 +262,7 @@ class ProductLikeServiceTest {
         sut.unLike(productId, userPk);
 
         // Assert
-        verify(publisher).publish(argThat((ProductChangedEvent event) ->
+        verify(outboxEventPublisher).publish(argThat((ProductUnLikeEvent event) ->
             event.productId().equals(101L)
         ));
     }
@@ -277,10 +279,10 @@ class ProductLikeServiceTest {
         sut.like(productId, userPk);
 
         // Assert
-        var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, publisher);
+        var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, outboxEventPublisher);
         inOrder.verify(productLikeRepository).save(any(ProductLike.class));
         inOrder.verify(productLikeEventPublisher).publish(any(ProductLikeEvent.class));
-        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
+        inOrder.verify(outboxEventPublisher).publish(any(ProductLikeEvent.class));
     }
 
     @Test
@@ -295,9 +297,9 @@ class ProductLikeServiceTest {
         sut.unLike(productId, userPk);
 
         // Assert
-        var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, publisher);
+        var inOrder = inOrder(productLikeRepository, productLikeEventPublisher, outboxEventPublisher);
         inOrder.verify(productLikeRepository).deleteByProductIdAndUserPk(productId, userPk);
         inOrder.verify(productLikeEventPublisher).publish(any(ProductUnLikeEvent.class));
-        inOrder.verify(publisher).publish(any(ProductChangedEvent.class));
+        inOrder.verify(outboxEventPublisher).publish(any(ProductUnLikeEvent.class));
     }
 }
