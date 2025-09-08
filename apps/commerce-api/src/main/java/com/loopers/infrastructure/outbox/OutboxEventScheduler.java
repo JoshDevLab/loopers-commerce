@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.loopers.domain.outbox.OutboxEvent;
 import com.loopers.domain.outbox.OutboxEventRepository;
-import com.loopers.infrastructure.support.RedisDistributedLock;
+import com.loopers.support.redis.RedisDistributedLock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -27,6 +27,12 @@ scheduling:
       enabled: true
       cleanup-days: 7           # 며칠 전 이벤트까지 정리할지
 
+    # 랭킹 Carry-Over 설정
+    ranking-carry-over:
+      enabled: true
+      decay-factor: 0.3     # 30%로 감쇠 적용
+      test-mode: false      # 테스트 모드 비활성화
+
 # 환경별 설정
 ---
 # 로컬/개발 환경
@@ -47,7 +53,13 @@ scheduling:
       enabled: true
       interval-seconds: 3  # 로컬에서는 더 빠르게
     outbox-cleanup:
-      enabled: false   # 로컬에서는 정리 비활성화
+      enabled: false
+    ranking-carry-over:
+      enabled: false        # 테스트에서는 비활성화   # 로컬에서는 정리 비활성화
+    ranking-carry-over:
+      enabled: true
+      decay-factor: 0.5     # 개발환경에서는 50% 감쇠
+      test-mode: true       # 테스트 모드 활성화 (30분마다 실행)
 
 ---
 # 테스트 환경
@@ -69,6 +81,8 @@ scheduling:
       enabled: false  # 테스트에서는 비활성화
     outbox-cleanup:
       enabled: false
+    ranking-carry-over:
+      enabled: false        # 테스트에서는 비활성화
 
 ---
 # QA 환경
@@ -91,6 +105,9 @@ scheduling:
     outbox-cleanup:
       enabled: true
       cleanup-days: 3  # QA는 더 자주 정리
+    ranking-carry-over:
+      enabled: true
+      decay-factor: 0.4     # QA에서는 40% 감쇠
 
 ---
 # 운영 환경
@@ -114,3 +131,6 @@ scheduling:
     outbox-cleanup:
       enabled: true
       cleanup-days: 30    # 운영에서는 30일 보관
+    ranking-carry-over:
+      enabled: true
+      decay-factor: 0.3     # 운영에서는 30% 감쇠
