@@ -5,6 +5,7 @@ import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.product.*;
 import com.loopers.domain.product.like.ProductLike;
 import com.loopers.domain.product.like.ProductLikeRepository;
+import com.loopers.domain.ranking.RankingService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.interfaces.api.ApiResponse;
@@ -12,6 +13,7 @@ import com.loopers.interfaces.api.PageResponse;
 import com.loopers.interfaces.api.product.dto.ProductDetailResponse;
 import com.loopers.interfaces.api.product.dto.ProductResponse;
 import com.loopers.support.E2ETestSupport;
+import com.loopers.support.RedisZSetOperations;
 import com.loopers.support.fixture.brand.BrandFixture;
 import com.loopers.support.fixture.product.ProductFixture;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,6 +51,12 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
 
     @Autowired
     ProductLikeRepository productLikeRepository;
+
+    @Autowired
+    RankingService rankingService;
+
+    @Autowired
+    RedisZSetOperations redisZSetOperations;
 
     @DisplayName("상품목록 조회 API 테스트")
     @Test
@@ -317,6 +326,144 @@ public class ProductV1ApiE2ETest extends E2ETestSupport {
                         tuple("Size M", "Color Red", BigDecimal.valueOf(10000).setScale(2), ProductStatus.ON_SALE.name()),
                         tuple("Size L", "Color Blue", BigDecimal.valueOf(12000).setScale(2), ProductStatus.ON_SALE.name())
                 );
+    }
+
+    @DisplayName("상품상세 조회시 랭킹 정보가 포함되어 반환된다")
+    @Test
+    void getProductDetailWithRanking() {
+        // Arrange
+        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
+        var product = productRepository.save(ProductFixture.createProduct(
+                "testProduct1",
+                "Description for product 1",
+                BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING,
+                brand,
+                "https://example.com/image1.jpg"
+        ));
+
+        productOptionRepository.save(ProductOption.create(
+                "name1",
+                "Size M",
+                "Color Red",
+                ProductStatus.ON_SALE,
+                BigDecimal.valueOf(10000),
+                product
+        ));
+
+        // 랭킹 데이터 추가 (3위로 설정)
+        LocalDate today = LocalDate.now();
+        String rankingKey = "ranking:all:" + today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        redisZSetOperations.add(rankingKey, "100", 200.0); // 1위
+        redisZSetOperations.add(rankingKey, "200", 150.0); // 2위
+        redisZSetOperations.add(rankingKey, product.getId().toString(), 100.0); // 3위
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Void> httpEntityWithHeaders = new HttpEntity<>(headers);
+
+        // Act
+        var response = client.exchange(
+                BASE_URL + "/" + product.getId(),
+                HttpMethod.GET,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<ProductDetailResponse>>() {}
+        );
+
+        // Assert
+        ProductDetailResponse productDetailResponse = Objects.requireNonNull(response.getBody()).data();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(productDetailResponse.getProductId()).isEqualTo(product.getId());
+        assertThat(productDetailResponse.getRanking()).isEqualTo(3L); // 3위 확인
+    }
+
+    @DisplayName("상품상세 조회시 랭킹에 없는 상품은 랭킹이 null로 반환된다")
+    @Test
+    void getProductDetailWithoutRanking() {
+        // Arrange
+        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
+        var product = productRepository.save(ProductFixture.createProduct(
+                "testProduct1",
+                "Description for product 1",
+                BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING,
+                brand,
+                "https://example.com/image1.jpg"
+        ));
+
+        productOptionRepository.save(ProductOption.create(
+                "name1",
+                "Size M",
+                "Color Red",
+                ProductStatus.ON_SALE,
+                BigDecimal.valueOf(10000),
+                product
+        ));
+
+        // 랭킹 데이터는 추가하지 않음
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Void> httpEntityWithHeaders = new HttpEntity<>(headers);
+
+        // Act
+        var response = client.exchange(
+                BASE_URL + "/" + product.getId(),
+                HttpMethod.GET,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<ProductDetailResponse>>() {}
+        );
+
+        // Assert
+        ProductDetailResponse productDetailResponse = Objects.requireNonNull(response.getBody()).data();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(productDetailResponse.getProductId()).isEqualTo(product.getId());
+        assertThat(productDetailResponse.getRanking()).isNull(); // 랭킹 없음
+    }
+
+    @DisplayName("상품상세 조회시 1위 상품은 랭킹이 1로 반환된다")
+    @Test
+    void getProductDetailWithFirstRanking() {
+        // Arrange
+        Brand brand = brandRepository.save(BrandFixture.createBrand("Brand1", "Brand description 1", "https://image1.com"));
+        var product = productRepository.save(ProductFixture.createProduct(
+                "testProduct1",
+                "Description for product 1",
+                BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING,
+                brand,
+                "https://example.com/image1.jpg"
+        ));
+
+        productOptionRepository.save(ProductOption.create(
+                "name1",
+                "Size M",
+                "Color Red",
+                ProductStatus.ON_SALE,
+                BigDecimal.valueOf(10000),
+                product
+        ));
+
+        // 1위로 설정
+        LocalDate today = LocalDate.now();
+        String rankingKey = "ranking:all:" + today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        redisZSetOperations.add(rankingKey, product.getId().toString(), 300.0); // 1위
+        redisZSetOperations.add(rankingKey, "200", 250.0); // 2위
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Void> httpEntityWithHeaders = new HttpEntity<>(headers);
+
+        // Act
+        var response = client.exchange(
+                BASE_URL + "/" + product.getId(),
+                HttpMethod.GET,
+                httpEntityWithHeaders,
+                new ParameterizedTypeReference<ApiResponse<ProductDetailResponse>>() {}
+        );
+
+        // Assert
+        ProductDetailResponse productDetailResponse = Objects.requireNonNull(response.getBody()).data();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(productDetailResponse.getProductId()).isEqualTo(product.getId());
+        assertThat(productDetailResponse.getRanking()).isEqualTo(1L); // 1위 확인
     }
 
 

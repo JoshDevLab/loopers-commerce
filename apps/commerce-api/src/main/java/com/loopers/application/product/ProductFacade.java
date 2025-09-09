@@ -6,6 +6,7 @@ import com.loopers.domain.outbox.OutboxEventPublisher;
 import com.loopers.domain.product.*;
 import com.loopers.domain.product.like.ProductLike;
 import com.loopers.domain.product.like.ProductLikeService;
+import com.loopers.domain.ranking.RankingService;
 import com.loopers.domain.user.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class ProductFacade {
     private final ProductOptionService productOptionService;
     private final ProductLikeService productLikeService;
     private final OutboxEventPublisher outboxEventPublisher;
+    private final RankingService rankingService;
 
     public Page<ProductInfo> getProductsWithCondition(ProductCriteria criteria, Pageable pageable) {
         return productService.searchByConditionWithPaging(criteria, pageable)
@@ -69,7 +72,7 @@ public class ProductFacade {
             return List.of();
         }
 
-        List<Product> products = productService.findAllByIds(productIds);
+        List<Product> products = productService.getProductsByIds(productIds);
 
         List<Long> brandIds = products.stream()
                 .map(product -> product.getBrand().getId())
@@ -89,5 +92,12 @@ public class ProductFacade {
 
         infos.forEach(ProductInfo::liked);
         return infos;
+    }
+
+    public ProductDetailInfo getProductDetailWithRanking(Long productId, UserInfo userInfo) {
+        ProductInfo productInfo = getProductDetail(productId, userInfo);
+        Long ranking = rankingService.getProductRank(productId, LocalDate.now());
+
+        return new ProductDetailInfo(productInfo, ranking);
     }
 }

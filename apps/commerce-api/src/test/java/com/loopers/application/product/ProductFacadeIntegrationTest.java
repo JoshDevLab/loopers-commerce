@@ -6,10 +6,12 @@ import com.loopers.domain.product.*;
 import com.loopers.domain.product.like.ProductLike;
 import com.loopers.domain.product.like.ProductLikeRepository;
 import com.loopers.domain.product.like.ProductLikeService;
+import com.loopers.domain.ranking.RankingService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserInfo;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.support.IntegrationTestSupport;
+import com.loopers.support.RedisZSetOperations;
 import com.loopers.support.util.ConcurrentTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +50,12 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
     ProductLikeService productLikeService;
+
+    @Autowired
+    RankingService rankingService;
+
+    @Autowired
+    RedisZSetOperations redisZSetOperations;
 
 
     @DisplayName("상품 페이지 목록 조회 테스트")
@@ -248,5 +257,119 @@ class ProductFacadeIntegrationTest extends IntegrationTestSupport {
         }
         System.out.println("Expected like count: " + threadCount + ", Actual like count: " + actualLikeCount);
         assertThat(actualLikeCount).isEqualTo(threadCount);
+    }
+
+    @DisplayName("상품 상세 조회 시 랭킹 정보가 포함된다")
+    @Test
+    void getProductDetailWithRanking() {
+        // Arrange
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
+
+        Product product = productRepository.save(Product.create(
+                "랭킹 테스트 상품", "상품 설명", BigDecimal.valueOf(15000),
+                ProductCategory.CLOTHING, brand, "https://ranking-product.jpg"
+        ));
+
+        productOptionRepository.save(ProductOption.create(
+                "name1",
+                "Size L",
+                "Color Blue",
+                ProductStatus.ON_SALE,
+                BigDecimal.valueOf(15000),
+                product
+        ));
+
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+        UserInfo userInfo = UserInfo.of(user);
+
+        // 랭킹 데이터 설정 (5위)
+        LocalDate today = LocalDate.now();
+        String rankingKey = "ranking:all:" + today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        // 다른 상품들을 상위 랭킹으로 설정
+        redisZSetOperations.add(rankingKey, "100", 500.0); // 1위
+        redisZSetOperations.add(rankingKey, "101", 400.0); // 2위
+        redisZSetOperations.add(rankingKey, "102", 300.0); // 3위
+        redisZSetOperations.add(rankingKey, "103", 200.0); // 4위
+        redisZSetOperations.add(rankingKey, product.getId().toString(), 100.0); // 5위
+
+        // Act
+        ProductDetailInfo result = productFacade.getProductDetailWithRanking(product.getId(), userInfo);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.productInfo().getName()).isEqualTo("랭킹 테스트 상품");
+        assertThat(result.ranking()).isEqualTo(5L); // 5위 확인
+    }
+
+    @DisplayName("랭킹에 없는 상품 상세 조회 시 랭킹은 null이다")
+    @Test
+    void getProductDetailWithoutRanking() {
+        // Arrange
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
+
+        Product product = productRepository.save(Product.create(
+                "비랭킹 상품", "상품 설명", BigDecimal.valueOf(10000),
+                ProductCategory.CLOTHING, brand, "https://no-ranking.jpg"
+        ));
+
+        productOptionRepository.save(ProductOption.create(
+                "name1",
+                "Size M",
+                "Color Red",
+                ProductStatus.ON_SALE,
+                BigDecimal.valueOf(10000),
+                product
+        ));
+
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+        UserInfo userInfo = UserInfo.of(user);
+
+        // 랭킹 데이터는 설정하지 않음
+
+        // Act
+        ProductDetailInfo result = productFacade.getProductDetailWithRanking(product.getId(), userInfo);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.productInfo().getName()).isEqualTo("비랭킹 상품");
+        assertThat(result.ranking()).isNull(); // 랭킹 없음
+    }
+
+    @DisplayName("1위 상품 상세 조회 시 랭킹이 1이다")
+    @Test
+    void getProductDetailWithFirstRanking() {
+        // Arrange
+        Brand brand = brandRepository.save(Brand.create("Brand1", "브랜드 설명", "https://image1.com"));
+
+        Product product = productRepository.save(Product.create(
+                "1위 상품", "1위 상품 설명", BigDecimal.valueOf(50000),
+                ProductCategory.ACCESSORY, brand, "https://first-product.jpg"
+        ));
+
+        productOptionRepository.save(ProductOption.create(
+                "name1",
+                "Size One",
+                "Color Gold",
+                ProductStatus.ON_SALE,
+                BigDecimal.valueOf(50000),
+                product
+        ));
+
+        User user = userRepository.save(User.create("testUser", "testUser@email.com", "1996-11-27", "MALE"));
+        UserInfo userInfo = UserInfo.of(user);
+
+        // 1위로 설정
+        LocalDate today = LocalDate.now();
+        String rankingKey = "ranking:all:" + today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        redisZSetOperations.add(rankingKey, product.getId().toString(), 1000.0); // 1위
+        redisZSetOperations.add(rankingKey, "200", 900.0); // 2위
+
+        // Act
+        ProductDetailInfo result = productFacade.getProductDetailWithRanking(product.getId(), userInfo);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.productInfo().getName()).isEqualTo("1위 상품");
+        assertThat(result.ranking()).isEqualTo(1L); // 1위 확인
     }
 }

@@ -79,6 +79,15 @@ public class RedisZSetOperations {
         }
     }
 
+    public Long zCard(String key) {
+        try {
+            return redisTemplate.opsForZSet().zCard(key);
+        } catch (Exception e) {
+            log.error("ZSET 카드 수 조회 실패: key={}", key, e);
+            return 0L;
+        }
+    }
+
     public Boolean expire(String key, Duration timeout) {
         try {
             return redisTemplate.expire(key, timeout);

@@ -41,7 +41,7 @@ public class ProductService {
         return productRepository.findByBrandId(brand);
     }
 
-    public List<Product> findAllByIds(List<Long> productIds) {
+    public List<Product> getProductsByIds(List<Long> productIds) {
         return productRepository.findAllByIdIn(productIds);
     }
 

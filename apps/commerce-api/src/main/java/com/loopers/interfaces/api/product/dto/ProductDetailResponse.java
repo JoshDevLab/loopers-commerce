@@ -23,6 +23,7 @@ public class ProductDetailResponse {
     private String categoryName;
     private String productStatus;
     private List<ProductOptionResponse> options;
+    private Long ranking; // 랭킹 정보 추가 (순위에 없으면 null)
 
     public static ProductDetailResponse from(ProductInfo productInfo) {
         return new ProductDetailResponse(
@@ -37,9 +38,30 @@ public class ProductDetailResponse {
                 productInfo.getCategoryName(),
                 productInfo.getProductStatus().name(),
                 productInfo.getOptions() != null ?
-                    productInfo.getOptions().stream()
-                        .map(ProductOptionResponse::from)
-                        .toList() : List.of()
+                        productInfo.getOptions().stream()
+                                .map(ProductOptionResponse::from)
+                                .toList() : List.of(),
+                null // ranking은 별도로 설정
+        );
+    }
+
+    public static ProductDetailResponse from(ProductInfo productInfo, Long ranking) {
+        return new ProductDetailResponse(
+                productInfo.getId(),
+                productInfo.getName(),
+                productInfo.getBasicPrice(),
+                productInfo.getDescription(),
+                productInfo.getImageUrl(),
+                productInfo.getBrandName(),
+                productInfo.getLikeCount(),
+                productInfo.getLiked(),
+                productInfo.getCategoryName(),
+                productInfo.getProductStatus().name(),
+                productInfo.getOptions() != null ?
+                        productInfo.getOptions().stream()
+                                .map(ProductOptionResponse::from)
+                                .toList() : List.of(),
+                ranking
         );
     }
 
@@ -62,7 +84,5 @@ public class ProductDetailResponse {
                     productOptionInfo.getProductOptionStatus()
             );
         }
-
     }
-
 }

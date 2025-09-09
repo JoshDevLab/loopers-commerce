@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.context.ApplicationEvent;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

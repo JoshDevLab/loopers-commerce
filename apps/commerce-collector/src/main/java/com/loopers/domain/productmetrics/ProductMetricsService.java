@@ -3,7 +3,7 @@ package com.loopers.domain.productmetrics;
 import com.loopers.domain.productmetrics.command.ProductLikeMetricCommand;
 import com.loopers.domain.productmetrics.command.ProductOrderMetricCommand;
 import com.loopers.domain.productmetrics.command.ProductViewCommand;
-import com.loopers.domain.ranking.RankingService;  // 캐시 대신 서비스 사용
+import com.loopers.domain.ranking.RankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
