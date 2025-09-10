@@ -1,26 +1,26 @@
 package com.loopers.domain.ranking;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class ScoreCalculator {
 
-    // 이벤트 가중치 설정
-    private static final double VIEW_WEIGHT = 0.1;
-    private static final double LIKE_WEIGHT = 0.2;
-    private static final double ORDER_WEIGHT = 0.6;
+    private final WeightConfigService weightConfigService;
 
     public double calculateViewScore() {
-        return VIEW_WEIGHT * 1.0;
+        return weightConfigService.getCurrentWeights().getViewWeight();
     }
 
     public double calculateLikeScore(boolean isLikeEvent) {
-        return isLikeEvent ? LIKE_WEIGHT * 1.0 : -(LIKE_WEIGHT * 1.0);
+        double score = weightConfigService.getCurrentWeights().getLikeWeight();
+        return isLikeEvent ? score : -score;
     }
 
     public double calculateOrderScore() {
-        return ORDER_WEIGHT * 1.0;
+        return weightConfigService.getCurrentWeights().getOrderWeight();
     }
 }
