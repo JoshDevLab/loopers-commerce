@@ -92,10 +92,20 @@ public class OutboxEvent extends BaseEntity {
         return outboxEvent;
     }
 
+    public static OutboxEvent createWeighConfig(String topicName, String aggregateId, String payload) {
+        OutboxEvent outboxEvent = new OutboxEvent();
+        outboxEvent.eventId = UUID.randomUUID().toString();
+        outboxEvent.aggregateId = aggregateId;
+        outboxEvent.eventType = EventType.WEIGHT_CONFIG_CHANGED;
+        outboxEvent.topicName = topicName;
+        outboxEvent.payload = payload;
+        return outboxEvent;
+    }
+
     public enum EventType {
         ORDER_CREATED,
         PRODUCT_LIKED,
         PRODUCT_UNLIKED,
-        PRODUCT_CHANGED, PRODUCT_VIEW, STOCK_ADJUSTED,
+        PRODUCT_CHANGED, PRODUCT_VIEW, STOCK_ADJUSTED, WEIGHT_CONFIG_CHANGED,
     }
 }

@@ -2,8 +2,9 @@ package com.loopers.interfaces.api.ranking;
 
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandRepository;
-import com.loopers.domain.product.*;
-import com.loopers.domain.ranking.RankingService;
+import com.loopers.domain.product.Product;
+import com.loopers.domain.product.ProductCategory;
+import com.loopers.domain.product.ProductRepository;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.interfaces.api.PageResponse;
 import com.loopers.interfaces.api.ranking.dto.RankingResponse;

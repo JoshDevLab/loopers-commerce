@@ -59,16 +59,6 @@ public class WeightCacheImpl implements WeightCache {
         }
     }
 
-    @Override
-    public boolean hasWeightConfig() {
-        try {
-            return Boolean.TRUE.equals(redisTemplate.hasKey(WEIGHT_CONFIG_KEY));
-        } catch (Exception e) {
-            log.error("가중치 설정 존재 여부 확인 실패", e);
-            return false;
-        }
-    }
-
     public static class WeightCacheException extends RuntimeException {
         public WeightCacheException(String message, Exception e) {
             super(message, e);

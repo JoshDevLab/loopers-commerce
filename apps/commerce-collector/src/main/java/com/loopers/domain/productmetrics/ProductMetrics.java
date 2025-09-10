@@ -72,11 +72,4 @@ public class ProductMetrics extends BaseEntity {
         this.salesCount++;
     }
 
-    public boolean isToday() {
-        return this.metricDate.equals(ZonedDateTime.now());
-    }
-
-    public boolean isDateBefore(ZonedDateTime date) {
-        return this.metricDate.isBefore(date);
-    }
 }

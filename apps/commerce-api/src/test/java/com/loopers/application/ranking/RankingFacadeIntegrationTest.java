@@ -2,7 +2,9 @@ package com.loopers.application.ranking;
 
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandRepository;
-import com.loopers.domain.product.*;
+import com.loopers.domain.product.Product;
+import com.loopers.domain.product.ProductCategory;
+import com.loopers.domain.product.ProductRepository;
 import com.loopers.domain.ranking.RankingService;
 import com.loopers.support.IntegrationTestSupport;
 import com.loopers.support.RedisZSetOperations;

@@ -38,7 +38,7 @@ class RankingIntegrationTest extends E2ETestSupport {
     @DisplayName("상품 메트릭 이벤트가 실제 Redis 랭킹에 반영되는지 통합 테스트")
     void productMetricsEventIntegrationTest() {
         // given
-        LocalDate testDate = LocalDate.of(2025, 9, 8);
+        LocalDate testDate = LocalDate.now();
         ZonedDateTime testDateTime = testDate.atStartOfDay(ZoneId.systemDefault());
         
         Long productId1 = 100L;
@@ -118,7 +118,7 @@ class RankingIntegrationTest extends E2ETestSupport {
     @DisplayName("좋아요 취소 시 점수가 감소하는지 테스트")
     void productUnlikeDecreasesScore() {
         // given
-        LocalDate testDate = LocalDate.of(2025, 9, 8);
+        LocalDate testDate = LocalDate.now();
         ZonedDateTime testDateTime = testDate.atStartOfDay(ZoneId.systemDefault());
         Long productId = 123L;
         
@@ -156,7 +156,7 @@ class RankingIntegrationTest extends E2ETestSupport {
     void carryOverScoresIntegrationTest() {
         // given
         Long productId = 456L;
-        LocalDate today = LocalDate.of(2025, 9, 8);
+        LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
         
         // 오늘 점수 생성
@@ -184,7 +184,7 @@ class RankingIntegrationTest extends E2ETestSupport {
     void ttlSetCorrectly() {
         // given
         Long productId = 789L;
-        LocalDate testDate = LocalDate.of(2025, 9, 8);
+        LocalDate testDate = LocalDate.now();
         
         // when
         rankingCache.incrementScore(productId, 1.0, testDate);
@@ -202,7 +202,7 @@ class RankingIntegrationTest extends E2ETestSupport {
     @DisplayName("동시에 여러 이벤트가 발생해도 점수가 정확히 누적되는지 테스트")
     void concurrentEventsAccumulation() {
         // given
-        LocalDate testDate = LocalDate.of(2025, 9, 8);
+        LocalDate testDate = LocalDate.now();
         ZonedDateTime testDateTime = testDate.atStartOfDay(ZoneId.systemDefault());
         Long productId = 999L;
         

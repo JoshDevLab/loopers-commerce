@@ -1,5 +1,7 @@
 package com.loopers.domain.ranking;
 
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +14,13 @@ public class WeightConfig {
     private double likeWeight;
     private double orderWeight;
 
-    public void validate() {
+    public static WeightConfig getDefaultWeightConfig(double defaultViewWeight, double defaultLikeWeight, double defaultOrderWeight) {
+        return new WeightConfig(defaultViewWeight, defaultLikeWeight, defaultOrderWeight);
+    }
+
+    public static void validate(double viewWeight, double likeWeight, double orderWeight) {
         if (viewWeight < 0 || likeWeight < 0 || orderWeight < 0) {
-            throw new IllegalArgumentException("가중치는 음수일 수 없습니다.");
+            throw new CoreException(ErrorType.BAD_REQUEST, "가중치는 음수일 수 없습니다.");
         }
     }
 

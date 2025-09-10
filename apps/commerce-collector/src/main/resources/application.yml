@@ -33,12 +33,14 @@ app:
       product-order-events: product-order-events
       product-view-events: product-view-events
       stock-adjusted-events: stock-adjusted-events
+      weight-config-events: weight-config-events
     consumer-groups:
       product-like-collector: product-like-collector
       product-order-collector: product-order-collector
       product-view-collector: product-view-collector
       audit-collector: audit-collector
       stock-adjusted-collector: stock-adjusted-collector
+      weight-config-collector: weight-config-collector
 demo-kafka:
   test:
     topic-name: demo.internal.topic-v1

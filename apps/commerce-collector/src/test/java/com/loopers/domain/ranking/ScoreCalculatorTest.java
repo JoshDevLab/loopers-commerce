@@ -3,17 +3,30 @@ package com.loopers.domain.ranking;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("ScoreCalculator 테스트")
 class ScoreCalculatorTest {
 
+    @Mock
+    private WeightConfigService weightConfigService;
+
+    @InjectMocks
     private ScoreCalculator scoreCalculator;
 
     @BeforeEach
     void setUp() {
-        scoreCalculator = new ScoreCalculator();
+        scoreCalculator = new ScoreCalculator(weightConfigService);
+        // 기본 가중치 설정
+        WeightConfig mockWeights = new WeightConfig(0.1, 0.2, 0.6);
+        when(weightConfigService.getCurrentWeights()).thenReturn(mockWeights);
     }
 
     @Test
@@ -68,7 +81,7 @@ class ScoreCalculatorTest {
         assertThat(orderScore).isGreaterThan(likeScore);
         assertThat(likeScore).isGreaterThan(viewScore);
         
-        // 전체 가중치 합이 1.0인지 검증
+        // 전체 가중치 합이 0.9인지 검증 (0.1 + 0.2 + 0.6 = 0.9)
         assertThat(viewScore + likeScore + orderScore).isEqualTo(0.9);
     }
 }

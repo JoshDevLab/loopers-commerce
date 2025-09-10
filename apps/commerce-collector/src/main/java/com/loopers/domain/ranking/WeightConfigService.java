@@ -43,7 +43,4 @@ public class WeightConfigService {
         log.info("랭킹 가중치를 기본값으로 초기화");
     }
 
-    public boolean hasCustomWeights() {
-        return weightCache.hasWeightConfig();
-    }
 }
