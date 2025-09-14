@@ -1,4 +1,4 @@
-package com.loopers.infrastructure.support;
+package com.loopers.support.redis;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

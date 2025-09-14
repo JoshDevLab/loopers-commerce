@@ -37,7 +37,9 @@ spring.config.activate.on-profile: test
 
 spring:
   cache:
-    type: none
+    type: redis
+    redis:
+      time-to-live: 60000
   data:
     redis:
       host: localhost

@@ -23,12 +23,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     public static final String[] OPTIONAL_AUTH_PATHS = {
             "/api/v1/products/**",
-            "/api/v1/brands/**"
+            "/api/v1/brands/**",
+            "/api/v1/rankings/**"
     };
 
     public static final String[] LOGIN_EXCLUDE_PATHS = {
             "/api/v1/products/**",
             "/api/v1/brands/**",
+            "/api/v1/rankings/**",
             "/api/v1/users",
             "/health",
             "/docs/**"

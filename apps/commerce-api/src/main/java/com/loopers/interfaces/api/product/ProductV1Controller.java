@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.product;
 
+import com.loopers.application.product.ProductDetailInfo;
 import com.loopers.application.product.ProductFacade;
 import com.loopers.application.product.ProductInfo;
 import com.loopers.domain.product.ProductCriteria;
@@ -32,9 +33,13 @@ public class ProductV1Controller {
 
     @GetMapping("/{productId}")
     public ApiResponse<ProductDetailResponse> getProductDetail(@PathVariable Long productId, @CurrentUser UserInfo userInfo) {
-        ProductInfo productInfo = productFacade.getProductDetail(productId, userInfo);
-        ProductDetailResponse from = ProductDetailResponse.from(productInfo);
-        System.out.println("from = " + from);
-        return ApiResponse.success(ProductDetailResponse.from(productInfo));
+        ProductDetailInfo productDetailInfo = productFacade.getProductDetailWithRanking(productId, userInfo);
+
+        ProductDetailResponse response = ProductDetailResponse.from(
+                productDetailInfo.productInfo(),
+                productDetailInfo.ranking()
+        );
+
+        return ApiResponse.success(response);
     }
 }

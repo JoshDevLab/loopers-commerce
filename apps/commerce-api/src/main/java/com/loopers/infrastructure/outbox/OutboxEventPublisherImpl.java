@@ -8,6 +8,7 @@ import com.loopers.domain.outbox.OutboxEvent;
 import com.loopers.domain.outbox.OutboxEventPublisher;
 import com.loopers.domain.product.like.ProductLikeEvent;
 import com.loopers.domain.product.like.ProductUnLikeEvent;
+import com.loopers.domain.ranking.WeightConfigChangedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -119,6 +121,24 @@ public class OutboxEventPublisherImpl implements OutboxEventPublisher {
                             OutboxEvent.createStockAdjusted(
                                     "stock-adjusted-events",
                                     event.productOptionId().toString(),
+                                    payload)
+                    )
+            );
+        }  catch (Exception e) {
+            log.error("Failed to save event to outbox: {}", event, e);
+            throw new RuntimeException("Outbox save failed", e);
+        }
+    }
+
+    @Override
+    public void publish(WeightConfigChangedEvent event) {
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            applicationEventPublisher.publishEvent(
+                    Objects.requireNonNull(
+                            OutboxEvent.createWeighConfig(
+                                    "weight-config-events",
+                                    UUID.randomUUID().toString(),
                                     payload)
                     )
             );
