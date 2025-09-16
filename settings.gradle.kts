@@ -3,6 +3,7 @@ rootProject.name = "loopers-commerce"
 include(
     ":apps:commerce-api",
     ":apps:commerce-collector",
+    ":apps:commerce-batch",
     ":modules:jpa",
     ":modules:redis",
     ":modules:feign",

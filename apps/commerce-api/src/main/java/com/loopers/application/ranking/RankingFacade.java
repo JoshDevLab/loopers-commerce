@@ -4,6 +4,10 @@ import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.ranking.RankingItem;
 import com.loopers.domain.ranking.RankingService;
+import com.loopers.domain.ranking.MvProductRankMonthly;
+import com.loopers.domain.ranking.MvProductRankWeekly;
+import com.loopers.domain.ranking.ProductRankMonthlyRepository;
+import com.loopers.domain.ranking.ProductRankWeeklyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,6 +25,8 @@ public class RankingFacade {
 
     private final RankingService rankingService;
     private final ProductService productService;
+    private final ProductRankMonthlyRepository monthlyRepository;
+    private final ProductRankWeeklyRepository weeklyRepository;
 
     public Page<RankingInfo> getRankings(LocalDate date, Pageable pageable) {
         if (date == null) {
@@ -61,4 +67,19 @@ public class RankingFacade {
         return new PageImpl<>(rankingInfos, pageable, totalCount);
     }
 
+    // 월간 랭킹 조회
+    public List<ProductRankingInfo> getMonthlyRanking(String reportMonth) {
+        return monthlyRepository.findTop10ByReportMonthOrderByRankPosition(reportMonth)
+                .stream()
+                .map(ProductRankingInfo::fromMonthly)
+                .toList();
+    }
+    
+    // 주간 랭킹 조회
+    public List<ProductRankingInfo> getWeeklyRanking(LocalDate weekStartDate) {
+        return weeklyRepository.findTop10ByWeekStartDateOrderByRankPosition(weekStartDate)
+                .stream()
+                .map(ProductRankingInfo::fromWeekly)
+                .toList();
+    }
 }
