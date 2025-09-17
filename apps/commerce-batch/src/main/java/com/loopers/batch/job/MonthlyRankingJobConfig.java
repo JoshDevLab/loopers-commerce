@@ -2,6 +2,8 @@ package com.loopers.batch.job;
 
 import com.loopers.batch.dto.ProductMetricsAggregation;
 import com.loopers.batch.dto.ProductRankingData;
+import com.loopers.domain.ranking.WeightConfigInfo;
+import com.loopers.domain.ranking.WeightConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -41,6 +43,7 @@ public class MonthlyRankingJobConfig {
     private final PlatformTransactionManager transactionManager;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+    private final WeightConfigService weightConfigService;
     
     private static final int CHUNK_SIZE = 1000;
     
@@ -95,20 +98,27 @@ public class MonthlyRankingJobConfig {
             @Value("#{jobParameters['reportMonth'] ?: T(java.time.YearMonth).now().minusMonths(1).toString()}") 
             String reportMonth) {
         
+        // 현재 설정된 가중치 조회
+        WeightConfigInfo weightConfig = weightConfigService.getCurrentWeights();
+        
         YearMonth targetMonth = YearMonth.parse(reportMonth);
         LocalDate startDate = targetMonth.atDay(1);
         LocalDate endDate = targetMonth.atEndOfMonth();
         
         log.info("월간 랭킹 데이터 읽기 시작: {} ({} ~ {})", reportMonth, startDate, endDate);
+        log.info("적용된 가중치 - 조회:{}, 좋아요:{}, 주문:{}", 
+                weightConfig.viewWeight(), weightConfig.likeWeight(), weightConfig.orderWeight());
         
-        String sql = """
+        // 기존 시스템의 가중치를 사용한 동적 SQL
+        // orderWeight를 sales_count에 매핑
+        String sql = String.format("""
             SELECT
                 pm.product_id,
                 p.name as product_name,
                 SUM(pm.sales_count) as total_sales,
                 SUM(pm.view_count) as total_views,
                 SUM(pm.like_count) as total_likes,
-                (SUM(pm.sales_count) * 3.0 + SUM(pm.view_count) * 1.0 + SUM(pm.like_count) * 2.0) as total_score
+                (SUM(pm.view_count) * %.3f + SUM(pm.like_count) * %.3f + SUM(pm.sales_count) * %.3f) as total_score
             FROM product_metrics pm
             JOIN product p ON pm.product_id = p.id
             WHERE DATE(pm.metric_date) BETWEEN ? AND ?
@@ -117,7 +127,7 @@ public class MonthlyRankingJobConfig {
             HAVING total_score > 0
             ORDER BY total_score DESC
             LIMIT 100
-            """;
+            """, weightConfig.viewWeight(), weightConfig.likeWeight(), weightConfig.orderWeight());
         
         return new JdbcCursorItemReaderBuilder<ProductMetricsAggregation>()
                 .name("monthlyRankingReader")

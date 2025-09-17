@@ -5,6 +5,8 @@ dependencies {
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
 
+    implementation(project(":apps:commerce-api"))
+
     // spring batch
     implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
