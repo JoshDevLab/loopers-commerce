@@ -20,7 +20,9 @@ public class ProductRankingData {
     private ZonedDateTime updatedAt;
     
     // 월간 랭킹용
-    private String reportMonth;
+    private Integer reportYear;
+    private Integer reportMonth;
+    private String reportMonthString; // YearMonth 형태 (예: 2024-01)
     
     // 주간 랭킹용
     private LocalDate weekStartDate;
@@ -32,5 +34,10 @@ public class ProductRankingData {
     
     public static ProductRankingDataBuilder weeklyBuilder() {
         return ProductRankingData.builder();
+    }
+    
+    // 테스트 호환성을 위한 getter
+    public String getReportMonth() {
+        return reportMonthString;
     }
 }

@@ -2,8 +2,7 @@ package com.loopers.batch.job;
 
 import com.loopers.batch.dto.ProductMetricsAggregation;
 import com.loopers.batch.dto.ProductRankingData;
-import com.loopers.domain.ranking.WeightConfigInfo;
-import com.loopers.domain.ranking.WeightConfigService;
+import com.loopers.batch.config.WeightConfigReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -42,7 +41,7 @@ public class WeeklyRankingJobConfig {
     private final PlatformTransactionManager transactionManager;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-    private final WeightConfigService weightConfigService;
+    private final WeightConfigReader weightConfigReader;
     
     private static final int CHUNK_SIZE = 1000;
     
@@ -98,8 +97,8 @@ public class WeeklyRankingJobConfig {
             @Value("#{jobParameters['weekStartDate'] ?: T(java.time.LocalDate).now().minusWeeks(1).with(T(java.time.DayOfWeek).MONDAY).toString()}") 
             String weekStartDate) {
         
-        // 기존 WeightConfigService에서 가중치 조회
-        WeightConfigInfo weightConfig = weightConfigService.getCurrentWeights();
+        // WeightConfigReader에서 가중치 조회
+        WeightConfigReader.WeightConfig weightConfig = weightConfigReader.getCurrentWeights();
         
         LocalDate startDate = LocalDate.parse(weekStartDate);
         LocalDate endDate = startDate.plusDays(6);

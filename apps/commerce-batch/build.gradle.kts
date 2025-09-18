@@ -1,15 +1,14 @@
 dependencies {
     // add-ons
     implementation(project(":modules:redis"))
+    implementation(project(":modules:jpa"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
 
-    implementation(project(":apps:commerce-api"))
-
     // spring batch
     implementation("org.springframework.boot:spring-boot-starter-batch")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
@@ -20,6 +19,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.batch:spring-batch-test")
     testImplementation(testFixtures(project(":modules:jpa")))
+    testImplementation(testFixtures(project(":modules:redis")))
     testImplementation("org.testcontainers:mysql")
     testImplementation("org.testcontainers:junit-jupiter")
 }

@@ -2,8 +2,7 @@ package com.loopers.batch.job;
 
 import com.loopers.batch.dto.ProductMetricsAggregation;
 import com.loopers.batch.dto.ProductRankingData;
-import com.loopers.domain.ranking.WeightConfigInfo;
-import com.loopers.domain.ranking.WeightConfigService;
+import com.loopers.batch.config.WeightConfigReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -43,7 +42,7 @@ public class MonthlyRankingJobConfig {
     private final PlatformTransactionManager transactionManager;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-    private final WeightConfigService weightConfigService;
+    private final WeightConfigReader weightConfigReader;
     
     private static final int CHUNK_SIZE = 1000;
     
@@ -98,8 +97,8 @@ public class MonthlyRankingJobConfig {
             @Value("#{jobParameters['reportMonth'] ?: T(java.time.YearMonth).now().minusMonths(1).toString()}") 
             String reportMonth) {
         
-        // 현재 설정된 가중치 조회
-        WeightConfigInfo weightConfig = weightConfigService.getCurrentWeights();
+        // WeightConfigReader에서 가중치 조회
+        WeightConfigReader.WeightConfig weightConfig = weightConfigReader.getCurrentWeights();
         
         YearMonth targetMonth = YearMonth.parse(reportMonth);
         LocalDate startDate = targetMonth.atDay(1);
@@ -152,10 +151,13 @@ public class MonthlyRankingJobConfig {
             
             log.debug("처리 중인 상품: {} (점수: {})", item.getProductName(), item.getTotalScore());
             
+            YearMonth ym = YearMonth.parse(reportMonth);
             return ProductRankingData.monthlyBuilder()
                     .productId(item.getProductId())
                     .productName(item.getProductName())
-                    .reportMonth(reportMonth)
+                    .reportYear(ym.getYear())
+                    .reportMonth(ym.getMonthValue())
+                    .reportMonthString(reportMonth)
                     .totalSales(item.getTotalSales())
                     .totalViews(item.getTotalViews())
                     .totalLikes(item.getTotalLikes())
